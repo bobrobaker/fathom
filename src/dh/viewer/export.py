@@ -16,7 +16,8 @@ import shutil
 from dh.controller.beliefs import sigmoid
 from dh.schemas import InvestigationGraph
 
-_HTML = pathlib.Path(__file__).resolve().parent / "index.html"
+_HTML = pathlib.Path(__file__).resolve().parent / "index.html"        # the spike viewer (S4)
+_SITE_HTML = pathlib.Path(__file__).resolve().parent / "site.html"    # the polished showpiece
 
 
 def _step_dict(ig: InvestigationGraph) -> dict:
@@ -49,7 +50,39 @@ def ig_to_dict(ig: InvestigationGraph, trigger: str | None = None,
         "root_cause": root_cause,
         "final_status": ig.status,
         "steps": [_step_dict(s) for s in steps],
+        "trace": list(ig.trace),  # per-step action / VOI / deltas, aligned with steps
     }
+
+
+def case_bundle(ig: InvestigationGraph, *, case_id: str, title: str, caption: str,
+                trigger: str | None = None, root_cause: str | None = None,
+                answer: dict | None = None, eval_row: dict | None = None) -> dict:
+    """The full replay bundle for one recorded run (fathom_visualizer_spec §2): the stepped IG +
+    per-step trace, a ground-truth-free header, the final answer, and the case's eval row. The
+    `trigger`/`root_cause` are eval-side annotations for rendering, never controller context."""
+    d = ig_to_dict(ig, trigger=trigger, root_cause=root_cause)
+    d.update({"case_id": case_id, "title": title, "caption": caption,
+              "answer": answer or {}, "eval_row": eval_row or {}})
+    return d
+
+
+def build_site(bundles: list[dict], out_dir: str | pathlib.Path) -> pathlib.Path:
+    """Assemble the hostable static site: one `<case_id>.json` per bundle, a `manifest.json`
+    listing them, `bundles.js` (so it loads over file:// without a server), and `index.html`."""
+    out = pathlib.Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    manifest = []
+    for b in bundles:
+        (out / f"{b['case_id']}.json").write_text(json.dumps(b, indent=2))
+        manifest.append({"case_id": b["case_id"], "title": b.get("title", b["case_id"]),
+                         "caption": b.get("caption", ""),
+                         "final_status": b.get("final_status", "")})
+    (out / "manifest.json").write_text(json.dumps(manifest, indent=2))
+    (out / "bundles.js").write_text(
+        "window.FATHOM_BUNDLES = " + json.dumps({b["case_id"]: b for b in bundles}, indent=2)
+        + ";\nwindow.FATHOM_MANIFEST = " + json.dumps(manifest, indent=2) + ";\n")
+    shutil.copyfile(_SITE_HTML, out / "index.html")
+    return out / "index.html"
 
 
 def export_viewer(ig: InvestigationGraph, out_dir: str | pathlib.Path,

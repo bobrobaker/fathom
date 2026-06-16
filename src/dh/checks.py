@@ -107,6 +107,71 @@ def channel_sanity_check(series: TimeSeries, min_var: float = 1e-6) -> dict:
     }
 
 
+def detector_health_check(
+    dark_count: TimeSeries, detector_temp: TimeSeries, threshold: float = 0.30,
+    min_var: float = 1e-6,
+) -> dict:
+    """Dark-count rise vs detector temperature — separates a *bias* drift from a *thermal* one
+    (#6). A bias/gain drift shows a *substantial* dark-count rise while the detector temperature,
+    measured by a *live* sensor, stays flat. Two guards keep it honest: a modest dark rise (a
+    secondary thermal effect, as in the TEC case) does not qualify, and a *stuck* detector_temp
+    channel (≈zero variance) cannot establish "non-thermal" at all — a frozen reading is not
+    evidence of a cool detector, so bias_drift is withheld until the channel is independently sane.
+    """
+    base, recent = _baseline(dark_count), _recent(dark_count)
+    rise = (recent - base) / base if base else 0.0
+    temp_rise = _recent(detector_temp) - _baseline(detector_temp)
+    temp_var = st.pvariance(detector_temp.v) if len(detector_temp.v) > 1 else 0.0
+    temp_live = temp_var > min_var
+    bias_drift = rise >= threshold and temp_live and temp_rise < 1.0  # big dark rise, live & flat temp
+    if not temp_live:
+        why = "detector_temp is stuck → cannot rule thermal in or out"
+    elif bias_drift:
+        why = "detector bias/gain drift (not thermal)"
+    else:
+        why = "no isolated detector bias signature"
+    return {
+        "check": "detector_health_check",
+        "dark_count_rise": rise,
+        "detector_temp_rise": temp_rise,
+        "detector_temp_live": temp_live,
+        "bias_drift": bias_drift,
+        "summary": f"dark-count {rise * 100:+.0f}% with detector temp {temp_rise:+.1f}C "
+        f"({'live' if temp_live else 'stuck'}) → {why}",
+    }
+
+
+def common_mode_check(series: list[TimeSeries], tol: float = 1.5,
+                      min_rel_change: float = 0.05) -> dict:
+    """Do several nominally-independent channels degrade with a *common onset*? (#8, A5).
+
+    Redundant/independent channels all sliding from one shared upstream cause (a power sag)
+    looks like several faults but is one. We consider only channels that actually moved
+    (>`min_rel_change` baseline→recent — flat channels' onsets are pure noise), and flag
+    common-mode when ≥2 of them degrade with onset times clustered within `tol` days — the
+    tell that one cause hit them all rather than several independent faults.
+    """
+    moved = []
+    for s in series:
+        if len(s.v) < 6:
+            continue
+        base = _baseline(s)
+        rel = abs(_recent(s) - base) / abs(base) if base else 0.0
+        if rel >= min_rel_change:
+            moved.append(_onset_changepoint(s))
+    spread = (max(moved) - min(moved)) if len(moved) > 1 else 0.0
+    common_mode = len(moved) >= 2 and spread <= tol
+    return {
+        "check": "common_mode_check",
+        "n_degraded": len(moved),
+        "onset_spread": spread,
+        "common_mode": common_mode,
+        "summary": f"{len(moved)} degraded channel(s), onset spread {spread:.2f}d → "
+        + ("common-mode (one upstream cause, not independent faults)" if common_mode
+           else "no common-mode signature"),
+    }
+
+
 def _onset_changepoint(series: TimeSeries) -> float:
     """Estimate degradation onset: the split minimizing a flat-pre / linear-post fit.
 

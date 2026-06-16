@@ -27,6 +27,14 @@ from dh.eval import report  # noqa: E402
 from dh.eval.bespoke import score  # noqa: E402
 from dh.generator import generate  # noqa: E402
 from dh.generator.cases import CASES_BY_ID, authored_cases  # noqa: E402
+from dh.viewer.export import case_bundle  # noqa: E402
+
+# captured during the run so the showpiece reuses real runs (no extra live calls)
+_VIEWER_BUNDLES: list[dict] = []
+_VIEWER_TITLES = {"case1": "TEC degradation", "case5": "No clean cause (abstain)",
+                  "case6": "Detector bias (buried)", "case7": "TEC tie-breaker",
+                  "case8": "Common-mode power", "case2": "Laser aging",
+                  "case3": "Window contamination", "case4": "Calibration drift"}
 
 
 def _run_case(spec, runs: int, budget: int) -> dict[str, list]:
@@ -51,11 +59,23 @@ def _run_case(spec, runs: int, budget: int) -> dict[str, list]:
             except Exception as e:  # noqa: BLE001 — a solver failure shouldn't kill the eval
                 print(f"  ! {name} run {r} failed: {e}", file=sys.stderr)
                 continue
-            results[name].append(score(ans, case, solver=name, tokens=meter.total_tokens))
-            print(f"  {spec.id} {name} run {r}: acc={results[name][-1].accuracy} "
-                  f"trig={results[name][-1].trigger_discrimination} "
-                  f"conf={results[name][-1].conflict_handling} tok={meter.total_tokens}",
-                  file=sys.stderr)
+            sc = score(ans, case, solver=name, tokens=meter.total_tokens)
+            results[name].append(sc)
+            print(f"  {spec.id} {name} run {r}: acc={sc.accuracy} loc={sc.localization} "
+                  f"trig={sc.trigger_discrimination} conf={sc.conflict_handling} "
+                  f"evF1={sc.evidence_f1:.2f} tok={meter.total_tokens} "
+                  f"(content {meter.content_tokens})", file=sys.stderr)
+            if name == "controller" and r == 0:  # first controller run → showpiece bundle
+                gt = case.ground_truth
+                _VIEWER_BUNDLES.append(case_bundle(
+                    ans.final_graph, case_id=spec.id, title=_VIEWER_TITLES.get(spec.id, spec.id),
+                    caption=spec.purpose, trigger=gt.trigger, root_cause=gt.root_cause,
+                    answer={"answer_type": ans.answer_type, "root_cause": ans.root_cause,
+                            "cited_evidence": ans.cited_evidence, "conflicts": ans.conflicts},
+                    eval_row={"accuracy": sc.accuracy, "localization": sc.localization,
+                              "trigger_discrimination": sc.trigger_discrimination,
+                              "conflict_handling": sc.conflict_handling,
+                              "evidence_f1": round(sc.evidence_f1, 2), "tokens": sc.tokens}))
     return case.id, results
 
 
@@ -83,6 +103,15 @@ def main():
     out = pathlib.Path(args.out) if args.out else out_dir / "bespoke.md"
     out.write_text("\n\n".join(docs))
     print(f"\n# wrote {out}", file=sys.stderr)
+
+    # assemble the showpiece from the controller runs we just recorded (curated subset, or all)
+    if _VIEWER_BUNDLES:
+        from dh.viewer.export import build_site
+        curated = [b for b in _VIEWER_BUNDLES if b["case_id"] in ("case1", "case5", "case6")] \
+            or _VIEWER_BUNDLES
+        site = pathlib.Path(__file__).resolve().parent.parent / "viewer_site"
+        build_site(curated, site)
+        print(f"# wrote showpiece ({len(curated)} cases) -> {site / 'index.html'}", file=sys.stderr)
 
 
 if __name__ == "__main__":

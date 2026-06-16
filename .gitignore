@@ -17,3 +17,6 @@ data/
 # Generated, regenerable outputs (golden fixtures in fixtures/ stay tracked)
 reports/
 viewer_out/
+
+# WSL "mark of the web" metadata that rides along with downloaded files
+*:Zone.Identifier

@@ -16,6 +16,14 @@ from dh.schemas import InvestigationGraph, Hypothesis
 RULED_OUT_CONF = 0.25   # below this a hypothesis is considered ruled out
 SUPPORTED_CONF = 0.60   # a corroborated (but not necessarily leading) hypothesis
 
+# Cumulative log-odds clamp (C3 / B7). Each evidence link is capped at |LLR|≈2.0 in the LLM
+# layer (≈7× odds shift per item, chosen so ~2 concordant items clear τ_dom=0.70: logit(0.70)
+# ≈ 0.85). On top of that we cap the *accumulated* log-odds at ±MAX_LOG_ODDS so confidence
+# saturates at ~0.95, never 0.99 — a hypothesis can never get pinned so high that later
+# contradicting evidence has "no path back down" (the stuck-decoy failure). The cap is large
+# enough not to bite in normal 2–3 item cases and only trims runaway agreement.
+MAX_LOG_ODDS = 3.0      # sigmoid(3.0) ≈ 0.953; sigmoid(-3.0) ≈ 0.047
+
 
 def sigmoid(x: float) -> float:
     if x >= 0:
@@ -36,7 +44,7 @@ def update_beliefs(ig: InvestigationGraph, prior: float = 0.0) -> InvestigationG
         if ln.hypothesis_id in totals:
             totals[ln.hypothesis_id] += (1.0 if ln.polarity == "+" else -1.0) * ln.weight
     for h in ig.hypotheses:
-        h.log_odds = totals[h.id]
+        h.log_odds = max(-MAX_LOG_ODDS, min(MAX_LOG_ODDS, totals[h.id]))  # clamp accumulated (C3)
 
     ranked = sorted(ig.hypotheses, key=lambda h: h.log_odds, reverse=True)
     for i, h in enumerate(ranked):

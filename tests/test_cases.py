@@ -106,9 +106,86 @@ def test_window_ground_truth_and_consistent_corpus(window):
     assert not any(a.id == "act.window_clean" for a in window.artifacts)
 
 
+# --- case #4: calibration drift (recent change IS the cause) -----------------
+
+@pytest.fixture(scope="module")
+def calib():
+    return generate("calibration_drift", ["B1", "C3"], seed=3)
+
+
+def test_calibration_is_config_with_nominal_physics(calib):
+    env = LidarEnvironment(calib)
+    assert [c["key"] for c in env.run_check("config_diff")["changed"]] == ["cal_table_version"]
+    assert env.run_check("temp_correlation_check")["correlated"] is False  # no thermal signature
+    assert env.run_check("tec_load_check")["at_limit"] is False
+    assert env.run_check("spatial_intensity_check")["localized"] is False  # not optics
+
+
+def test_calibration_ground_truth_and_chained_corpus(calib):
+    gt = calib.ground_truth
+    assert gt.answer_type == "cause" and gt.root_cause == "sub.calibration"
+    assert gt.trigger is None  # the recent change is the cause, not a non-causal trigger
+    ids = {a.id for a in calib.artifacts}
+    assert {"log.cal_update", "ticket.cal_regression", "doc.release_v13"} <= ids  # the chain
+
+
+# --- case #6: detector bias drift (absent-cue, buried evidence) --------------
+
+@pytest.fixture(scope="module")
+def detector():
+    return generate("detector_bias_drift", ["C1", "C2"], seed=5)
+
+
+def test_detector_bias_signature_and_absent_cue(detector):
+    env = LidarEnvironment(detector)
+    assert env.run_check("detector_health_check")["bias_drift"] is True
+    assert env.run_check("temp_correlation_check")["correlated"] is False  # not thermal
+    assert not any(a.id == "log.reboot" for a in detector.artifacts)  # absent-cue: no recent event
+
+
+def test_detector_buried_doc_is_navigation_gated(detector):
+    env = LidarEnvironment(detector)
+    reached = {n.id for n in env.traverse("sub.detector", "documented_in", direction="in")}
+    assert "doc.detector_bias" in reached
+    assert detector.ground_truth.root_cause == "part.detector"
+
+
+# --- case #7: TEC variant (tie-breaker under budget) -------------------------
+
+@pytest.fixture(scope="module")
+def variant():
+    return generate("tec_degradation_variant", ["D6"], seed=6)
+
+
+def test_variant_cheap_checks_inconclusive(variant):
+    env = LidarEnvironment(variant)
+    assert env.run_check("temp_correlation_check")["correlated"] is False  # sub-threshold
+    assert env.run_check("tec_load_check")["at_limit"] is False            # under limit
+    sig = {s.signal: s for s in variant.telemetry}
+    assert st.mean(sig["laser_diode_temp_C"].v[-5:]) > 27.0  # but diode elevated → still TEC
+    assert variant.ground_truth.root_cause == "part.tec"
+    assert "recommend_swap_test" in variant.ground_truth.load_bearing_evidence
+
+
+# --- case #8: common-mode power (redundant channels agree but are wrong) ------
+
+@pytest.fixture(scope="module")
+def common_mode():
+    return generate("common_mode_power", ["A4", "A5"], seed=7)
+
+
+def test_common_mode_signature(common_mode):
+    env = LidarEnvironment(common_mode)
+    assert env.run_check("common_mode_check")["common_mode"] is True
+    assert [c["key"] for c in env.run_check("config_diff")["changed"]] == ["scan_params"]
+    gt = common_mode.ground_truth
+    assert gt.root_cause == "sub.power"
+    assert set(gt.decoys) >= {"part.laser_module", "part.detector"}  # the two surface faults
+
+
 # --- registry ----------------------------------------------------------------
 
-def test_four_cases_authored():
+def test_all_eight_cases_authored():
     ids = {c.id for c in authored_cases()}
-    assert {"case1", "case2", "case3", "case5"} <= ids
+    assert ids == {f"case{i}" for i in range(1, 9)}
     assert all(CASES_BY_ID[i].authored for i in ids)

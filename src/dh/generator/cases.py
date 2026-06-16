@@ -20,27 +20,40 @@ class CaseSpec:
     seed: int
     purpose: str
     authored: bool = False  # True once the fault is implemented to depth
+    # Anti-shortcut balance (§5.2): does the salient recent event equal the true cause?
+    #   True  → the recent change/event IS the cause (a shortcut is right here)
+    #   False → a salient recent event exists but is NOT the cause (trigger≠cause / coincidence)
+    #   None  → no salient recent event (absent-cue) or no single cause (abstain)
+    # Across the set the True-fraction over the not-None cases must sit ≈0.5 (B8), so that
+    # "a recent event is present" carries ~no information about whether it is the cause.
+    salient_is_cause: bool | None = None
 
 
 CASES: list[CaseSpec] = [
     CaseSpec("case1", "tec_degradation", ("D1", "B5", "D5", "A2"), 0,
              "worked example: cross-subsystem + decoy + lying channel + demoted trigger",
-             authored=True),
+             authored=True, salient_is_cause=False),       # reboot present, non-causal
     CaseSpec("case2", "laser_aging", ("D5", "A1"), 1,
              "decoy as a true cause (no temp correlation) — symmetry vs case1",
-             authored=True),
+             authored=True, salient_is_cause=False),        # reboot present, non-causal
     CaseSpec("case3", "window_contamination", ("C-spatial", "A3"), 2,
-             "spatial-cluster signature; reasoning from absence", authored=True),
+             "spatial-cluster signature; reasoning from absence",
+             authored=True, salient_is_cause=False),        # reboot present, non-causal
     CaseSpec("case4", "calibration_drift", ("B1", "C3"), 3,
-             "post-release config; chained evidence (date -> release)"),
+             "post-release config; recent change IS the cause (anti-shortcut balance)",
+             authored=True, salient_is_cause=True),         # cal-table change IS the cause
     CaseSpec("case5", "no_clean_cause", ("E1",), 4,
-             "intermittent/coincidence -> correct answer is abstain", authored=True),
+             "intermittent/coincidence -> correct answer is abstain",
+             authored=True, salient_is_cause=None),         # abstain — no single cause
     CaseSpec("case6", "detector_bias_drift", ("C1", "C2"), 5,
-             "buried evidence reachable only via graph traversal + intra-doc"),
+             "absent-cue; buried evidence reachable via graph traversal + intra-doc",
+             authored=True, salient_is_cause=None),         # absent-cue — no recent event
     CaseSpec("case7", "tec_degradation_variant", ("D6",), 6,
-             "near-symmetric to a decoy; needs the expensive discriminating check"),
+             "near-symmetric to a decoy; needs the expensive discriminating check",
+             authored=True, salient_is_cause=False),        # reboot present, non-causal
     CaseSpec("case8", "common_mode_power", ("A4", "A5"), 7,
-             "one cause looks like two faults; redundant channels agree but are wrong"),
+             "one cause looks like two faults; redundant channels agree but are wrong",
+             authored=True, salient_is_cause=True),         # power-mode change IS the cause
 ]
 
 CASES_BY_ID = {c.id: c for c in CASES}

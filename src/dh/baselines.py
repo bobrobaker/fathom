@@ -58,32 +58,65 @@ def shortcut(env: Environment, backend: LLMBackend | None = None) -> Answer:
 
 
 # --- bare_llm (strong long-context) ------------------------------------------
+# B4 (non-negotiable #3): the best-honest long-context baseline gets the MAXIMAL raw data a
+# context dump contains — the full telemetry series (not summaries), the whole artifact corpus
+# (not 5 fixed-query hits), and the raw config store — but NOT the controller's computed check
+# verdicts. The principle: all the data, none of the computed discriminators. A reduction at
+# either end (thin data, or handed the discriminators) would rig the comparison.
+
+
+def _downsample(v: list[float], cap: int = 24) -> list[float]:
+    """At most `cap` points across the series so the full trajectory is visible without an
+    unbounded prompt; short series pass through whole."""
+    if len(v) <= cap:
+        return v
+    stride = len(v) / cap
+    return [v[min(len(v) - 1, round(i * stride))] for i in range(cap)]
+
 
 def _telemetry_digest(env: Environment) -> str:
+    """Full raw series per signal (downsampled if long) + descriptive stats — no verdicts."""
     lines = []
     for sig in env.list_signals():
         s = env.query_telemetry(sig)
+        series = _downsample(s.v)
         base = st.mean(s.v[:8]) if len(s.v) >= 8 else st.mean(s.v)
         recent = st.mean(s.v[-5:]) if len(s.v) >= 5 else st.mean(s.v)
+        sd = st.pstdev(s.v) if len(s.v) > 1 else 0.0
         spec = f" spec={s.spec}" if s.spec else ""
-        lines.append(f"  {sig}: baseline≈{base:.3f} → recent≈{recent:.3f}{spec}")
+        vals = "[" + ", ".join(f"{x:.3f}" for x in series) + "]"
+        lines.append(f"  {sig}: baseline≈{base:.3f} recent≈{recent:.3f} "
+                     f"min≈{min(s.v):.3f} max≈{max(s.v):.3f} sd≈{sd:.3f}{spec}\n    series={vals}")
     return "\n".join(lines)
 
 
 def _artifact_digest(env: Environment) -> str:
-    arts = []
-    for q in ("range degradation playbook", "TEC thermal laser", "reboot maintenance",
-              "prior incident", "window clean swap test"):
-        for a in env.search(q, k=5):
-            arts.append(a)
-    seen, out = set(), []
-    for a in arts:
-        if a.id in seen:
-            continue
-        seen.add(a.id)
+    """The ENTIRE observable corpus (B4) — every document, log, ticket, error, action."""
+    arts = env.all_artifacts() if hasattr(env, "all_artifacts") else env.search("", k=50)  # type: ignore[attr-defined]
+    out = []
+    for a in sorted(arts, key=lambda x: x.id):
         ts = f" t={a.timestamp}" if a.timestamp is not None else ""
-        out.append(f"  [{a.id}] ({a.kind}{ts}) {a.text}")
+        src = f" src={a.source}" if a.source else ""
+        out.append(f"  [{a.id}] ({a.kind}{ts}{src}) {a.text}")
     return "\n".join(out)
+
+
+def _config_digest(env: Environment) -> str:
+    """Raw config store — current vs baseline values (the LLM diffs them itself; not a verdict)."""
+    if not hasattr(env, "config_store"):
+        return "  (n/a)"
+    lines = []
+    for n in env.config_store():  # type: ignore[attr-defined]
+        cur, base = n.props.get("value"), n.props.get("baseline")
+        lines.append(f"  {n.id} ({n.name}): current={cur!r} baseline={base!r}")
+    return "\n".join(lines) or "  (none)"
+
+
+BARE_SYSTEM = (
+    "You are an expert diagnostic analyst with the complete case in front of you. Reason "
+    "carefully over all of the data and identify the single most likely root cause, citing the "
+    "evidence that supports it. Reply with ONLY the requested JSON object — no prose, no fences."
+)
 
 
 def _candidate_legend(env: Environment) -> str:
@@ -91,22 +124,26 @@ def _candidate_legend(env: Environment) -> str:
 
 
 def bare_llm(env: Environment, backend: LLMBackend | None = None) -> Answer:
-    """Dump all telemetry summaries + artifacts; ask for the root cause in one shot."""
+    """Dump the full raw case — every telemetry series, the whole corpus, the raw config — and
+    ask for the root cause in one shot. The strong long-context baseline (B4), no check verdicts."""
     backend = backend or get_backend()
     if backend is None:
         raise RuntimeError("bare_llm needs an LLM backend")
     body = (
         f"Symptom: {env.symptom()}\n\n"
-        f"Telemetry summaries (every signal):\n{_telemetry_digest(env)}\n\n"
-        f"Documents / logs / actions:\n{_artifact_digest(env)}\n\n"
+        f"Telemetry — full series for every signal (time-ordered values):\n{_telemetry_digest(env)}\n\n"
+        f"Config store (raw current vs baseline):\n{_config_digest(env)}\n\n"
+        f"Full document / log / ticket / error / action corpus:\n{_artifact_digest(env)}\n\n"
         f"Candidate root-cause node ids (answer with exactly one): {_candidate_legend(env)}\n\n"
-        "Identify the single most likely root cause. Distinguish a true cause from a merely "
-        "salient recent event, and note any unreliable channels. Return "
+        "Identify the single most likely root cause from all of the above. Distinguish a true "
+        "cause from a merely salient recent event (compare the degradation onset against the "
+        "event time), note any unreliable/stuck channels, and abstain if no single cause is "
+        "supported. Return "
         '{"answer_type":"cause"|"abstain","root_cause":node_id,"causal_chain":[node_ids],'
         '"cited_evidence":[artifact_ids],"ruled_out":[node_ids],"conflicts":[ids],'
         '"recommended_action":str}.'
     )
-    data = _call_json(backend, "bare", body, max_tokens=1536)
+    data = _call_json(backend, "bare", body, max_tokens=1536, system=BARE_SYSTEM)
     candidate_ids = {c["id"] for c in _seed_candidates(env)}
     root = data.get("root_cause")
     answer_type = data.get("answer_type") if data.get("answer_type") in ("cause", "abstain") else "cause"
@@ -151,7 +188,7 @@ def react(env: Environment, backend: LLMBackend | None = None, max_steps: int = 
             'or {"final":{"answer_type","root_cause","causal_chain","cited_evidence",'
             '"ruled_out","conflicts","recommended_action"}} when confident.'
         )
-        data = _call_json(backend, "react", body, max_tokens=1024)
+        data = _call_json(backend, "react", body, max_tokens=1024, system=REACT_SYSTEM)
         if "final" in data:
             f = data["final"] or {}
             at = f.get("answer_type") if f.get("answer_type") in ("cause", "abstain") else "cause"

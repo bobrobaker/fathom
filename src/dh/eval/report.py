@@ -10,14 +10,19 @@ from __future__ import annotations
 
 import statistics as st
 
-from dh.eval.bespoke import ACCURACY_FAMILY, CAPABILITY_FAMILY, CaseScore
+from dh.eval.bespoke import (
+    ACCURACY_FAMILY,
+    CAPABILITY_FAMILY,
+    LOCALIZATION_FAMILY,
+    CaseScore,
+)
 
 _SOLVER_ORDER = ["controller", "bare_llm", "react", "shortcut"]
 
 
 def summarize(scores: list[CaseScore]) -> dict[str, tuple[float, float]]:
     """metric → (mean, stdev) across runs (stdev 0 for a single run)."""
-    metrics = CAPABILITY_FAMILY + ACCURACY_FAMILY + ["tokens"]
+    metrics = CAPABILITY_FAMILY + ACCURACY_FAMILY + LOCALIZATION_FAMILY + ["tokens"]
     out: dict[str, tuple[float, float]] = {}
     for m in metrics:
         vals = [float(getattr(s, m)) for s in scores]
@@ -58,6 +63,8 @@ def render(results: dict[str, list[CaseScore]], case_id: str = "") -> str:
 
     out = [f"## Bespoke eval — {case_id or 'case'} (n={n_runs} run(s))", "",
            "### Accuracy family", *table(ACCURACY_FAMILY), "",
+           "### Localization (right subsystem — partial credit, reported apart from accuracy)",
+           *table(LOCALIZATION_FAMILY), "",
            "### Capability family", *table(CAPABILITY_FAMILY), "",
            "### Cost", *table(["tokens"], is_tokens=True), ""]
 

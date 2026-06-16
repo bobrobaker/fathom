@@ -28,8 +28,11 @@ usually sharing files, invariants, or tests.
 
 `<----- Ongoing phase ----->`
 
-**Status:** not started. This is the next keystroke (`spike_build_plan.md`; the
-full build is the *destination*, not now).
+**Status:** spike vertical built (M0–M9); spike-completion in progress per
+`handoffs/2026-06-16-spike-audit-response.md` — all 8 cases authored, baselines
+strengthened, scoring/abstention/conflict-surfacing hardened, findings + showpiece in
+flight. Final numbers pending the live A3 variance run. See
+`docs/decisions/2026-06-16-spike-completion-implementation-calls.md`.
 
 **Deliverable:** a runnable repo (per `spike_build_plan.md`, milestones M0→M9)
 producing — the **bespoke eval report** (`controller` vs `shortcut`/`bare_llm`/`react`,
@@ -70,8 +73,8 @@ Non-negotiables (`00_README` §"Non-negotiable rules"):
 - [~] M4.5 — benchmark harness + live mechanism proven (controller-core answers on a QA env); real MuSiQue n=20 read deferred — see `docs/decisions/2026-06-16-benchmark-scoped-harness-first.md`
 - [x] M5 — baselines (`shortcut`, strong `bare_llm`, real `react`)
 - [x] M6 — bespoke eval on case #1 + first uplift row
-- [~] M7 — generator generalized for the full set; **4/≥9 authored**: #1 TEC, #2 laser (symmetry), #3 window (spatial), #5 abstain. Remaining: #4 calibration, #6 buried-evidence, #7 tie-breaker, #8 common-mode (specs in `cases.py`; need the per-fault corpus-delta noted in debt)
-- [~] M8 — benchmark harness + scoring built (`controller-core`/`static_rag`/`bare_llm`, EM/F1, tokens); real MuSiQue n=100 run deferred (same decision as M4.5)
+- [x] M7 — generator generalized; **all 8 cases authored**: #1 TEC, #2 laser, #3 window, #4 calibration (change-is-cause), #5 abstain, #6 detector-bias (absent-cue + buried), #7 tie-breaker, #8 common-mode. Per-fault corpus delta (A1) replaced the `exclude_artifacts` stopgap; capability-binding + anti-shortcut-balance gated in `test_capability.py`.
+- [~] M8 — benchmark harness + scoring built; real MuSiQue n=20→n=100 run deferred (A5, time-boxed, not a ship-blocker; same decision as M4.5)
 - [x] M9 — viewer (`ig.json` export + static `index.html`, evidence-colored, step slider)
 
 **Validation:** `.venv/bin/pytest` (the milestone done-when gates: `test_schemas`,

@@ -8,7 +8,7 @@ import json
 
 from dh.controller.beliefs import sigmoid
 from dh.schemas import EvidenceItem, EvidenceLink, Hypothesis, InvestigationGraph
-from dh.viewer.export import export_viewer, ig_to_dict
+from dh.viewer.export import build_site, case_bundle, export_viewer, ig_to_dict
 
 
 def _ig_with_snapshots() -> InvestigationGraph:
@@ -55,4 +55,33 @@ def test_export_writes_static_bundle(tmp_path):
     assert json.loads(payload)["trigger"] == "log.reboot"
     html = (tmp_path / "index.html").read_text()
     assert "IG_DATA" in html and "<svg" in html  # self-contained, no CDN
+    assert "http://" not in html.replace('"http://www.w3.org/2000/svg"', "")  # no external deps
+
+
+def test_case_bundle_carries_trace_header_and_evalrow():
+    ig = _ig_with_snapshots()
+    ig.trace = [{"action": "seed"}, {"action": "run_check", "voi": 1.0}]
+    b = case_bundle(ig, case_id="case1", title="TEC", caption="the worked case",
+                    trigger="log.reboot", root_cause="part.tec",
+                    answer={"answer_type": "cause", "root_cause": "part.tec"},
+                    eval_row={"accuracy": 1.0, "trigger_discrimination": 1.0, "tokens": 1200})
+    assert b["case_id"] == "case1" and b["title"] == "TEC"
+    assert b["trigger"] == "log.reboot" and b["answer"]["root_cause"] == "part.tec"
+    assert b["eval_row"]["accuracy"] == 1.0
+    assert len(b["trace"]) == 2 and b["trace"][1]["action"] == "run_check"
+
+
+def test_build_site_writes_manifest_and_bundles(tmp_path):
+    bundles = [case_bundle(_ig_with_snapshots(), case_id=cid, title=cid, caption="c",
+                           trigger="log.reboot", root_cause="part.tec",
+                           eval_row={"accuracy": 1.0}) for cid in ("case1", "case5")]
+    index = build_site(bundles, tmp_path)
+    assert index.exists() and index.name == "index.html"
+    manifest = json.loads((tmp_path / "manifest.json").read_text())
+    assert {m["case_id"] for m in manifest} == {"case1", "case5"}
+    assert (tmp_path / "case1.json").exists() and (tmp_path / "case5.json").exists()
+    js = (tmp_path / "bundles.js").read_text()
+    assert js.startswith("window.FATHOM_BUNDLES =") and "FATHOM_MANIFEST" in js
+    html = (tmp_path / "index.html").read_text()
+    assert "FATHOM_BUNDLES" in html and "<svg" in html
     assert "http://" not in html.replace('"http://www.w3.org/2000/svg"', "")  # no external deps

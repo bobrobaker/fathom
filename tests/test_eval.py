@@ -55,11 +55,19 @@ def _shortcut_answer(case) -> Answer:
 # --- rubric correctness ------------------------------------------------------
 
 def test_accuracy_granularity_and_wrong(case):
-    assert score(_controller_answer(case), case).accuracy == 1.0
-    # the subsystem of the TEC part also counts (part_of family)
+    # exact part match earns accuracy AND localization
+    s = score(_controller_answer(case), case)
+    assert s.accuracy == 1.0 and s.localization == 1.0
+    # C6: naming only the subsystem of a PART fault is NOT full accuracy — it is localization
     sub_ans = _controller_answer(case).model_copy(update={"root_cause": "sub.thermal"})
-    assert score(sub_ans, case).accuracy == 1.0
-    assert score(_shortcut_answer(case), case).accuracy == 0.0  # blamed the reboot
+    s_sub = score(sub_ans, case)
+    assert s_sub.accuracy == 0.0 and s_sub.localization == 1.0
+    # the part-version is the same physical part → still exact
+    rev_ans = _controller_answer(case).model_copy(update={"root_cause": "part.tec.revB"})
+    assert score(rev_ans, case).accuracy == 1.0
+    # blamed the reboot → neither right nor localized
+    s_sc = score(_shortcut_answer(case), case)
+    assert s_sc.accuracy == 0.0 and s_sc.localization == 0.0
 
 
 def test_trigger_discrimination(case):

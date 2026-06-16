@@ -149,6 +149,7 @@ class InvestigationGraph(BaseModel):
     recommended_action: str | None = None  # next diagnostic action (VOI), incl. swap-test
     status: Literal["in_progress", "concluded", "abstained"] = "in_progress"
     snapshots: list["InvestigationGraph"] = []  # per-step copies for the viewer (§3.3)
+    trace: list[dict] = []  # per-step action record (action, VOI, evidence, deltas) for the viewer
 
 
 # --- §3.4 The answer (what the controller returns) ---------------------------

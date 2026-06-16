@@ -12,6 +12,7 @@ from __future__ import annotations
 import random
 
 from dh.generator import faults
+from dh.generator.faults import CorpusItem
 from dh.schemas import (
     Artifact,
     Case,
@@ -71,16 +72,20 @@ def _base_topology() -> tuple[list[Node], list[Edge]]:
                                         "past week (about 110 m vs a 120 m baseline). "
                                         "Diagnose the root cause."}))
 
-    # config store — all unchanged for case #1 (rules out calibration/firmware/setpoint)
-    config = {
-        "config.cal_table_version": ("cal_table_version", "v12"),
-        "config.firmware_version": ("firmware_version", "3.4.1"),
-        "config.tec_setpoint_C": ("tec_setpoint_C", 25.0),
-        "config.scan_params": ("scan_params", "raster_default"),
+    # config store — baseline values (a fault may diverge one via FaultFacts.config_changes).
+    # Each config item part_of its owning subsystem: a config change then falls inside that
+    # subsystem's cause-equivalence family (eval §8.1), so blaming the changed key counts as
+    # localizing the subsystem fault — the calibration case (#4) leans on this.
+    config = {  # id: (name, baseline_value, owning_subsystem)
+        "config.cal_table_version": ("cal_table_version", "v12", "sub.calibration"),
+        "config.firmware_version": ("firmware_version", "3.4.1", "sub.calibration"),
+        "config.tec_setpoint_C": ("tec_setpoint_C", 25.0, "sub.thermal"),
+        "config.scan_params": ("scan_params", "raster_default", "sub.power"),
     }
-    for nid, (name, val) in config.items():
+    for nid, (name, val, sub) in config.items():
         nodes.append(Node(id=nid, type="config", name=name,
                           props={"value": val, "baseline": val}))
+        edges.append(Edge(src=nid, dst=sub, type="part_of"))
 
     # measured_by: subsystem/KPI ← metric
     measured = [
@@ -104,71 +109,71 @@ def _base_topology() -> tuple[list[Node], list[Edge]]:
     return nodes, edges
 
 
-def _build_corpus(facts) -> tuple[list[Node], list[Edge], list[Artifact]]:
-    """Shared range-degradation corpus (docs, prior reports, logbook, diagnostic actions);
-    the error-log entry is fault-specific (only present when the fault injects one)."""
-    # (id, node_type, name, artifact_kind, text, edges_out[(dst,type)], extra_artifact_kw)
-    items = [
-        ("doc.system_model", "domain_doc", "Lidar thermal-optical model", "doc",
-         "System model: the Thermal -> Laser -> return-intensity -> effective-range chain. "
-         "Rule: laser optical output falls as the diode temperature rises above its setpoint. "
-         "Detector dark-count rises with detector temperature, lowering SNR.",
-         [("sub.thermal", "references"), ("sub.laser", "references"),
-          ("metric.intensity", "references")], {}),
-        ("doc.playbook", "procedure", "Diagnosing range degradation", "procedure",
-         "Playbook: when effective range degrades, work the differential "
-         "{window contamination, detector drift, laser aging, thermal/TEC, calibration drift}. "
-         "Cheap eliminations first: config_diff (calibration/firmware), spatial_intensity_check "
-         "(window). Discriminate laser aging vs thermal with temp_correlation_check and "
-         "tec_load_check. Check channel_sanity_check for stuck sensors and onset_vs_event_check "
-         "to order onset against recent events.",
-         [("kpi.effective_range", "references")], {}),
-        ("report.prior_tec", "report", "Prior incident: TEC degradation", "report",
-         "Six months ago a unit showed range loss with intensity tracking diode temperature "
-         "and TEC current near its limit; root cause was a degraded TEC module. Same signature.",
-         [("sub.thermal", "concluded"), ("part.tec", "references")], {}),
-        ("report.prior_laser", "report", "Prior incident: laser power aging", "report",
-         "A separate unit lost range from laser power aging: optical output fell but diode "
-         "temperature stayed nominal and intensity did NOT correlate with temperature.",
-         [("sub.laser", "concluded"), ("part.laser_module", "references")], {}),
-        ("log.reboot", "logbook_entry", "Scheduled system reboot", "logbook_entry",
-         "Scheduled system reboot performed (routine maintenance window).",
-         [], {"timestamp": faults.REBOOT_T, "source": "scheduled"}),
-        ("log.service", "logbook_entry", "Last thermal-subsystem service", "logbook_entry",
-         "Last service of the thermal subsystem (TEC module inspected, no action).",
-         [("sub.thermal", "references")], {"timestamp": faults.SERVICE_T}),
-        ("act.window_clean", "diagnostic_action", "Window cleaned", "diagnostic_action",
-         "Window cleaned during inspection; no improvement in return intensity afterwards "
-         "(reinforces: not contamination).",
-         [("sub.optics", "references")], {"timestamp": faults.WINDOW_CLEAN_T,
-                                          "props_result": "no_improvement"}),
-        ("act.swap_test", "diagnostic_action", "Laser-module swap-test (not tried)",
-         "diagnostic_action",
-         "Recommended-but-untried: swap the laser module to cleanly isolate laser aging from "
-         "a thermal cause before ordering parts. High value of information.",
-         [("sub.laser", "references"), ("sub.thermal", "references")], {"props_tried": False}),
+def _shared_corpus() -> list[CorpusItem]:
+    """The structural range-degradation corpus carried by *every* case: domain docs, the
+    playbook, prior-incident reports (case-based anchors about *other* units, so they never
+    contradict the current fault), generic logbook, and the recommended swap-test. Anything
+    whose truth depends on the injected fault is a per-fault `FaultFacts.corpus` item, not here."""
+    return [
+        CorpusItem("doc.system_model", "doc", node_type="domain_doc",
+                   name="Lidar thermal-optical model",
+                   text="System model: the Thermal -> Laser -> return-intensity -> effective-range "
+                        "chain. Rule: laser optical output falls as the diode temperature rises above "
+                        "its setpoint. Detector dark-count rises with detector temperature, lowering SNR.",
+                   refs=[("sub.thermal", "references"), ("sub.laser", "references"),
+                         ("metric.intensity", "references")]),
+        CorpusItem("doc.playbook", "procedure", node_type="procedure",
+                   name="Diagnosing range degradation",
+                   text="Playbook: when effective range degrades, work the differential "
+                        "{window contamination, detector drift, laser aging, thermal/TEC, calibration "
+                        "drift}. Cheap eliminations first: config_diff (calibration/firmware), "
+                        "spatial_intensity_check (window). Discriminate laser aging vs thermal with "
+                        "temp_correlation_check and tec_load_check. Check channel_sanity_check for stuck "
+                        "sensors and onset_vs_event_check to order onset against recent events.",
+                   refs=[("kpi.effective_range", "references")]),
+        CorpusItem("report.prior_tec", "report", node_type="report",
+                   name="Prior incident: TEC degradation",
+                   text="Six months ago a unit showed range loss with intensity tracking diode "
+                        "temperature and TEC current near its limit; root cause was a degraded TEC "
+                        "module. Same signature.",
+                   refs=[("sub.thermal", "concluded"), ("part.tec", "references")]),
+        CorpusItem("report.prior_laser", "report", node_type="report",
+                   name="Prior incident: laser power aging",
+                   text="A separate unit lost range from laser power aging: optical output fell but "
+                        "diode temperature stayed nominal and intensity did NOT correlate with temperature.",
+                   refs=[("sub.laser", "concluded"), ("part.laser_module", "references")]),
+        CorpusItem("log.service", "logbook_entry", node_type="logbook_entry",
+                   name="Last thermal-subsystem service",
+                   text="Last service of the thermal subsystem (TEC module inspected, no action).",
+                   refs=[("sub.thermal", "references")], timestamp=faults.SERVICE_T),
+        CorpusItem("act.swap_test", "diagnostic_action", node_type="diagnostic_action",
+                   name="Laser-module swap-test (not tried)",
+                   text="Recommended-but-untried: swap the laser module to cleanly isolate laser aging "
+                        "from a thermal cause before ordering parts. High value of information.",
+                   refs=[("sub.laser", "references"), ("sub.thermal", "references")],
+                   props={"tried": False}),
     ]
 
+
+def _emit_corpus(items: list[CorpusItem]) -> tuple[list[Node], list[Edge], list[Artifact]]:
+    """Emit each corpus item twice — a graph `Node` (if `node_type`) + an `Artifact` sharing
+    its id, the join key between navigation and retrieval. `node_type is None` ⇒ artifact only."""
     nodes: list[Node] = []
     edges: list[Edge] = []
     artifacts: list[Artifact] = []
-    for nid, ntype, name, kind, text, out_edges, kw in items:
-        props = {k.removeprefix("props_"): v for k, v in kw.items() if k.startswith("props_")}
-        nodes.append(Node(id=nid, type=ntype, name=name, props=props))
-        for dst, etype in out_edges:
-            edges.append(Edge(src=nid, dst=dst, type=etype))
-        artifacts.append(Artifact(
-            id=nid, kind=kind, text=text,
-            source=kw.get("source"), timestamp=kw.get("timestamp"),
-            refs=[dst for dst, _ in out_edges],
-        ))
-
-    # the error-log entry is an artifact only (no "error" node type), reachable via read_errors
-    if facts.error:
-        eid, etext, erefs = facts.error
-        artifacts.append(Artifact(id=eid, kind="error", text=etext,
-                                  timestamp=faults.ONSET, refs=erefs))
+    for it in items:
+        if it.node_type is not None:
+            nodes.append(Node(id=it.id, type=it.node_type, name=it.name or it.id, props=it.props))
+            for dst, etype in it.refs:
+                edges.append(Edge(src=it.id, dst=dst, type=etype))
+        artifacts.append(Artifact(id=it.id, kind=it.kind, text=it.text, source=it.source,
+                                  timestamp=it.timestamp, refs=[dst for dst, _ in it.refs]))
     return nodes, edges, artifacts
+
+
+def _build_corpus(facts) -> tuple[list[Node], list[Edge], list[Artifact]]:
+    """Shared structural corpus + this fault's per-fault delta (`facts.corpus`, spec §5)."""
+    return _emit_corpus(_shared_corpus() + facts.corpus)
 
 
 def _build_bom() -> TypedGraph:
@@ -197,12 +202,11 @@ def build_case(fault: str, mechanisms: list[str], seed: int = 0) -> Case:
         for n in base_nodes:
             if n.type == "KPI":
                 n.props["symptom"] = fct.symptom
+    if fct.config_changes:  # a real post-release config change (value diverges from baseline)
+        for n in base_nodes:
+            if n.id in fct.config_changes:
+                n.props["value"] = fct.config_changes[n.id]
     corpus_nodes, corpus_edges, artifacts = _build_corpus(fct)
-    if fct.exclude_artifacts:  # drop corpus items whose conclusion would contradict this fault
-        ex = set(fct.exclude_artifacts)
-        corpus_nodes = [n for n in corpus_nodes if n.id not in ex]
-        corpus_edges = [e for e in corpus_edges if e.src not in ex and e.dst not in ex]
-        artifacts = [a for a in artifacts if a.id not in ex]
 
     graph = TypedGraph(nodes=base_nodes + corpus_nodes, edges=base_edges + corpus_edges)
     ground_truth = GroundTruth(

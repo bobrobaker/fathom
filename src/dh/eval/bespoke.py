@@ -23,6 +23,16 @@ from dh.schemas import Answer, Case, InvestigationGraph
 ACCURACY_FAMILY = ["accuracy"]
 CAPABILITY_FAMILY = ["evidence_f1", "conflict_handling", "trigger_discrimination",
                      "abstention_calibration"]
+LOCALIZATION_FAMILY = ["localization"]
+
+# The canonical evidence ids a solver may legitimately cite that are not graph/artifact/signal
+# ids: deterministic check names (the `check` field each returns) + the recommend action. Used
+# both to canonicalise and to detect hallucinated citations — identically for all four solvers.
+CHECK_IDS = {
+    "config_diff", "spatial_intensity_check", "temp_correlation_check", "tec_load_check",
+    "channel_sanity_check", "onset_vs_event_check", "detector_health_check",
+    "common_mode_check", "recommend_swap_test",
+}
 
 
 # --- canonicalisation maps from a case ---------------------------------------
@@ -32,18 +42,54 @@ def _signal_to_metric(case: Case) -> dict[str, str]:
             if n.type in ("metric", "KPI") and "signal" in n.props}
 
 
-def _cause_equivalents(node_id: str | None, case: Case) -> set[str]:
-    """A cause id plus its part_of/version_of family (granularity robustness)."""
+def _node_type(node_id: str, case: Case) -> str | None:
+    return next((n.type for n in case.graph.nodes if n.id == node_id), None)
+
+
+def _exact_cause_set(node_id: str | None, case: Case) -> set[str]:
+    """Ids that count as naming the *exact* cause (C6 — strict accuracy).
+
+    The node itself, plus its `version_of` family (the same physical part across revisions,
+    e.g. part.tec ↔ part.tec.revB). For a *subsystem-level* cause (calibration/power, where
+    the subsystem itself is the fault), naming a `config` that is `part_of` it also counts —
+    that is at least as specific as the subsystem. A part fault is NOT satisfied by naming its
+    subsystem (that is localization, scored separately): a 'thermal' answer does not earn
+    accuracy for a 'tec' fault."""
     if not node_id:
         return set()
-    equiv = {node_id}
+    s = {node_id}
     for e in case.graph.edges:
-        if e.type in ("part_of", "version_of"):
+        if e.type == "version_of":
             if e.src == node_id:
-                equiv.add(e.dst)
+                s.add(e.dst)
             if e.dst == node_id:
-                equiv.add(e.src)
-    return equiv
+                s.add(e.src)
+    if _node_type(node_id, case) == "subsystem":
+        for e in case.graph.edges:
+            if e.type == "part_of" and e.dst == node_id and _node_type(e.src, case) == "config":
+                s.add(e.src)
+    return s
+
+
+def _subsystem_of(node_id: str | None, case: Case) -> str | None:
+    """The subsystem a part/config belongs to (`part_of`), or the node itself if a subsystem."""
+    if not node_id:
+        return None
+    for e in case.graph.edges:
+        if e.type == "part_of" and e.src == node_id:
+            return e.dst
+    return node_id if _node_type(node_id, case) == "subsystem" else None
+
+
+def _localization_set(node_id: str | None, case: Case) -> set[str]:
+    """Ids that count as localizing to the right *subsystem* (partial credit, reported apart
+    from accuracy): the exact cause, its subsystem, and everything `part_of` that subsystem."""
+    s = _exact_cause_set(node_id, case)
+    sub = _subsystem_of(node_id, case)
+    if sub:
+        s.add(sub)
+        s |= {e.src for e in case.graph.edges if e.type == "part_of" and e.dst == sub}
+    return s
 
 
 def _canon(idv: str, sig2metric: dict[str, str], ev2src: dict[str, str]) -> str:
@@ -62,6 +108,7 @@ def _canon_set(ids, sig2metric, ev2src) -> set[str]:
 class CaseScore:
     solver: str
     accuracy: float = 0.0
+    localization: float = 0.0       # right subsystem (partial credit), reported apart from accuracy
     evidence_f1: float = 0.0
     conflict_handling: float = 0.0
     trigger_discrimination: float = 0.0
@@ -90,18 +137,19 @@ def score(answer: Answer, case: Case, *, solver: str = "", tokens: int = 0) -> C
     sig2metric = _signal_to_metric(case)
     ev2src = {e.id: e.source for e in fg.evidence}
     valid_case_ids = {n.id for n in case.graph.nodes} | {a.id for a in case.artifacts} \
-        | {s.signal for s in case.telemetry} \
-        | {f"{c}_check" for c in ["config_diff", "spatial_intensity", "temp_correlation",
-                                  "tec_load", "channel_sanity", "onset_vs_event"]}
+        | {s.signal for s in case.telemetry} | CHECK_IDS
 
     s = CaseScore(solver=solver, tokens=tokens)
 
-    # accuracy — both abstain, or root cause within the gt cause family
+    # accuracy — both abstain, or root cause is the EXACT cause (C6: strict; a part fault is
+    # not satisfied by its subsystem). localization (right subsystem) is scored separately.
     if gt.answer_type == "abstain":
         s.accuracy = 1.0 if answer.answer_type == "abstain" else 0.0
+        s.localization = s.accuracy
     else:
-        s.accuracy = 1.0 if (answer.answer_type == "cause" and answer.root_cause
-                             in _cause_equivalents(gt.root_cause, case)) else 0.0
+        named = answer.root_cause if answer.answer_type == "cause" else None
+        s.accuracy = 1.0 if named in _exact_cause_set(gt.root_cause, case) else 0.0
+        s.localization = 1.0 if named in _localization_set(gt.root_cause, case) else 0.0
 
     # evidence-F1 — canonicalised cited vs load-bearing; out-of-case ids are hallucinations
     cited = _canon_set(answer.cited_evidence, sig2metric, ev2src)

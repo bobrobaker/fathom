@@ -93,6 +93,7 @@ class LidarEnvironment(Environment):
     _CHECKS = {
         "config_diff", "spatial_intensity_check", "temp_correlation_check",
         "tec_load_check", "channel_sanity_check", "onset_vs_event_check",
+        "detector_health_check", "common_mode_check",
     }
 
     def __init__(self, case: Case):
@@ -136,6 +137,15 @@ class LidarEnvironment(Environment):
         raise KeyError("no KPI node to anchor the symptom")
 
     # --- retrieval -----------------------------------------------------------
+    def all_artifacts(self) -> list[Artifact]:
+        """The full observable corpus — what a 'dump everything' long-context baseline reads
+        (spec §7). Observable evidence only; `Case.ground_truth` never travels through here."""
+        return list(self._case.artifacts)
+
+    def config_store(self) -> list[Node]:
+        """The raw config nodes (current + baseline values) — observable, not a computed diff."""
+        return [n for n in self._case.graph.nodes if n.type == "config"]
+
     def search(self, query: str, k: int = 5) -> list[Artifact]:
         from rank_bm25 import BM25Okapi
 
@@ -152,15 +162,27 @@ class LidarEnvironment(Environment):
         return list(self._telemetry)
 
     def query_telemetry(self, signal: str, window=None, condition=None) -> TimeSeries:
+        """Return a signal, optionally sliced by a time `window` and/or a `condition`.
+
+        A condition-dependent signal (D3/D4) carries a parallel tag list in
+        `props["conditions"]`; `condition=` keeps only the samples whose tag matches, so an
+        intermittent fault visible only under one operating point can be isolated. Signals
+        without condition tags ignore the filter (no spike case populates them yet — the
+        full-build D3/D4 cases do; the wiring is here so the controller can request it)."""
         if signal not in self._telemetry:
             raise KeyError(f"unknown signal {signal!r}")
         s = self._telemetry[signal]
-        if window is None:
+        tags = (s.spec or {}).get("conditions") if condition is not None else None
+        pts = list(zip(s.t, s.v, tags or [None] * len(s.t)))
+        if window is not None:
+            lo, hi = window
+            pts = [p for p in pts if lo <= p[0] <= hi]
+        if condition is not None and tags is not None:
+            pts = [p for p in pts if p[2] == condition]
+        if window is None and condition is None:
             return s.model_copy(deep=True)
-        lo, hi = window
-        keep = [(ti, vi) for ti, vi in zip(s.t, s.v) if lo <= ti <= hi]
-        return TimeSeries(signal=s.signal, t=[t for t, _ in keep],
-                          v=[v for _, v in keep], spec=s.spec)
+        return TimeSeries(signal=s.signal, t=[p[0] for p in pts],
+                          v=[p[1] for p in pts], spec=s.spec)
 
     # --- logs & actions ------------------------------------------------------
     def read_logbook(self, window=None) -> list[Artifact]:
@@ -224,6 +246,18 @@ class LidarEnvironment(Environment):
             raise KeyError(f"no timed event {event_id!r}")
         return checks.onset_vs_event_check(self._telemetry[signal], event.timestamp,
                                            event_label=event.id)
+
+    def _run_detector_health_check(self, args: dict) -> dict:
+        dark = self._metric_signal(args.get("dark_signal", "dark_count_rate"))
+        temp = self._metric_signal(args.get("temp_signal", "detector_temp_C"))
+        return checks.detector_health_check(self._telemetry[dark], self._telemetry[temp])
+
+    def _run_common_mode_check(self, args: dict) -> dict:
+        names = args.get("signals") or ["laser_power_mW", "dark_count_rate",
+                                        "mean_return_intensity"]
+        series = [self._telemetry[self._metric_signal(n)] for n in names
+                  if self._metric_signal(n) in self._telemetry]
+        return checks.common_mode_check(series)
 
 
 class BenchmarkEnvironment(Environment):

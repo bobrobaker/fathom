@@ -194,16 +194,18 @@
         "props": {}
       },
       {
-        "id": "log.reboot",
-        "type": "logbook_entry",
-        "name": "Scheduled system reboot",
-        "props": {}
-      },
-      {
         "id": "log.service",
         "type": "logbook_entry",
         "name": "Last thermal-subsystem service",
         "props": {}
+      },
+      {
+        "id": "act.swap_test",
+        "type": "diagnostic_action",
+        "name": "Laser-module swap-test (not tried)",
+        "props": {
+          "tried": false
+        }
       },
       {
         "id": "act.window_clean",
@@ -214,12 +216,10 @@
         }
       },
       {
-        "id": "act.swap_test",
-        "type": "diagnostic_action",
-        "name": "Laser-module swap-test (not tried)",
-        "props": {
-          "tried": false
-        }
+        "id": "log.reboot",
+        "type": "logbook_entry",
+        "name": "Scheduled system reboot",
+        "props": {}
       }
     ],
     "edges": [
@@ -255,6 +255,34 @@
         "src": "part.tec.revB",
         "dst": "part.tec",
         "type": "version_of",
+        "confidence": 1.0,
+        "props": {}
+      },
+      {
+        "src": "config.cal_table_version",
+        "dst": "sub.calibration",
+        "type": "part_of",
+        "confidence": 1.0,
+        "props": {}
+      },
+      {
+        "src": "config.firmware_version",
+        "dst": "sub.calibration",
+        "type": "part_of",
+        "confidence": 1.0,
+        "props": {}
+      },
+      {
+        "src": "config.tec_setpoint_C",
+        "dst": "sub.thermal",
+        "type": "part_of",
+        "confidence": 1.0,
+        "props": {}
+      },
+      {
+        "src": "config.scan_params",
+        "dst": "sub.power",
+        "type": "part_of",
         "confidence": 1.0,
         "props": {}
       },
@@ -413,13 +441,6 @@
         "props": {}
       },
       {
-        "src": "act.window_clean",
-        "dst": "sub.optics",
-        "type": "references",
-        "confidence": 1.0,
-        "props": {}
-      },
-      {
         "src": "act.swap_test",
         "dst": "sub.laser",
         "type": "references",
@@ -429,6 +450,13 @@
       {
         "src": "act.swap_test",
         "dst": "sub.thermal",
+        "type": "references",
+        "confidence": 1.0,
+        "props": {}
+      },
+      {
+        "src": "act.window_clean",
+        "dst": "sub.optics",
         "type": "references",
         "confidence": 1.0,
         "props": {}
@@ -1611,16 +1639,6 @@
       ]
     },
     {
-      "id": "log.reboot",
-      "kind": "logbook_entry",
-      "text": "Scheduled system reboot performed (routine maintenance window).",
-      "source": "scheduled",
-      "timestamp": 8.0,
-      "valid_from": null,
-      "valid_to": null,
-      "refs": []
-    },
-    {
       "id": "log.service",
       "kind": "logbook_entry",
       "text": "Last service of the thermal subsystem (TEC module inspected, no action).",
@@ -1630,18 +1648,6 @@
       "valid_to": null,
       "refs": [
         "sub.thermal"
-      ]
-    },
-    {
-      "id": "act.window_clean",
-      "kind": "diagnostic_action",
-      "text": "Window cleaned during inspection; no improvement in return intensity afterwards (reinforces: not contamination).",
-      "source": null,
-      "timestamp": 5.0,
-      "valid_from": null,
-      "valid_to": null,
-      "refs": [
-        "sub.optics"
       ]
     },
     {
@@ -1669,6 +1675,28 @@
         "sub.thermal",
         "part.tec"
       ]
+    },
+    {
+      "id": "act.window_clean",
+      "kind": "diagnostic_action",
+      "text": "Window cleaned during inspection; no improvement in return intensity afterwards (reinforces: not contamination).",
+      "source": null,
+      "timestamp": 5.0,
+      "valid_from": null,
+      "valid_to": null,
+      "refs": [
+        "sub.optics"
+      ]
+    },
+    {
+      "id": "log.reboot",
+      "kind": "logbook_entry",
+      "text": "Scheduled system reboot performed (routine maintenance window).",
+      "source": "scheduled",
+      "timestamp": 8.0,
+      "valid_from": null,
+      "valid_to": null,
+      "refs": []
     }
   ],
   "bom": {

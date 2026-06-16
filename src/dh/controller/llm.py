@@ -33,9 +33,14 @@ log = logging.getLogger("dh.llm")
 
 SYSTEM_PROMPT = (
     "You are a diagnostic controller. You maintain a hypothesis differential and propose "
-    "the single most discriminating next action. Never assert a measurement you have not "
-    "retrieved; cite evidence by id. Reply with ONLY the requested JSON object — no prose, "
-    "no code fences."
+    "the single most DISCRIMINATING next action — one that separates the leading hypotheses, "
+    "not one that re-confirms a hypothesis already well-supported. Weigh evidence both ways: "
+    "a nominal check argues AGAINST a hypothesis. A salient recent event (a reboot, a config "
+    "change) is only the cause if the degradation onset aligns with it; if the onset predates "
+    "it, the event is a non-causal trigger — note it, don't blame it. Distrust a channel with "
+    "near-zero variance under changing load (a stuck/lying channel). Never assert a measurement "
+    "you have not retrieved; cite evidence by id. Reply with ONLY the requested JSON object — "
+    "no prose, no code fences."
 )
 
 
@@ -110,17 +115,25 @@ class ScriptedBackend:
 class MeteredBackend:
     """Wraps any backend to accumulate approximate token cost (chars/4) for the eval.
 
-    Approximate by design — the CLI backend exposes no usage; the point is a fair,
-    consistent cost axis across solvers, not billing accuracy."""
+    A *CLI-derived estimate* by design — the headless CLI exposes no usage API, so we count
+    chars/4 of the content we control (the user prompt + the system prompt we pass). Because the
+    CLI is invoked with tools stripped and its default system prompt replaced (see CLIBackend),
+    little hidden scaffolding remains, so this approximates API *input* tokens. The system-prompt
+    portion — the fixed per-call overhead — is tracked separately (`scaffold_tokens`) so a report
+    can subtract it for a content-only, API-equivalent estimate and show it is small and constant
+    across solvers (B10). The same meter wraps every solver, so any residual overhead cancels in
+    the cross-solver comparison. Counts are ~model-agnostic (chars/4), not billing-accurate."""
     def __init__(self, inner: LLMBackend):
         self.inner = inner
         self.name = f"metered:{inner.name}"
         self.in_tokens = 0
         self.out_tokens = 0
+        self.scaffold_tokens = 0   # system-prompt tokens — the fixed per-call CLI scaffolding
         self.calls = 0
 
     def complete(self, prompt: str, *, system: str | None = None, max_tokens: int = 1024) -> str:
         self.in_tokens += (len(prompt) + len(system or "")) // 4
+        self.scaffold_tokens += len(system or "") // 4
         self.calls += 1
         out = self.inner.complete(prompt, system=system, max_tokens=max_tokens)
         self.out_tokens += len(out) // 4
@@ -129,6 +142,11 @@ class MeteredBackend:
     @property
     def total_tokens(self) -> int:
         return self.in_tokens + self.out_tokens
+
+    @property
+    def content_tokens(self) -> int:
+        """API-equivalent estimate: total net of the fixed system-prompt scaffolding (B10)."""
+        return self.total_tokens - self.scaffold_tokens
 
 
 def get_backend(model: str | None = None) -> LLMBackend | None:
@@ -168,13 +186,16 @@ def _read_tag(prompt: str) -> str:
 
 
 def _call_json(backend: LLMBackend, tag: str, body: str, *, retries: int = 2,
-               max_tokens: int = 1024) -> dict:
-    """Call the backend for `tag`, parse JSON, retry on failure, then degrade to {}."""
+               max_tokens: int = 1024, system: str = SYSTEM_PROMPT) -> dict:
+    """Call the backend for `tag`, parse JSON, retry on failure, then degrade to {}.
+
+    `system` defaults to the controller's prompt; baselines pass their own so the controller's
+    hypothesis-differential guidance never leaks into bare_llm / react (fairness, §7)."""
     prompt = f"TASK:{tag}\n{body}"
     for attempt in range(retries + 1):
         nudge = "" if attempt == 0 else "\n\nYour previous reply was not valid JSON. Return ONLY the JSON object."
         try:
-            raw = backend.complete(prompt + nudge, system=SYSTEM_PROMPT, max_tokens=max_tokens)
+            raw = backend.complete(prompt + nudge, system=system, max_tokens=max_tokens)
         except Exception as e:  # noqa: BLE001 — backend failures must degrade, not crash
             log.warning("backend error on %s (attempt %d): %s", tag, attempt + 1, e)
             continue
@@ -198,7 +219,12 @@ class ActionProposal(BaseModel):
 
 # --- prompt helpers ----------------------------------------------------------
 
-MAX_WEIGHT = 2.0  # cap |LLR| so one piece of evidence can't saturate a hypothesis
+# Cap |LLR| per evidence link at ≈2.0 (≈7× odds shift, e^2≈7.4) so one observation — which the
+# LLM may over-weight — can't saturate a hypothesis. Sized against τ_dom=0.70 (logit≈0.85): one
+# strong item clears it, but the §6.2 stop also needs margin>0.20 over the runner-up, so a clean
+# conclusion still wants a second concordant item. The accumulated log-odds is clamped again in
+# `beliefs` (MAX_LOG_ODDS) so confidence tops out near 0.95, leaving room to be pulled back down.
+MAX_WEIGHT = 2.0
 
 
 def _coerce_node_ref(node_ref, label, cand_ids: set[str], cand_names: dict[str, str]):
@@ -264,6 +290,12 @@ def propose_actions(backend: LLMBackend, ig: InvestigationGraph, action_menu: li
         f"{_ig_brief(ig)}\n"
         f"Available action types: {sorted(capabilities)}\n"
         f"Available checks/targets: {action_menu}\n"
+        "Propose the next actions. Favour the ONE action that best discriminates between the "
+        "current leading hypotheses — score expected_discrimination high only when the result "
+        "would move them apart (raise one AND lower another), low for an action that merely "
+        "re-confirms an already-supported hypothesis. If two hypotheses are both high, pick the "
+        "action that tells them apart. If a salient recent event (reboot / config change) could "
+        "be mistaken for the cause, propose onset_vs_event_check against it to order the onset.\n"
         'Return {"actions":[{"type","args","rationale","expected_discrimination",'
         '"target_hypotheses"}]} where type is one of run_check|traverse|search|'
         "recommend_swap_test, args carries its parameters (e.g. {\"name\":\"tec_load_check\"} "
@@ -288,6 +320,13 @@ def interpret_result(backend: LLMBackend, ig: InvestigationGraph, action: Action
         f"Action just taken: {action.type} args={action.args}\n"
         f"Structured result:\n{json.dumps(result)}\n"
         f"Hypothesis ids: {hyp_ids}\n"
+        "Interpret this result into evidence and links. Emit a link for EVERY hypothesis the "
+        "result bears on — a NEGATIVE ('-') link to any hypothesis it argues against (e.g. a "
+        "nominal/at-spec reading rules one out), not only a positive link to the favoured one. "
+        "If the result demotes a salient recent event (its onset_predates_event is true, so the "
+        "event is coincident not causal) or flags a stuck/unreliable channel, put that event's "
+        "or channel's id (use the node id, e.g. log.reboot or metric.detector_temp) in "
+        "conflicts.\n"
         'Return {"evidence":{"id","summary","source"},"links":[{"hypothesis_id",'
         '"polarity","weight"}],"conflicts":[node_or_signal_ids]} where polarity is "+" or '
         '"-" and weight≈|log-likelihood-ratio| (0..4). Link only to listed hypothesis ids.'
