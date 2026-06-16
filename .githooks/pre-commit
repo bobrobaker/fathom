@@ -1,0 +1,11 @@
+#!/bin/sh
+# Tier-1 enforcement: mechanical invariants block, semantic judgment doesn't.
+# Arm once per clone: git config core.hooksPath .githooks
+ROOT="$(git rev-parse --show-toplevel)"
+python3 "$ROOT/tools/lint.py" || exit 1
+
+# Monition store: regenerate the reviewable text dump so git tracks dump.sql, not the
+# binary .dolt/ (which is gitignored). Guarded so a clone without the store still commits.
+if [ -d "$ROOT/monition/.dolt" ]; then
+    ( cd "$ROOT" && monition dump && git add monition/dump.sql )
+fi
