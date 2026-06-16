@@ -1,0 +1,33 @@
+# Fathom spike configuration — model pin, thresholds, seeds, VOI costs.
+# Authoritative shapes live in docs/handoff/spike_spec.md; section refs below.
+
+model:
+  id: claude-sonnet-4-6   # pinned for the spike; PROVISIONAL — finalize at M3 (§10)
+  temperature: 0.0        # low temp for determinism (build plan, critical-path notes)
+  max_tokens: 4096
+
+# Stop / abstain thresholds (§6.2)
+thresholds:
+  tau_dom: 0.70           # conclude if max confidence exceeds this ...
+  tau_margin: 0.20        # ... and margin over the runner-up exceeds this
+  tau_min: 0.55           # budget-exhausted: conclude iff leader exceeds, else abstain
+  conflict_abstain: 0.50  # mutually-contradictory-evidence abstain trigger (§6.2)
+
+controller:
+  budget: 12              # max diagnostic actions per case (§6.1)
+
+# VOI fixed action costs (§6.3): pick argmax(expected_discrimination / cost)
+voi_costs:
+  run_check: 1
+  traverse: 1
+  search: 2
+  recommend_swap_test: 3
+
+seeds:
+  generator: 0            # generator determinism (§5.1); case #1 uses seed=0
+  runs: 3                 # eval variance reported over >=3 runs (§9 S1)
+
+benchmark:
+  dataset: musique        # MuSiQue dev subset (§8.2)
+  smoke_n: 20             # M4.5 fail-fast fit check
+  eval_n: 100             # M8 full subset

@@ -13,3 +13,7 @@ monition/.dolt/
 # Datasets / large fixtures pulled at runtime (MuSiQue etc.)
 data/
 *.parquet
+
+# Generated, regenerable outputs (golden fixtures in fixtures/ stay tracked)
+reports/
+viewer_out/

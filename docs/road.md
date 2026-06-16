@@ -62,17 +62,17 @@ Non-negotiables (`00_README` §"Non-negotiable rules"):
 
 **Milestone tracker** (gate each before the next; done-when in `spike_build_plan.md`):
 
-- [ ] M0 — skeleton + schemas (`test_schemas` round-trips; `TypedGraph.neighbors()`)
-- [ ] M1 — generator for case #1, the TEC case → `fixtures/tec_case.json` (spine)
-- [ ] M2 — `LidarEnvironment` + the six deterministic checks (`test_checks`)
-- [ ] M3 — LLM plumbing (structured prompt builders + robust JSON parsing)
-- [ ] M4 — controller solves case #1 (`test_controller_tec`) ← primary gate (spine)
-- [ ] M4.5 — benchmark fit smoke-test on ~20 MuSiQue items (fail-fast scope gate)
-- [ ] M5 — baselines (`shortcut`, strong `bare_llm`, real `react`)
-- [ ] M6 — bespoke eval on case #1 + first uplift row
-- [ ] M7 — expand to the full case set (≥8), incl. abstain (#5) + buried-evidence (#6)
-- [ ] M8 — benchmark track (MuSiQue n=100; `controller-core` vs `bare_llm`/`static_rag`)
-- [ ] M9 — viewer (`ig.json` export + static `index.html`, evidence-colored, step slider)
+- [x] M0 — skeleton + schemas (`test_schemas` round-trips; `TypedGraph.neighbors()`)
+- [x] M1 — generator for case #1, the TEC case → `fixtures/tec_case.json` (spine)
+- [x] M2 — `LidarEnvironment` + the six deterministic checks (`test_checks`)
+- [x] M3 — LLM plumbing (structured prompt builders + robust JSON parsing)
+- [x] M4 — controller solves case #1 (`test_controller_tec`) ← primary gate (spine)
+- [~] M4.5 — benchmark harness + live mechanism proven (controller-core answers on a QA env); real MuSiQue n=20 read deferred — see `docs/decisions/2026-06-16-benchmark-scoped-harness-first.md`
+- [x] M5 — baselines (`shortcut`, strong `bare_llm`, real `react`)
+- [x] M6 — bespoke eval on case #1 + first uplift row
+- [~] M7 — generator generalized for the full set; **4/≥9 authored**: #1 TEC, #2 laser (symmetry), #3 window (spatial), #5 abstain. Remaining: #4 calibration, #6 buried-evidence, #7 tie-breaker, #8 common-mode (specs in `cases.py`; need the per-fault corpus-delta noted in debt)
+- [~] M8 — benchmark harness + scoring built (`controller-core`/`static_rag`/`bare_llm`, EM/F1, tokens); real MuSiQue n=100 run deferred (same decision as M4.5)
+- [x] M9 — viewer (`ig.json` export + static `index.html`, evidence-colored, step slider)
 
 **Validation:** `.venv/bin/pytest` (the milestone done-when gates: `test_schemas`,
 `test_generator`, `test_checks`, `test_controller_tec`), plus the bespoke eval report
