@@ -97,7 +97,9 @@ emits internally-consistent telemetry + corpus + hidden ground truth.
 
 - **Determinism.** The generator is seeded; the model is pinned; temperature is low. Residual LLM
   nondeterminism is reported as **variance over ≥3 runs** (mean ± spread), not hidden.
-- **Model pin.** [§5 — decided from the A8 probe: which model, and why.]
+- **Model pin.** `claude-sonnet-4-6`, held fixed across all four solvers for every comparison
+  (the like-to-like invariant — never mix models within one comparison, or the model confounds
+  the structure). Rationale in §5.
 - **Cost axis (CLI-derived estimate, B10).** Tokens are chars/4 of the content each solver sends,
   metered identically for all four (`MeteredBackend`). The headless CLI is invoked with tools
   stripped and its default system prompt replaced, so little hidden scaffolding remains; the fixed
@@ -136,8 +138,16 @@ emits internally-consistent telemetry + corpus + hidden ground truth.
 
 ## 5. Model pin (A8)
 
-> [The Opus-vs-Sonnet probe result and the pin decision, with the like-to-like invariant noted
-> (one model held fixed across all four solvers per comparison).]
+Pinned **`claude-sonnet-4-6`**. The audit flagged a model test because the earlier
+under-discrimination of conflicts (B7) *might* have been model capability rather than prompt — but
+that concern was resolved **structurally** by the deterministic conflict sweep (§3 of the decision
+record), which surfaces demoted triggers and stuck channels mechanically and is therefore
+model-independent. Sonnet solves the flagship case cleanly and is materially cheaper, which makes
+the honest cost story (§4.4) stronger, not weaker. A full like-to-like Opus sweep was **deferred**:
+it was impractical to complete in-session under heavy shared-machine CLI contention, and the
+swappable CLI↔API backend means it can be run later without code change. The **like-to-like
+invariant held**: for any one comparison, all four solvers run on the pinned model — the model is
+never mixed within a comparison.
 
 ---
 

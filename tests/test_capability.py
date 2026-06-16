@@ -9,10 +9,13 @@ strengthened bare_llm actually fails each scored axis — is produced by the liv
 reported in the findings; this file is the cheap, reproducible guard that ships in CI.
 """
 
+import json
 import statistics as st
 
 import pytest
 
+from dh.controller.llm import ScriptedBackend
+from dh.controller.loop import diagnose
 from dh.environment import LidarEnvironment
 from dh.generator import generate
 from dh.generator.cases import CASES_BY_ID, authored_cases
@@ -120,6 +123,45 @@ def test_case8_common_mode_trap_needs_onset_clustering():
     assert set(case.ground_truth.decoys) >= {"part.laser_module", "part.detector"}
     # the redundant agreement is the trap: no single cheap check names sub.power
     assert env.run_check("temp_correlation_check")["correlated"] is False
+
+
+# --- the conflict sweep (B7): surfaced reliably, never falsely ---------------
+
+def _scripted_conclude_tec():
+    """A backend that concludes TEC fast — so any conflict surfaced comes from the sweep,
+    not from the loop happening to run the onset/channel checks itself."""
+    return ScriptedBackend({
+        "seed": json.dumps({"hypotheses": [
+            {"id": "h.tec", "label": "TEC", "node_ref": "part.tec"},
+            {"id": "h.laser", "label": "laser", "node_ref": "part.laser_module"}]}),
+        "propose": json.dumps({"actions": [{"type": "run_check",
+            "args": {"name": "tec_load_check"}, "expected_discrimination": 0.9}]}),
+        "interpret": json.dumps({"evidence": {"id": "ev.tl", "summary": "TEC high",
+            "source": "tec_load_check"}, "links": [{"hypothesis_id": "h.tec",
+            "polarity": "+", "weight": 2.0}]}),
+        "synthesize": json.dumps({"answer_type": "cause", "root_cause": "part.tec",
+            "cited_evidence": ["ev.tl"]}),
+    })
+
+
+def test_conflict_sweep_surfaces_trigger_and_lying_channel_on_case1():
+    """Even when the controller concludes early, the deterministic sweep demotes the reboot and
+    flags the stuck detector_temp — the capability the bare baselines structurally lack."""
+    case = _case("case1")
+    ans = diagnose(LidarEnvironment(case), backend=_scripted_conclude_tec(), budget=3)
+    assert ans.root_cause == "part.tec"
+    assert "log.reboot" in ans.conflicts            # demoted trigger
+    assert "metric.detector_temp" in ans.conflicts  # stuck lying channel
+
+
+def test_conflict_sweep_does_not_demote_a_causal_change_on_case4():
+    """The change-is-cause case must NOT have its recent change demoted (onset aligns, not
+    predates) — the sweep is general, not a case-1 hack."""
+    case = _case("case4")
+    ans = diagnose(LidarEnvironment(case), backend=_scripted_conclude_tec(), budget=3)
+    # no spurious trigger/channel conflicts injected (case4 has no demoted trigger, no stuck channel)
+    assert "log.reboot" not in ans.conflicts
+    assert all(not c.startswith("log.") for c in ans.conflicts)
 
 
 @pytest.mark.parametrize("cid", [f"case{i}" for i in range(1, 9)])
