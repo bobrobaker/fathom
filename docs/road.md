@@ -70,7 +70,7 @@ Non-negotiables (`00_README` §"Non-negotiable rules"):
 - [x] M2 — `LidarEnvironment` + the six deterministic checks (`test_checks`)
 - [x] M3 — LLM plumbing (structured prompt builders + robust JSON parsing)
 - [x] M4 — controller solves case #1 (`test_controller_tec`) ← primary gate (spine)
-- [~] M4.5 — benchmark harness + live mechanism proven (controller-core answers on a QA env); real MuSiQue n=20 read deferred — see `docs/decisions/2026-06-16-benchmark-scoped-harness-first.md`
+- [~] M4.5 — benchmark harness + live mechanism proven (`agentic_rag`, an iterative-retrieval solver that shares only LLM plumbing with the diagnostic controller — NOT its structure; see `benchmark.py` docstring + the `test_benchmark` claim-test); real MuSiQue n=20 read deferred. The spec's "shared core / controller minus lidar checks" wording (§0/§8.2) over-claims and needs the gated rescope-vs-refactor decision — see `docs/decisions/2026-06-16-benchmark-scoped-harness-first.md`
 - [x] M5 — baselines (`shortcut`, strong `bare_llm`, real `react`)
 - [x] M6 — bespoke eval on case #1 + first uplift row
 - [x] M7 — generator generalized; **all 8 cases authored**: #1 TEC, #2 laser, #3 window, #4 calibration (change-is-cause), #5 abstain, #6 detector-bias (absent-cue + buried), #7 tie-breaker, #8 common-mode. Per-fault corpus delta (A1) replaced the `exclude_artifacts` stopgap; capability-binding + anti-shortcut-balance gated in `test_capability.py`.

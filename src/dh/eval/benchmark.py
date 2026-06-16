@@ -1,9 +1,20 @@
 """Benchmark track — agentic-retrieval generalization (spec §8.2, build plan M4.5/M8).
 
-Runs the **shared core** (controller minus lidar checks: search-driven iterative
-retrieval + answer selection) against `bare_llm` and `static_rag` on a QA passage set,
-reporting answer-EM/F1 and tokens/question. Framed as *agentic retrieval generalization*,
-not diagnosis (audit concern #2).
+Runs an **agentic-retrieval** solver (`agentic_rag`: search-driven iterative retrieval +
+answer selection) against `bare_llm` and `static_rag` on a QA passage set, reporting
+answer-EM/F1 and tokens/question.
+
+**Scope of the claim (verified, not asserted — see `tests/test_benchmark.py`):** this solver
+shares only **LLM plumbing** (`_call_json`, `get_backend`) and the `Environment.search`
+interface with the diagnostic controller (`dh.controller.loop.diagnose`). It does **NOT** run
+the controller's hypothesis differential, VOI selection, log-odds belief update, Investigation
+Graph, or calibrated abstention. So a benchmark number tests whether the *iterative-retrieval
+pattern* generalizes to QA — **not** whether the diagnostic *structure* (the project's thesis)
+does. The spec's earlier "shared core / controller minus lidar checks" wording over-claimed this;
+treat the benchmark as a component sanity check, report-only (T4 permits). Making the two paths
+genuinely share a reasoning core is a full-build refactor (parameterize `diagnose()`), not the
+spike — and even then QA is a weak exerciser of a differential (one answer-chain, not competing
+hypotheses).
 
 The harness is dataset-agnostic: feed it `BenchmarkItem`s. A MuSiQue loader lives in
 `tools/` behind the optional `benchmark` extra; the synthetic fixture in the tests proves
@@ -65,8 +76,11 @@ def _answer_text(data: dict) -> str:
     return (data.get("answer") or "").strip()
 
 
-def controller_core(env: BenchmarkEnvironment, backend: LLMBackend, rounds: int = 3) -> str:
-    """Iterative retrieval + answer selection — the shared core, no lidar checks."""
+def agentic_rag(env: BenchmarkEnvironment, backend: LLMBackend, rounds: int = 3) -> str:
+    """Iterative retrieval + answer selection. Shares ONLY LLM plumbing with the diagnostic
+    controller — no hypothesis differential / VOI / belief update / IG / abstention (it forces an
+    answer after `rounds`). NOT the controller's reasoning "core"; see the module docstring and
+    the `test_benchmark` claim-test that pins this relationship."""
     seen: dict[str, str] = {}
     query = env.symptom()
     for _r in range(rounds):
@@ -107,7 +121,7 @@ def bare_llm_qa(env: BenchmarkEnvironment, backend: LLMBackend, k: int = 12) -> 
     return _answer_text(_call_json(backend, "qabare", body))
 
 
-CORE_SOLVERS = {"controller_core": controller_core, "static_rag": static_rag,
+CORE_SOLVERS = {"agentic_rag": agentic_rag, "static_rag": static_rag,
                 "bare_llm": bare_llm_qa}
 
 
@@ -148,7 +162,8 @@ def run_benchmark(items: list[BenchmarkItem], backend: LLMBackend | None = None,
 
 
 def render_benchmark(results: dict[str, BenchmarkResult]) -> str:
-    lines = ["## Benchmark — agentic retrieval (controller-core vs baselines)", "",
+    lines = ["## Benchmark — agentic retrieval (agentic_rag vs baselines; shares plumbing, "
+             "not the diagnostic structure)", "",
              "| solver | n | EM | F1 | tokens/q |", "|---|---|---|---|---|"]
     for r in results.values():
         s = r.summary()
