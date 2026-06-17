@@ -51,7 +51,7 @@ Harness + live mechanism are done (`src/dh/eval/benchmark.py`). Remaining: a
 `tools/load_musique.py` (the `benchmark` extra), then n=20 fail-fast → n=100 — OR a
 formal decision to scope the benchmark to report-only/drop per the M4.5 gate (T4 allows
 this). See `docs/decisions/2026-06-16-benchmark-scoped-harness-first.md`.
-**▶ Reply:**
+**▶ Reply:** Decided (2026-06-16): **footnote**, do not validate-for-generalization. MuSiQue is a compositional chain with no rival-hypothesis adjudication, so a score tests retrieval/abstention/grounding, not the differential — report those (abstention + grounding, not EM alone). A differential-shaped domain (FEVER claim-verification) is the path to a real generalization claim, deferred to full-build (roadmap Phase 4). This **supersedes** the competitiveness framing in `spike-audit-response.md` A5. See `docs/decisions/2026-06-16-benchmark-tests-retrieval-not-differential.md`.
 
 ### A6. Live prompt iteration (capability quality)
 The live model under-discriminates the decoy and doesn't always surface the demoted
@@ -92,7 +92,7 @@ Will the capability-family win survive the ≥3-run average, or is it within noi
 Confirmation criterion **T3 ("evidence-F1 ≥ bare_llm at ≤ its cost") is currently NOT met.**
 Efficiency was one of the four stated axes. Is the capability uplift worth the cost in the
 portfolio story, or does the loop need to get cheaper (fewer steps / smaller prompts)?
-**▶ Reply:**
+**▶ Reply:** Report it as an honest capability-vs-cost tradeoff (resolved in `spike-audit-response.md` B3): ~6× is normal for a bounded agentic loop; keep the number, do a modest reduction pass, frame as "structure buys capability `bare_llm` lacks at a quantified token premium." T3 is a confirmation criterion, not a success gate — a clean miss, reported, is fine. The VOI ablation (`docs/decisions/2026-06-16-voi-ablation-before-formalizing.md`) may cut steps if scored selection turns out not to earn its calls.
 
 ### B4. Is `bare_llm` genuinely "best honest"? (non-negotiable #3)
 A weak `bare_llm` invalidates the whole result. It currently gets telemetry *summaries*
@@ -116,7 +116,7 @@ fair to all solvers — but they need an adversarial read to confirm they don't 
 ### B7. Live capability quality is shaky
 Decoy (laser) stayed at conf ~0.99 next to TEC; the reboot wasn't always demoted into
 `conflicts`. The capability number could shrink materially once averaged over cases/runs.
-**▶ Reply:**
+**▶ Reply:** Addressed structurally since the audit: the cumulative log-odds clamp (`beliefs.MAX_LOG_ODDS`) lets contradicting evidence pull a saturated decoy back down, and the deterministic conflict sweep (`loop._finalize_conflicts`) guarantees the demoted trigger / stuck channel surface in `conflicts`; A6 prompt iteration pushes discriminating actions. Re-measure over the ≥3-run A3 and report the averaged number even if it shrinks. The VOI ablation (`docs/decisions/2026-06-16-voi-ablation-before-formalizing.md`) tests whether scored selection actually improves discrimination here.
 
 ### B8. Anti-shortcut balance is currently skewed
 All 4 authored cases have the reboot as a *coincidence/trigger*; **none** have the salient
@@ -127,7 +127,7 @@ where a recent change IS the cause (else the ≈0.5 balance is violated, #4 / §
 ### B9. The benchmark claim is unvalidated (audit concern #2)
 Is the diagnosis-shaped core even competitive at real multi-hop QA? Unknown. The synthetic
 smoke is too easy to signal. This may need to be dropped or framed as report-only.
-**▶ Reply:**
+**▶ Reply:** Reframed: the right question is not "is it competitive" but "can MuSiQue validate the *differential*" — structurally it cannot. The benchmark solver `agentic_rag` shares only LLM plumbing with the controller, not hypotheses/VOI/beliefs/IG (verified in `handoffs/2026-06-16-lesson-unverified-load-bearing-claims.md`). So the benchmark tests retrieval/abstention/grounding, not the harness. Footnote it; FEVER for generalization. See `docs/decisions/2026-06-16-benchmark-tests-retrieval-not-differential.md`.
 
 ### B10. Reproducibility depends on the subscription CLI backend
 The live numbers come from `claude -p` (nondeterministic, no usage API → token cost is a

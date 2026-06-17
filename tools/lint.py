@@ -64,12 +64,17 @@ def check_opening_thesis(path, text):
 
 
 # ---- project checks go here ----------------------------------------------
-# def check_<name>(path, text):
-#     """Shadows: '<the governance rule this check backstops>'. <ERROR|WARN>."""
-#     ...
+def check_causal_terminology(path, text):
+    """Shadows: 'the authored `affects` graph is an influence/coupling graph, not a
+    "causal model"/"causal spine" — confidence-weighted directed edges, no structural
+    equations / do-calculus; reserve "causal" for finding-level claims (causal_chain,
+    non-causal trigger)'. Loose backstop → always WARN."""
+    for m in re.finditer(r"forward[- ]causal|causal[- ](?:model|spine)", text, re.I):
+        warn(path, f"'{m.group(0)}' — call the affects graph an influence/coupling "
+                   "graph, not causal (keep causal_chain / non-causal)")
 # ---------------------------------------------------------------------------
 
-CHECKS = [check_relative_links, check_opening_thesis]
+CHECKS = [check_relative_links, check_opening_thesis, check_causal_terminology]
 
 
 def main():

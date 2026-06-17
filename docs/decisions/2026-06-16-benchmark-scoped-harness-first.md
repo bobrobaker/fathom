@@ -1,6 +1,6 @@
 # Benchmark track: harness built + mechanism proven; real MuSiQue run deferred
 
-**Date:** 2026-06-16 · **Status:** accepted · **Milestones:** M4.5 (decision gate), M8
+**Date:** 2026-06-16 · **Status:** accepted · **Milestones:** M4.5 (decision gate), M8 · **Refined by:** [2026-06-16-benchmark-tests-retrieval-not-differential.md](2026-06-16-benchmark-tests-retrieval-not-differential.md) — the benchmark tests retrieval/abstention/grounding, *not* the differential; footnote MuSiQue, FEVER for a real generalization claim.
 
 ## Decision
 

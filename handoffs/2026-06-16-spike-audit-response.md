@@ -16,7 +16,7 @@ Replies to `handoffs/2026-06-16-spike-completion-audit.md`. Each item below carr
 
 **A4 — findings doc.** Yes — this is *the* deliverable; nothing ships without it. Write it **after** A2/A3 so it reports real numbers. Structure as you proposed; **lead with the eval design** (the hiring signal), then the per-case table with variance, then the honest cost section (B3), the viewer, and the clean outcome. Keep the modest-story framing.
 
-**A5 — benchmark. (decided: build it.)** Build `tools/load_musique.py` and run the M4.5 fail-fast on **real MuSiQue**, n=20 — *not* the synthetic smoke (B9: it signals nothing). Decide from n=20: competitive → n=100, keep; not → scope to report-only with one honest line ("purpose-built for diagnosis, not generic QA"). Never ship a synthetic-smoke number.
+**A5 — benchmark. (decided: build it.)** Build `tools/load_musique.py` and run the M4.5 fail-fast on **real MuSiQue**, n=20 — *not* the synthetic smoke (B9: it signals nothing). Decide from n=20: competitive → n=100, keep; not → scope to report-only with one honest line ("purpose-built for diagnosis, not generic QA"). Never ship a synthetic-smoke number. **[Superseded 2026-06-16:** the *competitiveness* framing here is replaced by a *structural* one — MuSiQue can't validate the differential regardless of score; footnote it, FEVER for generalization. See `docs/decisions/2026-06-16-benchmark-tests-retrieval-not-differential.md`.**]**
 
 **A6 — prompt iteration.** Yes, to fix B7: the `interpret` prompt must (i) when two hypotheses are both high, prefer a *discriminating* action over re-confirming both, and (ii) always run the onset check on a salient recent event and record it in `conflicts` when demoted. Then **re-measure**; do not touch cases/scoring (#5). **Time-box** (2–3 iterations) — polish, not a ship-blocker.
 
@@ -85,7 +85,7 @@ Replies to `handoffs/2026-06-16-spike-completion-audit.md`. Each item below carr
 ## Resolved direction calls (Bolun, this session)
 
 - **B3 — cost premium:** report it as an honest capability-vs-cost tradeoff (CLI-derived estimate); modest reduction pass; no chasing a cost win.
-- **A5/B9 — benchmark:** build `tools/load_musique.py`, take the real n=20 read, decide keep-vs-report-only from it.
+- **A5/B9 — benchmark:** build `tools/load_musique.py`, take the real n=20 read, decide keep-vs-report-only from it. **[Superseded 2026-06-16 → footnote (structural, not competitiveness); FEVER for generalization — `docs/decisions/2026-06-16-benchmark-tests-retrieval-not-differential.md`.]**
 - **B10 — reproducibility:** CLI estimates with the per-call-overhead calibration (above); build the swappable CLI↔API backend, default CLI.
 - **A8 — model:** test Opus on the controller, like-to-like (model held fixed across all solvers per comparison); pin the winner before final numbers.
 

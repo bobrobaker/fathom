@@ -126,7 +126,10 @@ abstention), reading the same IG state object. `full_build_spec.md` §4, §6.
 **Status:** sketched; refine when Phase 3 exits.
 
 **Deliverable:** the bespoke eval at scale + multiple benchmarks (MuSiQue + HotpotQA +
-optional newer set, scope set by the spike's benchmark finding); a reproducibility
+optional newer set, scope set by the spike's benchmark finding) **plus a differential-shaped
+domain** (FEVER-style supports/refutes/NEI) for a real *generalization* claim — multi-hop QA
+tests retrieval/abstention/grounding, not the differential
+(`docs/decisions/2026-06-16-benchmark-tests-retrieval-not-differential.md`); a reproducibility
 harness (seeds, pinned model, reported variance) so every writeup number is defensible;
 CI running the eval on every change; and the **portfolio layer** — a writeup that leads
 with the designed eval, the finding framed modestly and honestly, a README opening with

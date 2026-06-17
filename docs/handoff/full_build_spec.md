@@ -33,9 +33,13 @@ The complete ~20-mechanism catalog (worked example §7) realized across a larger
 
 The polished controller: the abductive loop with a **formal VOI** option (entropy reduction over the hypothesis distribution) alongside the spike's LLM-scored version; richer tool/retrieval interfaces (optionally via MCP for real integrations); the controller/environment separation preserved, leaving room for more environment adapters. The **Investigation Graph remains the single live state object** the reasoning writes, the eval reads, and the viewer renders.
 
+> **Design direction (future build).** Prefer **typed VOI estimators + a router** over one global entropy engine: estimation differs by relation type — statistical separation for correlations, categorical/Bayesian for config/binary tests, temporal-margin for ordering, exploration/heuristic for retrieval/traversal. The LLM *routes* (recognizes the type, picks the estimator); the estimators are reusable knowledge. **Gated:** build the formal VOI only if the pre-build ablation shows scoring earns its place — see `docs/decisions/2026-06-16-voi-ablation-before-formalizing.md`.
+
 ## 5. The full eval suite
 
 The bespoke eval at scale (many cases, the two metric families from spike §8.1, variance over runs); **multiple benchmarks** (MuSiQue + HotpotQA + optionally a newer set — scope set by the spike's benchmark finding); the full baseline ladder; and a **reproducibility harness** (seeds, pinned model, reported variance) so every number in the writeup is defensible.
+
+> **Design direction (future build) — the second-domain fork.** Multi-hop QA is **footnoted, not a generalization claim** (it tests retrieval/abstention/grounding, not the differential). For a genuine "the *structure* generalizes" claim, add a **differential-shaped** second domain — FEVER-style claim verification (supports / refutes / not-enough-info) — which exercises VOI + log-odds + abstention the way diagnosis does. See `docs/decisions/2026-06-16-benchmark-tests-retrieval-not-differential.md`.
 
 ## 6. The showpiece — the live Investigation Graph viewer
 
@@ -47,6 +51,8 @@ The polished, impressive artifact (the explicit "seeming impressive" goal): a **
 - The **finding framed modestly and honestly** (carried from the spike): what the structure bought, where it tied, where it didn't — a test-architect's report, credible whether or not the controller dominates.
 - A **README** that opens with the eval and the headline number(s), the live IG demo, and a one-paragraph "why this matters for AI-native test architecture."
 - **Lidar framing kept legible** for AV/sensing recruiters.
+- **Name two honest limitations** in the writeup: (i) the influence graph is *authored, not learned* — at real scale a faithful influence graph is the central knowledge-acquisition bottleneck the spike sidesteps; (ii) the benchmark tests retrieval/abstention/grounding, not the differential. Shift the headline toward **decomposition + transfer**.
+- **Thesis pointer.** Fathom's framing leans on a portfolio-level thesis: the LLM's value here is *decomposition + transfer* — atomizing a proprietary question into sub-claims a generic relationship or a deterministic check can answer, while the evidence layer anchors the atomic facts (the `domain_doc` rules and `affects` coupling-strengths are this in embryo; the typed VOI estimators, §4, too). Full statement lives in the cross-project decision store.
 
 ## 8. Engineering at scale
 
@@ -63,7 +69,7 @@ Each phase is shippable; the portfolio piece is presentable after **Phase A + th
 ## 10. Spike-conditioned open decisions
 
 - Headline claim (accuracy vs capability) — set by the spike.
-- Benchmark scope (showcase vs footnote) — set by M4.5 + M8.
+- Benchmark scope — **decided (2026-06-16): footnote** the multi-hop QA track (it tests retrieval/abstention/grounding, not the differential); a differential-shaped domain (FEVER) is the path to a real generalization claim. See `docs/decisions/2026-06-16-benchmark-tests-retrieval-not-differential.md`.
 - Final schema (which links/nodes/reification survived) — set by spike traversal data.
 - Whether to add environments/domains beyond lidar — a stretch, only if it strengthens the story.
 
