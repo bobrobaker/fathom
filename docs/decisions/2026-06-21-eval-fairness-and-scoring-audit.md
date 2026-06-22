@@ -1,5 +1,12 @@
 # Eval fairness & scoring audit: react made fair, scorer de-quirked
 
+> **SUPERSEDED IN PART (2026-06-22).** The *fairness/scoring fixes* (react, scorer) still hold. But
+> the **thesis-negative 4/8 finding** and the decision to **shelve the interpret-prompt over-crediting
+> fix to Phase 2** are superseded: the controller investigation (branch `investigate-controller`)
+> implemented that fix (the M1 affirmative-evidence gate) and others, reaching **8/8 live**. Current
+> result: `investigation/RESULTS.md`; tracker: `docs/road.md` Phase 1 Note (2026-06-22). This remains
+> the provenance of the 2026-06-21 decisions, not current truth.
+
 **Date:** 2026-06-21 · **Status:** accepted · **Milestones:** A3 (live eval), A4 (findings) · **Surfaces:** `src/dh/baselines.py`, `src/dh/eval/bespoke.py`, `tools/run_eval.py`
 
 ## Context
