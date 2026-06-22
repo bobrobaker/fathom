@@ -255,7 +255,8 @@ class LidarEnvironment(Environment):
 
     def _run_laser_power_check(self, args: dict) -> dict:
         sig = self._metric_signal(args.get("signal", "laser_power_mW"))
-        return checks.laser_power_check(self._telemetry[sig])
+        diode = self._telemetry.get("laser_diode_temp_C")  # to tell laser-aging from thermal loss
+        return checks.laser_power_check(self._telemetry[sig], diode_temp=diode)
 
     def _run_common_mode_check(self, args: dict) -> dict:
         names = args.get("signals") or ["laser_power_mW", "dark_count_rate",

@@ -275,30 +275,48 @@ def onset_vs_event_check(series: TimeSeries, event_t: float, event_label: str = 
 LASER_POWER_DECLINE_RATIO = 0.97
 
 
-def laser_power_check(laser_power: TimeSeries) -> dict:
-    """Direct emitter-power discriminator: is laser output power sustained BELOW baseline?
+def laser_power_check(laser_power: TimeSeries, diode_temp: TimeSeries | None = None) -> dict:
+    """Direct emitter-power discriminator: is laser output power sustained BELOW baseline because
+    the *laser itself is aging* — as opposed to a downstream/thermal power loss?
 
     The other cheap checks can only *eliminate* alternatives for a laser-aging fault (window,
     detector, TEC, calibration all read nominal); none affirms the laser positively. This check
-    supplies that affirmative signal by measuring emitter power directly: recent mean vs baseline
-    mean. `affirmative` (=`low_power`) is true only on a *sustained* decline (recent/baseline ≤
-    LASER_POWER_DECLINE_RATIO) — a transient dip that recovered leaves recent≈baseline and reads
-    nominal, so it cannot rule a laser fault in (exactly the no_clean_cause case). Structural, not
-    laser-exclusive: low emitter power is consistent with *any* source-side power loss (the LLM
-    decides which hypotheses it bears on); the check only reports the anomaly."""
+    supplies that affirmative signal by measuring emitter power directly (recent vs baseline mean).
+    But low emitter power alone is NOT laser-specific — a TEC losing the setpoint also drops output
+    power as a downstream effect (case #7/#1). The discriminator is the diode temperature: laser
+    aging drops power with the diode held AT its control setpoint (nominal), whereas a thermal cause
+    drops power with the diode ELEVATED above setpoint. So `affirmative` (laser aging) requires BOTH
+    a sustained decline AND a nominal diode — the mirror of `tec_load_check.losing_setpoint`. A
+    transient dip that recovered leaves recent≈baseline (the no_clean_cause case), and a decline
+    with an elevated diode is thermal, not laser — neither affirms the laser. Structural, not
+    per-case: it reads the decline ratio and the diode-vs-setpoint relation, no case constants.
+    `declined` reports the raw power-loss fact for the LLM regardless."""
     base, recent = _baseline(laser_power), _recent(laser_power)
     ratio = recent / base if base else 1.0
-    low_power = ratio <= LASER_POWER_DECLINE_RATIO
+    declined = ratio <= LASER_POWER_DECLINE_RATIO
+    diode_nominal = True
+    diode_recent = setpoint_max = None
+    if diode_temp is not None:
+        setpoint_max = (diode_temp.spec or {}).get("max")
+        diode_recent = _recent(diode_temp)
+        if setpoint_max is not None:
+            diode_nominal = diode_recent <= setpoint_max
+    low_power = declined and diode_nominal  # laser AGING: power down AND diode at setpoint
     return {
         "check": "laser_power_check",
         "baseline_mW": base,
         "recent_mW": recent,
         "ratio": ratio,
         "rel_change": ratio - 1.0,
+        "declined": declined,
+        "diode_temp": diode_recent,
+        "diode_setpoint_max": setpoint_max,
+        "diode_nominal": diode_nominal,
         "low_power": low_power,
-        "affirmative": low_power,  # a sustained power decline rules a source-side power loss IN
+        "affirmative": low_power,  # power decline WITH a nominal diode rules laser aging IN
         "summary": f"laser power {recent:.1f} mW vs baseline {base:.1f} mW "
         f"({(ratio - 1.0) * 100:+.1f}%) → "
-        + ("sustained decline below baseline (source-side power loss)" if low_power
+        + ("sustained decline with diode at setpoint (laser aging)" if low_power
+           else "thermally-induced decline (diode above setpoint — not laser aging)" if declined
            else "at/near baseline (no sustained power loss)"),
     }
