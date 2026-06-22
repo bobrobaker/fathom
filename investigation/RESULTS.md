@@ -300,6 +300,37 @@ present (the power loss is explained by the upstream cause, not an independent l
 and (c) decide whether the abstain gate should be **enforced** (authoritative) rather than advisory
 — which would make case5 robust but would currently break case8 until (a)/(b) lift its margin.
 
+## Round 3 — hardening case8 + enforcing the gate (live-confirmed)
+
+The round-2 case8 pass was fragile (margin 0.028; relied on the LLM overriding an advisory abstain).
+Two hardening changes, integrated and **live-confirmed (n=1)**:
+
+- **Explain-away the common-mode decoy** (`loop.py::_promote_common_mode`): under a confirmed
+  common-mode signature the degraded surface channels are *symptoms* of the shared cause, so their
+  misattributed positive support (e.g. `laser_power_check` crediting laser because the supply sag
+  dropped laser power) is removed before the demotion. #5: keyed on the structural common-mode
+  detection, fires only when the sweep fires (case8).
+- **Authoritative abstain gate** (`llm.py::synthesize`): `if abstain: answer_type="abstain"` — the
+  deterministic gate is no longer overridable by the LLM's prose. Side effect (good): case7 without
+  its discriminator now *abstains* instead of confabulating the wrong decoy.
+
+### Live results (round 3, n=1, budget 8) — both goals robustly met
+| case | result | margin | vs round 2 |
+|---|---|---|---|
+| **case8** | concludes `sub.power` = gold, acc 1.0 | **0.77** | was fragile (0.028); decoy now ruled out (−1.50) |
+| **case5** | `abstain`, acc 1.0 | n/a (no hyp > conf 0.12) | now via the AUTHORITATIVE gate, not LLM goodwill |
+
+case8 is now a genuinely dominant conclusion, not a coin-flip; case5 abstains deterministically.
+Combined deterministic suite: **189 passed.** Cost note (Row 7) stands and is slightly worse: the
+correct-but-exploratory behavior runs closer to full budget (case5 ran all 8 steps → 173k tokens).
+
+### Still NOT live-re-confirmed under round-3 code
+case1,2,3,4,6,7 were not re-run live after the round-3 changes (the authoritative gate + explain-away
+change behavior on every case). The 189-suite is the regression evidence; the standing live risks are
+unchanged: case2's dependence on the LLM running `laser_power_check`, and any case whose live margin
+falls ≤ tau_margin would now be *forced* to abstain by the authoritative gate (deterministic spikes
+on case1/4/5/7/8 still conclude/abstain correctly, so no scripted regression).
+
 ### The honest takeaway
 The investigation found and fixed **real, general, #5-defensible mechanism bugs** (M2/M3
 sweep→beliefs + symmetric promotion, M4 margin gate, M5 evidence-availability, the synthesis

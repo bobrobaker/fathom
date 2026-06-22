@@ -3,7 +3,7 @@ project: fathom
 goal: Make case5 (abstain) and case8 (common-mode) succeed LIVE by fixing M1 (interpret
   over-crediting) and the case8 seeding/granularity bug — using the spike+audit pattern, #5-safe.
 created: 2026-06-22
-status: HARDENING DONE + deterministically verified; live confirm BLOCKED by subscription session limit (resume below)
+status: DONE — case5 + case8 both robustly PASS live (round 3). case8 sub.power margin 0.77; case5 abstain via authoritative gate.
 
 ## UPDATE 2026-06-22 (round 3 — HARDENING done, live confirm blocked)
 Hardening committed (suite 189 green). Two changes on `investigate-controller`:
