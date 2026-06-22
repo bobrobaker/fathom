@@ -15,8 +15,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import pathlib
 import sys
+
+logging.basicConfig(level=logging.INFO, stream=sys.stderr,
+                    format="%(asctime)s %(name)s %(message)s", datefmt="%H:%M:%S")
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "src"))
 

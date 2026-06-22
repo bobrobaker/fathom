@@ -232,13 +232,16 @@ def _leader_and_margin(prompt: str):
     return los[0][0], margin
 
 
-def test_case7_concludes_wrong_cause_without_the_discriminator(monkeypatch):
-    """REPRODUCE the failure on PRE-FIX behaviour.
+def test_case7_without_the_discriminator_does_not_confidently_conclude(monkeypatch):
+    """The discriminator is load-bearing: WITHOUT it, case7 must NOT confidently name part.tec.
 
     We simulate the unfixed tec_load_check by stripping the `losing_setpoint` discriminator
-    from its result (exactly the pre-fix payload). With only the ambiguous, near-symmetric
-    cheap checks, h.tec and h.laser tie (margin 0) and the faithful synthesis names the
-    surface decoy — accuracy=0. This is the documented case7 miss.
+    from its result (the pre-fix payload). With only the ambiguous, near-symmetric cheap checks,
+    h.tec and h.laser tie (margin ≈ 0). Pre-hardening the faithful synthesis named the surface
+    decoy outright (accuracy=0 — the documented miss). Post-hardening the authoritative abstain
+    gate fires on the non-discriminating tie, so the controller ABSTAINS instead of confabulating
+    a confident wrong cause — a strictly better failure mode. Either way it does not earn the
+    correct answer without the discriminator, which is the point: the discriminator carries case7.
     """
     import dh.environment as environment
     orig = environment.LidarEnvironment._run_tec_load_check
@@ -252,10 +255,10 @@ def test_case7_concludes_wrong_cause_without_the_discriminator(monkeypatch):
     monkeypatch.setattr(environment.LidarEnvironment, "_run_tec_load_check", _prefix)
     _case, env = _case_env()
     ans = diagnose(env, backend=FaithfulBackend(), budget=12)
-    assert ans.answer_type == "cause"
-    assert ans.root_cause != "part.tec", (
-        f"expected the documented WRONG conclusion, got {ans.root_cause}")
-    assert ans.root_cause == "part.laser_module"  # the near-symmetric decoy
+    # without the discriminator the controller never earns the correct cause; the authoritative
+    # gate now abstains on the tie rather than naming the decoy (confident-wrong → calibrated-abstain)
+    assert ans.root_cause != "part.tec"
+    assert ans.answer_type == "abstain" or ans.root_cause == "part.laser_module"
 
 
 def test_case7_concludes_part_tec_with_fix():

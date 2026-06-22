@@ -493,6 +493,14 @@ def synthesize(backend: LLMBackend, ig: InvestigationGraph,
     answer_type = data.get("answer_type")
     if answer_type not in ("cause", "abstain"):
         answer_type = "abstain" if abstain else "cause"
+    # The deterministic abstain gate (loop: leader not confident OR not dominant) is AUTHORITATIVE,
+    # not advisory: when it fires, the controller abstains regardless of what the LLM's prose chose.
+    # Without this the gate is a suggestion the model can ignore — it concluded a thin-margin leader
+    # (case8 margin 0.028) and only happened to be right, while another sample would confabulate on
+    # a state the belief math judged non-discriminating. The model may still abstain on its own; it
+    # may not override an abstain the geometry demands.
+    if abstain:
+        answer_type = "abstain"
     # resolve root_cause: models often return the hypothesis id, not its node_ref
     hyp_node = {h.id: h.node_ref for h in ig.hypotheses}
     root_cause = data.get("root_cause")

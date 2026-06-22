@@ -331,10 +331,22 @@ def _promote_common_mode(ig: InvestigationGraph, env: Environment, known_ids) ->
     # fires but attaches zero links whenever the LLM seeded parts rather than subsystems.
     target_hyps = _hyps_in_subsystems(ig, case, promoted)
     decoy_hyps = [h for h in _hyps_in_subsystems(ig, case, deg_subs) if h not in target_hyps]
+    decoy_ids = {h.id for h in decoy_hyps}
     for h in target_hyps:
         if not any(ln.evidence_id == ev_id and ln.hypothesis_id == h.id for ln in ig.links):
             ig.links.append(EvidenceLink(evidence_id=ev_id, hypothesis_id=h.id,
                                          polarity="+", weight=_CM_PROMOTE_WEIGHT))
+    # Explain-away: under a CONFIRMED common-mode signature, a degraded surface channel's own
+    # decline (e.g. laser_power falling because the shared supply sagged) is a SYMPTOM of the
+    # upstream cause, not independent evidence for that channel's own fault. So the positive
+    # support those decoys accrued from per-channel readings is misattributed — drop it, then add
+    # the demotion. Without this, an affirmative single-channel check (laser_power_check) keeps a
+    # decoy near the upstream cause and the margin collapses (case8: laser 0.924 vs power 0.953).
+    # Keyed on the structural common-mode detection, not any case id; only fires when the sweep
+    # fires (case8), so it cannot disturb a non-common-mode case (#5).
+    ig.links = [ln for ln in ig.links
+                if not (ln.hypothesis_id in decoy_ids and ln.polarity == "+"
+                        and ln.evidence_id != ev_id)]
     for h in decoy_hyps:  # the surface decoys the common-mode reading argues against
         if not any(ln.evidence_id == ev_id and ln.hypothesis_id == h.id for ln in ig.links):
             ig.links.append(EvidenceLink(evidence_id=ev_id, hypothesis_id=h.id,
@@ -501,6 +513,10 @@ def diagnose(
             log.info("no new actions proposed; stopping early")
             break
         seen.add(_action_key(best))
+        _ltop, _lconf, _lmargin = beliefs.leader(ig)
+        log.info("step %d/%d: action=%s args=%s | leader=%s conf=%.2f margin=%.2f",
+                 _step + 1, budget, best.type, best.args,
+                 _ltop.id if _ltop else None, _lconf, _lmargin)
         result = _execute(env, best)
         ev, links, conflicts = interpret_result(backend, ig, best, result)
         if ev:
