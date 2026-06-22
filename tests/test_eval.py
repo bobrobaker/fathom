@@ -77,9 +77,15 @@ def test_trigger_discrimination(case):
 
 
 def test_conflict_handling(case):
-    assert score(_controller_answer(case), case).conflict_handling == 1.0       # both surfaced
-    assert score(_bare_answer(case), case).conflict_handling == 0.5             # channel only
-    assert score(_shortcut_answer(case), case).conflict_handling == 0.0
+    # conflict_handling is F1 (decision 2026-06-21): precision penalises over-surfacing
+    assert score(_controller_answer(case), case).conflict_handling == 1.0       # both, no extras
+    assert score(_bare_answer(case), case).conflict_handling == pytest.approx(2 / 3)  # 1 of 2, P=1
+    assert score(_shortcut_answer(case), case).conflict_handling == 0.0         # surfaced none
+    # over-surfacing is penalised: dumping junk ids alongside the real conflicts drops precision,
+    # so a solver cannot game the metric to 1.0 by listing everything (the #2 fix)
+    spammy = _controller_answer(case).model_copy(update={
+        "conflicts": ["metric.detector_temp", "log.reboot", "part.window", "sub.optics"]})
+    assert score(spammy, case).conflict_handling < 1.0
 
 
 def test_evidence_f1_and_hallucination_penalty(case):

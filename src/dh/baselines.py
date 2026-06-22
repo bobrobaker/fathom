@@ -15,7 +15,9 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import statistics as st
+import sys
 
 from dh.controller.llm import LLMBackend, _call_json, get_backend
 from dh.controller.loop import _seed_candidates
@@ -176,6 +178,7 @@ def react(env: Environment, backend: LLMBackend | None = None, max_steps: int = 
     checks = env.list_checks() if hasattr(env, "list_checks") else []  # type: ignore[attr-defined]
     candidate_ids = {c["id"] for c in _seed_candidates(env)}
     transcript: list[str] = []
+    trace = bool(os.environ.get("DH_REACT_TRACE"))  # step-by-step audit; never logs ground truth
 
     for _step in range(max_steps):
         body = (
@@ -183,16 +186,33 @@ def react(env: Environment, backend: LLMBackend | None = None, max_steps: int = 
             f"Tools: {sorted(caps)}; checks={checks}\n"
             f"Candidate root-cause node ids: {sorted(candidate_ids) or '(none)'}\n"
             f"History so far:\n" + ("\n".join(transcript) or "  (empty)") + "\n"
+            # parity with bare_llm's diagnostic framing (fairness, §7): same guidance, not rubric hints
+            "Distinguish a true cause from a merely salient recent event (compare the degradation "
+            "onset against the event time), and note any unreliable/stuck channels. In the final, "
+            "conflicts = ids of salient events or channels you considered and ruled out (e.g. a "
+            "recent reboot, a stuck detector channel); ruled_out = candidate node ids you eliminated. "
             'Reply with either {"action":{"type","args"}} to use a tool '
-            "(type ∈ run_check|search|traverse|read_logbook|read_errors|read_diagnostic_actions) "
-            'or {"final":{"answer_type","root_cause","causal_chain","cited_evidence",'
+            "(type ∈ run_check|search|traverse|read_logbook|read_errors|read_diagnostic_actions). "
+            'Arg schemas: run_check args={"name":<one of checks>}; search args={"query":str,"k":int}; '
+            'traverse args={"node_id":<candidate id>,"edge_type":str,"direction":"out"|"in"}. '
+            'For the final answer, root_cause MUST be one of the candidate node ids above, and '
+            "causal_chain / cited_evidence / ruled_out / conflicts MUST be lists of BARE ids "
+            '(check names like "tec_load_check" or artifact/node ids like "err.tec_load", '
+            "part.*, sub.*) — NOT prose descriptions. Reply "
+            '{"final":{"answer_type","root_cause","causal_chain","cited_evidence",'
             '"ruled_out","conflicts","recommended_action"}} when confident.'
         )
         data = _call_json(backend, "react", body, max_tokens=1024, system=REACT_SYSTEM)
+        if trace:
+            print(f"[react step {_step}] emitted={json.dumps(data)[:400]}", file=sys.stderr)
         if "final" in data:
             f = data["final"] or {}
             at = f.get("answer_type") if f.get("answer_type") in ("cause", "abstain") else "cause"
             root = f.get("root_cause")
+            if trace:
+                print(f"[react FINAL] type={at} root_cause={root!r} "
+                      f"in_candidates={root in candidate_ids} "
+                      f"cited={f.get('cited_evidence')}", file=sys.stderr)
             return Answer(
                 answer_type=at, root_cause=root if at == "cause" else None,
                 causal_chain=[c for c in f.get("causal_chain", []) if isinstance(c, str)],
@@ -204,6 +224,9 @@ def react(env: Environment, backend: LLMBackend | None = None, max_steps: int = 
             )
         action = data.get("action") or {}
         obs = _react_execute(env, action)
+        if trace:
+            print(f"[react step {_step}] action={json.dumps(action)[:200]} "
+                  f"-> obs={json.dumps(obs)[:200]}", file=sys.stderr)
         transcript.append(f"  action={json.dumps(action)} -> {json.dumps(obs)[:300]}")
 
     log.info("react hit step cap; abstaining")
@@ -215,7 +238,10 @@ def _react_execute(env: Environment, action: dict) -> dict:
     t, args = action.get("type"), action.get("args", {}) or {}
     try:
         if t == "run_check":
-            return env.run_check(args.get("name", ""), args)
+            # the model may key the check name as name/check_id/check/check_name — accept any
+            name = (args.get("name") or args.get("check_id") or args.get("check")
+                    or args.get("check_name") or "")
+            return env.run_check(name, args)
         if t == "search":
             return {"results": [{"id": a.id, "text": a.text}
                                 for a in env.search(args.get("query", ""), args.get("k", 4))]}

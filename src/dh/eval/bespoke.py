@@ -120,13 +120,18 @@ class CaseScore:
         return {n: getattr(self, n) for n in names}
 
 
-def _f1(pred: set[str], gold: set[str], hallucinated: set[str]) -> float:
-    """F1 of pred vs gold; hallucinated citations dilute precision (§8.1)."""
+def _f1(pred: set[str], gold: set[str]) -> float:
+    """Standard F1 of pred vs gold (1.0 when both empty).
+
+    Citing an id outside the gold set — including a hallucinated/out-of-case id, which
+    canonicalises *into* `pred` — is a false positive counted once (precision = tp/|pred|).
+    Hallucination is surfaced separately in CaseScore.extra rather than double-penalised in the
+    denominator (decision 2026-06-21: the old `+len(hallucinated)` double-counted, since a
+    fabricated id is already in pred and never matches gold)."""
     if not gold and not pred:
         return 1.0
     tp = len(pred & gold)
-    precision_denom = len(pred) + len(hallucinated)
-    precision = tp / precision_denom if precision_denom else 0.0
+    precision = tp / len(pred) if pred else 0.0
     recall = tp / len(gold) if gold else 0.0
     return 2 * precision * recall / (precision + recall) if (precision + recall) else 0.0
 
@@ -156,12 +161,15 @@ def score(answer: Answer, case: Case, *, solver: str = "", tokens: int = 0) -> C
     gold_ev = _canon_set(gt.load_bearing_evidence, sig2metric, ev2src)
     hallucinated = {c for c in answer.cited_evidence
                     if c not in valid_case_ids and c not in ev2src}
-    s.evidence_f1 = _f1(cited, gold_ev, hallucinated)
+    s.evidence_f1 = _f1(cited, gold_ev)
+    if hallucinated:
+        s.extra["hallucinated_citations"] = sorted(hallucinated)
 
-    # conflict-handling — fraction of gt conflicts surfaced
+    # conflict-handling — F1 of surfaced vs gt conflicts (precision penalises over-surfacing,
+    # so a solver cannot game it by dumping every id into `conflicts`; decision 2026-06-21)
     surfaced = _canon_set(answer.conflicts, sig2metric, ev2src)
     gold_conf = _canon_set(gt.conflicts, sig2metric, ev2src)
-    s.conflict_handling = (len(surfaced & gold_conf) / len(gold_conf)) if gold_conf else 1.0
+    s.conflict_handling = _f1(surfaced, gold_conf)
 
     # trigger-discrimination — trigger exists, not named as cause, and noted
     if gt.trigger:

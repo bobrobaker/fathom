@@ -276,7 +276,7 @@ All four return an `Answer` (the baselines fill `final_graph` minimally) so the 
 |---|---|
 | **accuracy** | `answer.root_cause == gt.root_cause` (or both abstain) |
 | **evidence-F1** | F1 of `cited_evidence` vs `gt.load_bearing_evidence`; hallucinated citations (ids not in case) → precision penalty |
-| **conflict-handling** | fraction of `gt.conflicts` surfaced in `answer.conflicts` |
+| **conflict-handling** | F1 of `answer.conflicts` vs `gt.conflicts` (lying channel + demoted trigger); over-surfacing is penalized on precision, so the metric can't be gamed by dumping every id (decision 2026-06-21; was recall — see `docs/decisions/2026-06-21-eval-fairness-and-scoring-audit.md`) |
 | **trigger-discrimination** | 1 if a `gt.trigger` exists and was *not* named as cause (and was noted), else 0 |
 | **abstention-calibration** | correct on the abstain/cause decision (scored across the set: false-abstain and false-conclude both penalized) |
 | **cost** | total tokens per resolved case |

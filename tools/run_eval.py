@@ -44,9 +44,13 @@ def _run_case(spec, runs: int, budget: int) -> dict[str, list]:
     case = generate(spec.fault, list(spec.mechanisms), seed=spec.seed)
     results: dict[str, list] = {s: [] for s in ("controller", "bare_llm", "react", "shortcut")}
 
-    # deterministic baseline — run once
-    results["shortcut"].append(score(baselines.shortcut(LidarEnvironment(case)),
-                                     case, solver="shortcut", tokens=0))
+    # deterministic baseline — run once (no per-run loop, so trace it here for visibility)
+    sc_short = score(baselines.shortcut(LidarEnvironment(case)),
+                     case, solver="shortcut", tokens=0)
+    results["shortcut"].append(sc_short)
+    print(f"  {spec.id} shortcut (det.): acc={sc_short.accuracy} loc={sc_short.localization} "
+          f"trig={sc_short.trigger_discrimination} conf={sc_short.conflict_handling} "
+          f"evF1={sc_short.evidence_f1:.2f} tok=0", file=sys.stderr)
 
     for r in range(runs):
         for name, fn in (("controller", None), ("bare_llm", baselines.bare_llm),

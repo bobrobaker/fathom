@@ -80,6 +80,14 @@ def test_react_abstains_at_step_cap(env):
     assert ans.answer_type == "abstain"
 
 
+@pytest.mark.parametrize("key", ["name", "check_id", "check", "check_name"])
+def test_react_executor_accepts_check_name_aliases(env, key):
+    # fairness regression: the live model keys the check name as check_id (not name); the
+    # executor must still run the check, else react starves on errors and always abstains.
+    obs = baselines._react_execute(env, {"type": "run_check", "args": {key: "tec_load_check"}})
+    assert "error" not in obs or "unknown check" not in obs.get("error", "")
+
+
 # --- registry ----------------------------------------------------------------
 
 def test_solver_registry():
