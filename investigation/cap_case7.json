@@ -1,0 +1,212 @@
+{
+  "case_id": "case7",
+  "fault": "tec_degradation_variant",
+  "salient_is_cause": false,
+  "ground_truth": {
+    "root_cause": "part.tec",
+    "causal_chain": [
+      "part.tec",
+      "metric.diode_temp",
+      "metric.intensity",
+      "kpi.effective_range"
+    ],
+    "trigger": "log.reboot",
+    "conflicts": [
+      "log.reboot"
+    ],
+    "load_bearing_evidence": [
+      "recommend_swap_test",
+      "temp_correlation_check",
+      "tec_load_check",
+      "onset_vs_event_check"
+    ]
+  },
+  "answer": {
+    "answer_type": "cause",
+    "root_cause": "part.tec",
+    "causal_chain": [
+      "h4"
+    ],
+    "cited_evidence": [
+      "e1"
+    ],
+    "conflicts": [
+      "log.reboot"
+    ],
+    "recommended_action": "Service or replace the TEC assembly: (1) renew thermal interface material between cold-plate and detector/laser mount; (2) verify no blockage of heat-rejection path (fins, fan, airflow); (3) if TEC element itself is degraded, replace module. Opportunistically clean the optical window during the maintenance window to close h1, and audit signal-processing calibration constants to close h5. Reboot is demoted to coincident non-cause per ev.trigger_demoted."
+  },
+  "score": {
+    "accuracy": 1.0,
+    "localization": 1.0,
+    "evidence_f1": 0.4,
+    "conflict_handling": 1.0,
+    "trigger_discrimination": 1.0,
+    "abstention_calibration": 1.0,
+    "cost_tokens": 41118
+  },
+  "hypotheses": [
+    {
+      "id": "h1",
+      "label": "Window contamination reducing transmit/receive throughput",
+      "log_odds": -0.5,
+      "status": "open",
+      "node_ref": "part.window"
+    },
+    {
+      "id": "h2",
+      "label": "Laser output power aging / gradual emitter degradation",
+      "log_odds": -1.5,
+      "status": "ruled_out",
+      "node_ref": "part.laser_module"
+    },
+    {
+      "id": "h3",
+      "label": "Detector responsivity drift reducing SNR at range",
+      "log_odds": -1.0,
+      "status": "open",
+      "node_ref": "part.detector"
+    },
+    {
+      "id": "h4",
+      "label": "TEC / thermal regulation failure elevating detector or laser junction temperature",
+      "log_odds": 2.0,
+      "status": "leading",
+      "node_ref": "part.tec"
+    },
+    {
+      "id": "h5",
+      "label": "Calibration / signal-processing parameter drift skewing range computation",
+      "log_odds": -0.5,
+      "status": "open",
+      "node_ref": "sub.calibration"
+    }
+  ],
+  "links": [
+    {
+      "evidence_id": "e1",
+      "hypothesis_id": "h4",
+      "polarity": "+",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "e1",
+      "hypothesis_id": "h2",
+      "polarity": "-",
+      "weight": 1.5
+    },
+    {
+      "evidence_id": "e1",
+      "hypothesis_id": "h3",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "e1",
+      "hypothesis_id": "h1",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "e1",
+      "hypothesis_id": "h5",
+      "polarity": "-",
+      "weight": 0.5
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e1",
+      "summary": "TEC current is 2.04 A (82 % of the 2.5 A limit) yet the diode is held 2.2 \u00b0C above its 26.0 \u00b0C setpoint (measured 28.22 \u00b0C), with losing_setpoint=true. The TEC is saturating its thermal authority without achieving setpoint \u2014 a clear sign of TEC/thermal-regulation failure. Elevated junction temperature is sufficient to account for reduced laser efficiency and detector SNR degradation, making intrinsic emitter aging or detector drift redundant explanations.",
+      "source": "tec_load_check"
+    },
+    {
+      "id": "ev.trigger_demoted",
+      "summary": "log.reboot: degradation onset predates it \u2192 coincident, not causal",
+      "source": "onset_vs_event_check"
+    }
+  ],
+  "ig_conflicts": [
+    "log.reboot"
+  ],
+  "trace": [
+    {
+      "action": "seed",
+      "args": {},
+      "rationale": "seed the differential from the symptom",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "h1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "h1": 0.5,
+        "h2": 0.5,
+        "h3": 0.5,
+        "h4": 0.5,
+        "h5": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "tec_load_check"
+      },
+      "rationale": "No evidence has been collected yet; all five hypotheses sit at equal log-odds. tec_load_check is the highest-leverage first move because h4 (TEC / thermal regulation failure) is a 'super-cause': an abnormal result would simultaneously raise h4 and provide the thermal mechanism that accelerates h2 (elevated laser junction temperature hastening emitter degradation) and h3 (elevated detector temperature depressing responsivity), collapsing three hypotheses to one thermal root cause. A nominal TEC result strongly lowers h4 and severs the thermal coupling to h2/h3, forcing those two hypotheses to stand on their own and effectively eliminating one branch before investing in optical or calibration checks. h1 (window contamination) and h5 (calibration drift) are thermally independent and therefore largely unaffected by this check, but that is acceptable: the action moves the three thermally-linked hypotheses sharply apart from each other and from h1/h5, yielding the highest expected information gain from a single measurement at this stage.",
+      "voi": 0.78,
+      "evidence_id": "e1",
+      "conflicts_added": [],
+      "leader": "h4",
+      "leader_conf": 0.881,
+      "margin": 0.503,
+      "confidences": {
+        "h1": 0.378,
+        "h2": 0.182,
+        "h3": 0.269,
+        "h4": 0.881,
+        "h5": 0.378
+      }
+    },
+    {
+      "action": "conflict_sweep",
+      "args": {},
+      "rationale": "order onset vs the salient recent event; sanity-check channels",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [
+        "log.reboot"
+      ],
+      "leader": "h4",
+      "leader_conf": 0.881,
+      "margin": 0.503,
+      "confidences": {
+        "h1": 0.378,
+        "h2": 0.182,
+        "h3": 0.269,
+        "h4": 0.881,
+        "h5": 0.378
+      }
+    },
+    {
+      "action": "synthesize",
+      "args": {
+        "answer_type": "cause",
+        "root_cause": "part.tec"
+      },
+      "rationale": "conclude or abstain from the differential",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "h4",
+      "leader_conf": 0.881,
+      "margin": 0.503,
+      "confidences": {
+        "h1": 0.378,
+        "h2": 0.182,
+        "h3": 0.269,
+        "h4": 0.881,
+        "h5": 0.378
+      }
+    }
+  ]
+}

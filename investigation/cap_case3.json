@@ -1,0 +1,305 @@
+{
+  "case_id": "case3",
+  "fault": "window_contamination",
+  "salient_is_cause": false,
+  "ground_truth": {
+    "root_cause": "part.window",
+    "causal_chain": [
+      "part.window",
+      "metric.intensity",
+      "kpi.effective_range"
+    ],
+    "trigger": "log.reboot",
+    "conflicts": [
+      "log.reboot"
+    ],
+    "load_bearing_evidence": [
+      "spatial_intensity_check",
+      "temp_correlation_check",
+      "tec_load_check"
+    ]
+  },
+  "answer": {
+    "answer_type": "cause",
+    "root_cause": "part.window",
+    "causal_chain": [
+      "H1"
+    ],
+    "cited_evidence": [
+      "ev_spatial_intensity_001",
+      "ev_tec_load_check_001",
+      "ev_config_diff_001",
+      "ev.trigger_demoted"
+    ],
+    "conflicts": [
+      "log.reboot"
+    ],
+    "recommended_action": "Physically inspect and clean the transmit/receive optical window. ev_spatial_intensity_001 shows a localized, non-uniform intensity shortfall (spread=0.484, localized=true) consistent with a discrete surface contaminant \u2014 smear, film, or debris \u2014 causing partial aperture obscuration. All uniform-effect mechanisms are eliminated: thermal regulation is healthy with headroom (ev_tec_load_check_001), no config/firmware parameters changed (ev_config_diff_001), and H2/H3 predict spatially uniform attenuation which is contradicted by the high inter-region spread. The recent reboot is a non-causal coincident event (ev.trigger_demoted) since degradation onset predates it."
+  },
+  "score": {
+    "accuracy": 1.0,
+    "localization": 1.0,
+    "evidence_f1": 0.571,
+    "conflict_handling": 1.0,
+    "trigger_discrimination": 1.0,
+    "abstention_calibration": 1.0,
+    "cost_tokens": 74879
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "label": "Window contamination reducing transmitted/received optical power (~8% SNR loss consistent with partial obscuration or film buildup)",
+      "log_odds": 2.5,
+      "status": "leading",
+      "node_ref": "part.window"
+    },
+    {
+      "id": "H2",
+      "label": "Laser output power aging/degradation reducing peak emitted intensity over multi-week timescale",
+      "log_odds": -2.5,
+      "status": "ruled_out",
+      "node_ref": "part.laser_module"
+    },
+    {
+      "id": "H3",
+      "label": "Detector responsivity drift (dark-current rise or gain shift) elevating noise floor and shrinking effective range",
+      "log_odds": -2.5,
+      "status": "ruled_out",
+      "node_ref": "part.detector"
+    },
+    {
+      "id": "H4",
+      "label": "TEC/thermal regulation failure causing elevated or unstable operating temperature that degrades both laser and detector performance",
+      "log_odds": -3.0,
+      "status": "ruled_out",
+      "node_ref": "part.tec"
+    },
+    {
+      "id": "H5",
+      "label": "Calibration or firmware parameter drift (range-gate offset, threshold coefficient, or intensity scaling) producing apparent range shortfall without hardware fault",
+      "log_odds": -3.0,
+      "status": "ruled_out",
+      "node_ref": "sub.calibration"
+    }
+  ],
+  "links": [
+    {
+      "evidence_id": "ev_tec_load_check_001",
+      "hypothesis_id": "H4",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev_tec_load_check_001",
+      "hypothesis_id": "H2",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev_tec_load_check_001",
+      "hypothesis_id": "H3",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev_config_diff_001",
+      "hypothesis_id": "H5",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev_config_diff_001",
+      "hypothesis_id": "H1",
+      "polarity": "+",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev_config_diff_001",
+      "hypothesis_id": "H2",
+      "polarity": "+",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev_config_diff_001",
+      "hypothesis_id": "H3",
+      "polarity": "+",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev_spatial_intensity_001",
+      "hypothesis_id": "H1",
+      "polarity": "+",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev_spatial_intensity_001",
+      "hypothesis_id": "H2",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev_spatial_intensity_001",
+      "hypothesis_id": "H3",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev_spatial_intensity_001",
+      "hypothesis_id": "H4",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev_spatial_intensity_001",
+      "hypothesis_id": "H5",
+      "polarity": "-",
+      "weight": 1.0
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_tec_load_check_001",
+      "summary": "TEC current is 1.19 A, only 48% of the 2.5 A limit; diode temperature is 25.15 \u00b0C, within 0.85 \u00b0C of the 26 \u00b0C setpoint ceiling and not losing setpoint. Thermal regulation is healthy with ample headroom \u2014 no thermal runaway, no saturation, no temperature instability.",
+      "source": "tec_load_check"
+    },
+    {
+      "id": "ev_config_diff_001",
+      "summary": "config_diff returned no changed parameters and any_change=false. No firmware update, range-gate offset change, threshold coefficient edit, or intensity-scaling modification is on record. The apparent 8 % range shortfall therefore cannot be attributed to a deliberate or accidental parameter write; however, internal runtime state drift not persisted to config files remains a residual (lower-probability) possibility.",
+      "source": "config_diff"
+    },
+    {
+      "id": "ev_spatial_intensity_001",
+      "summary": "Spatial intensity check across 4 aperture regions yields spread=0.484 and localized=true. The intensity shortfall is non-uniform across the aperture, which is the signature of a discrete optical surface contaminant or partial obscuration (window film, smear, debris) rather than any system-wide degradation mechanism. Laser output aging (H2) and detector responsivity drift (H3) would each produce spatially uniform attenuation with near-zero inter-region spread; the high spread and localized flag argue against both. TEC/thermal failure (H4) and calibration drift (H5) are similarly uniform-effect mechanisms and are further disfavoured.",
+      "source": "spatial_intensity_check"
+    },
+    {
+      "id": "ev.trigger_demoted",
+      "summary": "log.reboot: degradation onset predates it \u2192 coincident, not causal",
+      "source": "onset_vs_event_check"
+    }
+  ],
+  "ig_conflicts": [
+    "log.reboot"
+  ],
+  "trace": [
+    {
+      "action": "seed",
+      "args": {},
+      "rationale": "seed the differential from the symptom",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.5,
+        "H2": 0.5,
+        "H3": 0.5,
+        "H4": 0.5,
+        "H5": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "tec_load_check"
+      },
+      "rationale": "All five hypotheses are at equal prior (log_odds 0.00) and no evidence has been collected yet. The TEC/thermal check is the highest-leverage first step because H4 (thermal regulation failure) is a root-cause hypothesis that, if confirmed, would simultaneously explain H2 (laser power degradation) and H3 (detector noise rise) as thermally-driven secondary effects \u2014 collapsing three hypotheses into one. Conversely, a nominal TEC result (stable setpoint, low duty-cycle, no oscillation) provides strong evidence AGAINST H4 and decouples H2/H3 from a thermal driver, forcing independent hardware or software explanations. H1 (window contamination) and H5 (calibration drift) are both thermally-independent, so TEC behaviour does not confound them. This single check therefore produces the greatest log-odds separation across the leading set: an abnormal result raises H4 sharply and pulls H2/H3 upward as co-effects, while a clean result drops H4 and redirects attention to H1, H2 (intrinsic aging), H3 (intrinsic drift), and H5. No evidence has been cited yet; this action is proposed to generate the first discriminating datum.",
+      "voi": 0.78,
+      "evidence_id": "ev_tec_load_check_001",
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.5,
+        "H2": 0.269,
+        "H3": 0.269,
+        "H4": 0.119,
+        "H5": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "config_diff"
+      },
+      "rationale": "H1 (window contamination) and H5 (calibration/firmware drift) are co-leading at log_odds=0.00. H4 is already ruled out by ev_tec_load_check_001. config_diff is the sharpest single discriminator between the two leaders: if range-gate offsets, threshold coefficients, or intensity-scaling parameters show a change whose timestamp aligns with the ~1-week onset, H5 rises substantially and hardware hypotheses H1/H2/H3 become secondary; if the diff is clean (no parameter mutations), H5 is effectively eliminated and all residual probability shifts to optical/hardware causes. This binary software-vs-hardware fork is cheaper and more unambiguous than any hardware measurement taken while H5 remains unrefuted \u2014 acting on H1 or H2/H3 before ruling out a miscalibration would risk unnecessary physical intervention. H2 and H3 (both at log_odds=-1.00) are not advanced here because a clean diff will surface them naturally as the next tier.",
+      "voi": 0.85,
+      "evidence_id": "ev_config_diff_001",
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.622,
+      "margin": 0.245,
+      "confidences": {
+        "H1": 0.622,
+        "H2": 0.378,
+        "H3": 0.378,
+        "H4": 0.119,
+        "H5": 0.119
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "spatial_intensity_check"
+      },
+      "rationale": "H4 is ruled out by ev_tec_load_check_001 and H5 by ev_config_diff_001. The remaining contest is H1 (window contamination) vs H2 (laser aging) vs H3 (detector drift). A spatial_intensity_check is the single most discriminating step: (a) spatially non-uniform or azimuthally patterned intensity reduction \u2192 strongly raises H1 and lowers H2/H3, because optical hardware degradation and detector drift are isotropic whereas contamination is not; (b) spatially uniform ~8% intensity drop across all channels \u2192 lowers H1, raises H2 (laser power decline) and leaves H3 viable; (c) intensity nominally flat but with elevated per-channel noise variance \u2192 favours H3 (dark-current / gain shift) over H1 and H2. No prior evidence has addressed the spatial distribution of the optical loss, so this check produces genuinely new discriminating information rather than re-confirming already-supported hypotheses.",
+      "voi": 0.85,
+      "evidence_id": "ev_spatial_intensity_001",
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.924,
+      "margin": 0.848,
+      "confidences": {
+        "H1": 0.924,
+        "H2": 0.076,
+        "H3": 0.076,
+        "H4": 0.047,
+        "H5": 0.047
+      }
+    },
+    {
+      "action": "conflict_sweep",
+      "args": {},
+      "rationale": "order onset vs the salient recent event; sanity-check channels",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [
+        "log.reboot"
+      ],
+      "leader": "H1",
+      "leader_conf": 0.924,
+      "margin": 0.848,
+      "confidences": {
+        "H1": 0.924,
+        "H2": 0.076,
+        "H3": 0.076,
+        "H4": 0.047,
+        "H5": 0.047
+      }
+    },
+    {
+      "action": "synthesize",
+      "args": {
+        "answer_type": "cause",
+        "root_cause": "part.window"
+      },
+      "rationale": "conclude or abstain from the differential",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.924,
+      "margin": 0.848,
+      "confidences": {
+        "H1": 0.924,
+        "H2": 0.076,
+        "H3": 0.076,
+        "H4": 0.047,
+        "H5": 0.047
+      }
+    }
+  ]
+}

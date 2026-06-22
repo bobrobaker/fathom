@@ -1,0 +1,275 @@
+{
+  "case_id": "case1",
+  "fault": "tec_degradation",
+  "salient_is_cause": false,
+  "ground_truth": {
+    "root_cause": "part.tec",
+    "causal_chain": [
+      "part.tec",
+      "metric.diode_temp",
+      "metric.laser_power",
+      "metric.intensity",
+      "kpi.effective_range"
+    ],
+    "trigger": "log.reboot",
+    "conflicts": [
+      "metric.detector_temp",
+      "log.reboot"
+    ],
+    "load_bearing_evidence": [
+      "tec_load_check",
+      "temp_correlation_check",
+      "metric.diode_temp",
+      "onset_vs_event_check",
+      "err.tec_load"
+    ]
+  },
+  "answer": {
+    "answer_type": "cause",
+    "root_cause": "part.tec",
+    "causal_chain": [
+      "hyp.tec_degradation"
+    ],
+    "cited_evidence": [
+      "ev.tec_load_check",
+      "ev.config_diff_clean",
+      "ev.trigger_demoted",
+      "ev.stuck_detector_temp_C"
+    ],
+    "conflicts": [
+      "log.reboot",
+      "metric.detector_temp"
+    ],
+    "recommended_action": "Replace or service the TEC assembly: ev.tec_load_check shows TEC current at 91% of hard limit (2.27 A / 2.5 A) with losing_setpoint=true and laser diode 5 \u00b0C above its 26 \u00b0C setpoint. Restoring thermal regulation is the critical path. Secondary: inspect and clean the optical window to close hyp.window_contamination (still open, log_odds=-0.60), since a fouled window could be a residual contributor. Disregard the reboot as causal (ev.trigger_demoted) and treat detector_temp_C as unreliable until the stuck-channel fault is resolved (ev.stuck_detector_temp_C)."
+  },
+  "score": {
+    "accuracy": 1.0,
+    "localization": 1.0,
+    "evidence_f1": 0.444,
+    "conflict_handling": 1.0,
+    "trigger_discrimination": 1.0,
+    "abstention_calibration": 1.0,
+    "cost_tokens": 50874
+  },
+  "hypotheses": [
+    {
+      "id": "hyp.window_contamination",
+      "label": "Window contamination \u2014 particulate or film on the optical window attenuating outbound and/or return signal, consistent with gradual ~8 % range loss over days",
+      "log_odds": -0.6,
+      "status": "open",
+      "node_ref": "part.window"
+    },
+    {
+      "id": "hyp.laser_aging",
+      "label": "Laser aging / output power decline \u2014 progressive reduction in emitted peak power reducing SNR at range, consistent with slow monotonic degradation",
+      "log_odds": -1.6,
+      "status": "ruled_out",
+      "node_ref": "part.laser_module"
+    },
+    {
+      "id": "hyp.detector_drift",
+      "label": "Detector sensitivity drift \u2014 dark-current increase or responsivity shift reducing receiver SNR, plausible over a week without thermal excursion",
+      "log_odds": -1.1,
+      "status": "ruled_out",
+      "node_ref": "part.detector"
+    },
+    {
+      "id": "hyp.tec_degradation",
+      "label": "TEC / thermal regulation failure \u2014 rising detector or laser operating temperature degrading both emitter power and detector sensitivity, may present as range loss correlated with ambient temperature",
+      "log_odds": 2.4,
+      "status": "leading",
+      "node_ref": "part.tec"
+    },
+    {
+      "id": "hyp.calibration_drift",
+      "label": "Calibration / signal-processing parameter drift \u2014 stale range-gate threshold or gain coefficient causing effective detection cutoff to shift, detectable via config_diff against last known-good baseline",
+      "log_odds": -2.0,
+      "status": "ruled_out",
+      "node_ref": "sub.calibration"
+    }
+  ],
+  "links": [
+    {
+      "evidence_id": "ev.config_diff_clean",
+      "hypothesis_id": "hyp.calibration_drift",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.config_diff_clean",
+      "hypothesis_id": "hyp.window_contamination",
+      "polarity": "+",
+      "weight": 0.4
+    },
+    {
+      "evidence_id": "ev.config_diff_clean",
+      "hypothesis_id": "hyp.laser_aging",
+      "polarity": "+",
+      "weight": 0.4
+    },
+    {
+      "evidence_id": "ev.config_diff_clean",
+      "hypothesis_id": "hyp.detector_drift",
+      "polarity": "+",
+      "weight": 0.4
+    },
+    {
+      "evidence_id": "ev.config_diff_clean",
+      "hypothesis_id": "hyp.tec_degradation",
+      "polarity": "+",
+      "weight": 0.4
+    },
+    {
+      "evidence_id": "ev.tec_load_check",
+      "hypothesis_id": "hyp.tec_degradation",
+      "polarity": "+",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.tec_load_check",
+      "hypothesis_id": "hyp.laser_aging",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.tec_load_check",
+      "hypothesis_id": "hyp.detector_drift",
+      "polarity": "-",
+      "weight": 1.5
+    },
+    {
+      "evidence_id": "ev.tec_load_check",
+      "hypothesis_id": "hyp.window_contamination",
+      "polarity": "-",
+      "weight": 1.0
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev.config_diff_clean",
+      "summary": "config_diff returned no changed parameters; all signal-processing and range-gate thresholds match the last known-good baseline. No calibration or gain coefficient drift detectable in stored configuration.",
+      "source": "config_diff"
+    },
+    {
+      "id": "ev.tec_load_check",
+      "summary": "TEC current is 2.27 A \u2014 91 % of the 2.5 A hard limit \u2014 while the laser diode is held 5 \u00b0C above its 26 \u00b0C setpoint (measured 31.0 \u00b0C), with losing_setpoint=true. The TEC is saturated and no longer able to regulate diode temperature, directly implicating TEC thermal-regulation failure as the mechanism causing progressive SNR/range degradation. The check summary explicitly notes this implicates the TEC, not intrinsic laser aging.",
+      "source": "tec_load_check"
+    },
+    {
+      "id": "ev.trigger_demoted",
+      "summary": "log.reboot: degradation onset predates it \u2192 coincident, not causal",
+      "source": "onset_vs_event_check"
+    },
+    {
+      "id": "ev.stuck_detector_temp_C",
+      "summary": "detector_temp_C is stuck (\u2248zero variance) \u2192 unreliable channel",
+      "source": "channel_sanity_check"
+    }
+  ],
+  "ig_conflicts": [
+    "log.reboot",
+    "metric.detector_temp"
+  ],
+  "trace": [
+    {
+      "action": "seed",
+      "args": {},
+      "rationale": "seed the differential from the symptom",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "hyp.window_contamination",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "hyp.window_contamination": 0.5,
+        "hyp.laser_aging": 0.5,
+        "hyp.detector_drift": 0.5,
+        "hyp.tec_degradation": 0.5,
+        "hyp.calibration_drift": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "config_diff"
+      },
+      "rationale": "All five hypotheses sit at equal log_odds=0.00 and zero evidence has been collected. config_diff is the highest-leverage first step: it directly tests hyp.calibration_drift by comparing current range-gate threshold, detection-cutoff, and gain coefficients against the last known-good baseline. The result is strongly binary \u2014 (A) a diff is found: hyp.calibration_drift rises sharply while all four hardware/optical hypotheses (window, laser, detector, TEC) fall, because a parameter shift fully accounts for the ~8% range loss without requiring any physical degradation; (B) no diff found: hyp.calibration_drift is effectively eliminated, concentrating probability on the physical hypotheses and making the subsequent hardware checks (detector_health_check, tec_load_check, spatial_intensity_check) far more targeted. No hardware access is needed, making this the fastest zero-risk discriminator before committing to intrusive checks.",
+      "voi": 0.83,
+      "evidence_id": "ev.config_diff_clean",
+      "conflicts_added": [],
+      "leader": "hyp.window_contamination",
+      "leader_conf": 0.599,
+      "margin": 0.0,
+      "confidences": {
+        "hyp.window_contamination": 0.599,
+        "hyp.laser_aging": 0.599,
+        "hyp.detector_drift": 0.599,
+        "hyp.tec_degradation": 0.599,
+        "hyp.calibration_drift": 0.119
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "tec_load_check"
+      },
+      "rationale": "All four remaining hypotheses sit at equal log_odds (0.40). TEC degradation is the only 'hub' cause that simultaneously degrades both laser output (via junction temperature) and detector sensitivity (via dark-current increase), so it subsumes laser_aging and detector_drift as secondary effects. A tec_load_check will surface duty-cycle saturation, setpoint error, or thermal runaway indicators. Result nominal \u2192 cleanly eliminates hyp.tec_degradation and refocuses investigation onto the three independent-pathway hypotheses (window_contamination, laser_aging, detector_drift). Result abnormal \u2192 strongly raises hyp.tec_degradation and partially explains hyp.laser_aging and hyp.detector_drift as downstream thermal effects, shifting them from independent root causes to symptoms \u2014 a large log_odds move in opposite directions for tec_degradation versus the other two. Window_contamination has no thermal dependence and is unaffected either way, keeping it as a parallel track. No prior evidence addresses thermal regulation; config_diff (ev.config_diff_clean) only cleared the calibration branch and says nothing about hardware health.",
+      "voi": 0.78,
+      "evidence_id": "ev.tec_load_check",
+      "conflicts_added": [],
+      "leader": "hyp.tec_degradation",
+      "leader_conf": 0.917,
+      "margin": 0.562,
+      "confidences": {
+        "hyp.window_contamination": 0.354,
+        "hyp.laser_aging": 0.168,
+        "hyp.detector_drift": 0.25,
+        "hyp.tec_degradation": 0.917,
+        "hyp.calibration_drift": 0.119
+      }
+    },
+    {
+      "action": "conflict_sweep",
+      "args": {},
+      "rationale": "order onset vs the salient recent event; sanity-check channels",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [
+        "log.reboot",
+        "metric.detector_temp"
+      ],
+      "leader": "hyp.tec_degradation",
+      "leader_conf": 0.917,
+      "margin": 0.562,
+      "confidences": {
+        "hyp.window_contamination": 0.354,
+        "hyp.laser_aging": 0.168,
+        "hyp.detector_drift": 0.25,
+        "hyp.tec_degradation": 0.917,
+        "hyp.calibration_drift": 0.119
+      }
+    },
+    {
+      "action": "synthesize",
+      "args": {
+        "answer_type": "cause",
+        "root_cause": "part.tec"
+      },
+      "rationale": "conclude or abstain from the differential",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "hyp.tec_degradation",
+      "leader_conf": 0.917,
+      "margin": 0.562,
+      "confidences": {
+        "hyp.window_contamination": 0.354,
+        "hyp.laser_aging": 0.168,
+        "hyp.detector_drift": 0.25,
+        "hyp.tec_degradation": 0.917,
+        "hyp.calibration_drift": 0.119
+      }
+    }
+  ]
+}
