@@ -8,7 +8,25 @@ Runs `controller` + the three baselines on one or more authored cases over N run
     .venv/bin/python tools/run_eval.py --all            # every authored case
 
 Uses the live LLM backend (CLI by default; Anthropic if keyed). `shortcut` is
-deterministic and run once. Token cost is metered (approx) per solver.
+deterministic and run once. Token cost is metered from the CLI's real `usage` per solver.
+
+RUN PROTOCOL (read before an n=3 run — the settings are correct automatically, the *procedure*
+is what bites):
+  - **Backend flags are baked into `CLIBackend` (src/dh/controller/llm.py): `--tools ""`
+    (deletes the ~14-17k built-in tool defs) + `--setting-sources project,local` (drops the
+    global ~/.claude/CLAUDE.md), on subscription auth, no API key.** Nothing to configure here;
+    `get_backend()` returns that backend. See docs/decisions/2026-06-22-claude-cli-prompt-cache.md.
+  - **Close other interactive `claude` sessions first.** The subscription `claude -p` backend
+    serializes under concurrent `claude` sessions — a controller run that takes seconds on a
+    clear machine takes many minutes alongside a live session (monition t61).
+  - **Run per-case, sequentially, with `--out`** so a mid-run failure doesn't lose prior cases
+    and doesn't clobber the n=1 deliverable (`reports/bespoke.md`):
+        for c in case1 case2 ... case8; do
+          .venv/bin/python tools/run_eval.py --runs 3 --case $c --out reports/n3_$c.md
+        done
+  - Per-call cost is now scaffolding-free (~hundreds of input tokens/call); `cost_tokens` is
+    output-dominated. n=3 over 8 cases is affordable but still ~hours of wall-clock if a live
+    session is competing — prefer an idle window.
 """
 
 from __future__ import annotations
@@ -63,12 +81,12 @@ def _run_case(spec, runs: int, budget: int) -> dict[str, list]:
             except Exception as e:  # noqa: BLE001 — a solver failure shouldn't kill the eval
                 print(f"  ! {name} run {r} failed: {e}", file=sys.stderr)
                 continue
-            sc = score(ans, case, solver=name, tokens=meter.total_tokens)
+            sc = score(ans, case, solver=name, tokens=meter.cost_tokens)
             results[name].append(sc)
             print(f"  {spec.id} {name} run {r}: acc={sc.accuracy} loc={sc.localization} "
                   f"trig={sc.trigger_discrimination} conf={sc.conflict_handling} "
-                  f"evF1={sc.evidence_f1:.2f} tok={meter.total_tokens} "
-                  f"(content {meter.content_tokens})", file=sys.stderr)
+                  f"evF1={sc.evidence_f1:.2f} cost_tok={meter.cost_tokens} "
+                  f"(raw {meter.total_tokens}, cached {meter.cached_tokens})", file=sys.stderr)
             if name == "controller" and r == 0:  # first controller run → showpiece bundle
                 gt = case.ground_truth
                 _VIEWER_BUNDLES.append(case_bundle(
