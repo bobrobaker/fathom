@@ -353,6 +353,46 @@ not affirm the laser. Mirrors `losing_setpoint`; structural/#5-safe. Expected: c
 credits laser → keeps investigating → concludes `part.tec`; case2 (diode nominal) still affirms
 laser; case5/case8 unaffected. Needs a live re-confirm of case7 + case2/case5/case8.
 
+### Round 4 — case7 regression fixed → 8/8 live, regression CLOSED
+
+The case7 regression was fixed by making `laser_power_check` **diode-aware**: it affirms *laser
+aging* only when power is down AND the diode is at its setpoint (nominal); a power drop with an
+*elevated* diode is thermal (the TEC's `losing_setpoint` case), so it no longer credits the laser.
+The mirror of `losing_setpoint`; structural/#5-safe. This change affects only the two elevated-diode
+cases (case1, case7) — for the other six `laser_power_check`'s output is byte-identical, so their
+round-3 live results stand and only case1+case7 were re-run.
+
+**Final live regression table (the controller's actual behavior, n=1, budget 8, 0 CLI errors):**
+
+| case | gold | live answer | acc | source |
+|---|---|---|---|---|
+| case1 tec_degradation | part.tec | part.tec | 1.0 | v4 (diode-aware) |
+| case2 laser_aging | part.laser_module | part.laser_module | 1.0 | v3 |
+| case3 window_contamination | part.window | part.window | 1.0 | v3 |
+| case4 calibration_drift | sub.calibration | sub.calibration | 1.0 | v3 |
+| case5 no_clean_cause | abstain | abstain | 1.0 | v3 |
+| case6 detector_bias_drift | part.detector | part.detector | 1.0 | v3 |
+| case7 tec_degradation_variant | part.tec | part.tec | 1.0 | v4 (fixed) |
+| case8 common_mode_power | sub.power | sub.power (margin 0.77) | 1.0 | v3 |
+
+**8/8 live accuracy, 0 regressions.** From the spike's thesis-negative 4/8 to 8/8 — every fix a
+general, #5-defensible mechanism change. (n=1; LLM variance real; the cost premium from the M1
+fix — runs explore to budget rather than shortcut to a confident-wrong leader — stands as the
+honest accuracy↔cost tradeoff, §Row 7.)
+
+### Code-review (4 findings) & simplify (deferred refactors)
+- **Code-review #3** (laser_power_check non-specific affirmative) **is now fixed** by the diode-aware
+  change — it's what caused the case7 regression and is closed. The other three stand as low-severity
+  notes: the leader-anchor band gap (conf∈(tau_min,tau_dom] keeps the LLM's root_cause), the
+  explain-away over-erasure edge (compound common-mode + independent fault), and the
+  `_affects_ancestors` per-call rebuild.
+- **Simplify**: changed code is clean; identified cleanups are out-of-scope refactors (consolidate
+  `_affects_ancestors`/`_subsystem_of` into `graph.py`; the controller's direct `env._case.graph`
+  access is an altitude smell) — recorded, not churned.
+- **build_viewer audit**: `build_viewer_site.py` uses the identical `generate→diagnose→score` path,
+  so it inherits all fixes by construction; `build_site` rendering of the new IG shapes (synthetic
+  `hyp.upstream_power`, promotion links, abstain) verified on the real live data.
+
 ### Still NOT live-re-confirmed under round-3 code
 case1,2,3,4,6,7 were not re-run live after the round-3 changes (the authoritative gate + explain-away
 change behavior on every case). The 189-suite is the regression evidence; the standing live risks are
