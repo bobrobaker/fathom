@@ -6,6 +6,14 @@ regenerated from `reports/bespoke.md`, never hand-edited to flatter the controll
 
 # Fathom — spike findings
 
+> **⚠ SUPERSEDED (2026-06-22), pending rewrite at merge.** The n=1 **thesis-negative 4/8** result
+> reported below was overturned by the controller investigation on branch `investigate-controller`
+> (unmerged): general, #5-defensible mechanism fixes took the controller to **8/8 live accuracy**
+> (n=1). The current, authoritative result is **`investigation/RESULTS.md`** (full audit/fix/spike
+> table). This document's §4/§6 must be rewritten negative→positive **honestly** at merge — the win
+> is real but n=1, and the A3 ≥3-run variance pass is now load-bearing for the positive claim (see
+> `docs/road.md` Phase 1 Note, 2026-06-22). Treat everything below as the pre-investigation record.
+
 **What this is.** Fathom is a diagnostic harness: one abductive LLM **controller** maintains a
 hypothesis differential and proposes the single most-discriminating next action, run against a
 generated lidar system-under-test through one `Environment` interface. This document reports the

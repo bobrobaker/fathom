@@ -2,6 +2,14 @@
 
 **Date:** 2026-06-16 · **Status:** accepted · **Milestone:** M3
 
+> **CLIBackend argv superseded (2026-06-22).** The `--allowed-tools "" --output-format text` invocation
+> shown below is stale: the current backend uses **`--tools "" --setting-sources project,local
+> --output-format json`** (and parses real `usage`). `--allowed-tools ""` strips tool *permissions*,
+> not *definitions* — `--tools ""` deletes the ~21k scaffolding prefix outright. Authoritative:
+> `docs/decisions/2026-06-22-claude-cli-prompt-cache.md` + the `CLIBackend`/`MeteredBackend` docstrings.
+> The rest of this record (three-backend structure, dormant SDK path, scratch cwd, subscription auth)
+> still holds.
+
 ## Decision
 
 The controller and baselines reach the model through one `complete(prompt, system) -> text`

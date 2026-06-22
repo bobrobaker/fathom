@@ -1,0 +1,269 @@
+{
+  "case_id": "case2",
+  "fault": "laser_aging",
+  "salient_is_cause": false,
+  "ground_truth": {
+    "root_cause": "part.laser_module",
+    "causal_chain": [
+      "part.laser_module",
+      "metric.laser_power",
+      "metric.intensity",
+      "kpi.effective_range"
+    ],
+    "trigger": "log.reboot",
+    "conflicts": [
+      "log.reboot"
+    ],
+    "load_bearing_evidence": [
+      "temp_correlation_check",
+      "tec_load_check",
+      "metric.laser_power",
+      "onset_vs_event_check"
+    ]
+  },
+  "answer": {
+    "answer_type": "cause",
+    "root_cause": "part.laser_module",
+    "causal_chain": [
+      "hyp.laser_aging"
+    ],
+    "cited_evidence": [
+      "ev.spatial_intensity_check.001",
+      "ev.detector_health_check.001",
+      "ev.trigger_demoted"
+    ],
+    "conflicts": [
+      "log.reboot"
+    ],
+    "recommended_action": "Measure laser emitter output power directly via the internal monitor photodiode (or an external optical power meter) at the nominal drive current. An ~8\u201310% power reduction would confirm hyp.laser_aging and quantify the degradation for scheduling emitter or driver replacement. This is the single most discriminating check: a nominal reading would instead rule out laser aging, shift weight to hyp.calibration_drift (audit range-threshold coefficients) or hyp.thermal_tec (compare laser-junction temperature to TEC set-point), and prevent premature emitter replacement. The recent reboot (ev.trigger_demoted) is confirmed non-causal because degradation onset predates it."
+  },
+  "score": {
+    "accuracy": 1.0,
+    "localization": 1.0,
+    "evidence_f1": 0.286,
+    "conflict_handling": 1.0,
+    "trigger_discrimination": 1.0,
+    "abstention_calibration": 1.0,
+    "cost_tokens": 51861
+  },
+  "hypotheses": [
+    {
+      "id": "hyp.window_contamination",
+      "label": "Window contamination attenuating outbound/return signal",
+      "log_odds": -2.3,
+      "status": "ruled_out",
+      "node_ref": "part.window"
+    },
+    {
+      "id": "hyp.laser_aging",
+      "label": "Laser emitter output power degradation due to aging or drive-current loss",
+      "log_odds": 2.0,
+      "status": "leading",
+      "node_ref": "part.laser_module"
+    },
+    {
+      "id": "hyp.detector_drift",
+      "label": "Receiver/detector sensitivity drift reducing SNR at range",
+      "log_odds": -1.0,
+      "status": "open",
+      "node_ref": "part.detector"
+    },
+    {
+      "id": "hyp.thermal_tec",
+      "label": "TEC under-performing, causing thermal drift that degrades laser or detector operating point",
+      "log_odds": 0.0,
+      "status": "open",
+      "node_ref": "part.tec"
+    },
+    {
+      "id": "hyp.calibration_drift",
+      "label": "Signal processing / calibration parameter drift skewing range threshold",
+      "log_odds": 0.2,
+      "status": "open",
+      "node_ref": "sub.calibration"
+    }
+  ],
+  "links": [
+    {
+      "evidence_id": "ev.spatial_intensity_check.001",
+      "hypothesis_id": "hyp.window_contamination",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.spatial_intensity_check.001",
+      "hypothesis_id": "hyp.laser_aging",
+      "polarity": "+",
+      "weight": 1.5
+    },
+    {
+      "evidence_id": "ev.spatial_intensity_check.001",
+      "hypothesis_id": "hyp.detector_drift",
+      "polarity": "+",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev.spatial_intensity_check.001",
+      "hypothesis_id": "hyp.thermal_tec",
+      "polarity": "+",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev.spatial_intensity_check.001",
+      "hypothesis_id": "hyp.calibration_drift",
+      "polarity": "+",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.detector_health_check.001",
+      "hypothesis_id": "hyp.detector_drift",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.detector_health_check.001",
+      "hypothesis_id": "hyp.thermal_tec",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev.detector_health_check.001",
+      "hypothesis_id": "hyp.laser_aging",
+      "polarity": "+",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.detector_health_check.001",
+      "hypothesis_id": "hyp.calibration_drift",
+      "polarity": "-",
+      "weight": 0.3
+    },
+    {
+      "evidence_id": "ev.detector_health_check.001",
+      "hypothesis_id": "hyp.window_contamination",
+      "polarity": "-",
+      "weight": 0.3
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev.spatial_intensity_check.001",
+      "summary": "Intensity drop is spatially uniform across all 4 measured regions (spread=0.022, localized=false). This strongly rules out window contamination, which would produce a spatially asymmetric or localized attenuation pattern. The uniformity is instead consistent with a global signal-path degradation: reduced laser output power, reduced detector sensitivity, thermal operating-point shift, or calibration parameter drift.",
+      "source": "spatial_intensity_check"
+    },
+    {
+      "id": "ev.detector_health_check.001",
+      "summary": "Detector health check returns near-zero dark-count rise (\u22120.3%, effectively 0%), negligible detector temperature rise (\u22120.044 \u00b0C \u2248 0), no bias drift, and a confirmed live temperature channel. All three detector-specific indicators are nominal, yielding no isolated detector bias signature. By elimination this raises relative probability of a source-side (laser) fault.",
+      "source": "detector_health_check"
+    },
+    {
+      "id": "ev.trigger_demoted",
+      "summary": "log.reboot: degradation onset predates it \u2192 coincident, not causal",
+      "source": "onset_vs_event_check"
+    }
+  ],
+  "ig_conflicts": [
+    "log.reboot"
+  ],
+  "trace": [
+    {
+      "action": "seed",
+      "args": {},
+      "rationale": "seed the differential from the symptom",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "hyp.window_contamination",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "hyp.window_contamination": 0.5,
+        "hyp.laser_aging": 0.5,
+        "hyp.detector_drift": 0.5,
+        "hyp.thermal_tec": 0.5,
+        "hyp.calibration_drift": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "spatial_intensity_check"
+      },
+      "rationale": "With all five hypotheses at equal log-odds and zero evidence in hand, the single most discriminating split is: is the attenuation spatially non-uniform (contamination signature) or spatially uniform (systemic/component-level cause)? A spatial_intensity_check maps return-signal intensity across the aperture and field angles. A patchy, edge-biased, or sector-localised intensity deficit is the hallmark of hyp.window_contamination and cannot be explained by laser aging, detector drift, TEC drift, or calibration drift, all of which produce a field-uniform reduction in SNR. Conversely, a perfectly uniform intensity loss across the aperture actively argues against contamination and collapses the differential to the four systemic hypotheses. No other single check splits the field this cleanly at this stage: tec_load_check or detector_health_check would only confirm or deny one hypothesis each, whereas this check raises one hypothesis while simultaneously lowering or eliminating another, satisfying the discrimination criterion.",
+      "voi": 0.82,
+      "evidence_id": "ev.spatial_intensity_check.001",
+      "conflicts_added": [],
+      "leader": "hyp.laser_aging",
+      "leader_conf": 0.818,
+      "margin": 0.087,
+      "confidences": {
+        "hyp.window_contamination": 0.119,
+        "hyp.laser_aging": 0.818,
+        "hyp.detector_drift": 0.731,
+        "hyp.thermal_tec": 0.731,
+        "hyp.calibration_drift": 0.622
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "detector_health_check"
+      },
+      "rationale": "The two highest-ranked open hypotheses are hyp.laser_aging (log_odds=1.50) and hyp.detector_drift (log_odds=1.00), with hyp.thermal_tec tied at 1.00. All three are consistent with the spatially-uniform intensity drop (ev.spatial_intensity_check.001), so that evidence cannot separate them. A detector health check isolates the receive path (responsivity, dark-current, noise floor) independently of laser output. A NOMINAL result is evidence AGAINST hyp.detector_drift and AGAINST the receive-side branch of hyp.thermal_tec, pushing probability toward hyp.laser_aging. A DEGRADED result is evidence FOR hyp.detector_drift and raises the question of whether a thermal operating-point shift (hyp.thermal_tec) is the upstream driver \u2014 warranting a subsequent tec_load_check. This single measurement therefore moves the two leading competitors in opposite directions, which is the definition of a discriminating action. It is preferred over tec_load_check at this step because tec_load_check, if nominal, still leaves laser_aging and detector_drift unresolved, whereas detector_health_check resolves the laser-vs-detector split directly.",
+      "voi": 0.83,
+      "evidence_id": "ev.detector_health_check.001",
+      "conflicts_added": [],
+      "leader": "hyp.laser_aging",
+      "leader_conf": 0.881,
+      "margin": 0.331,
+      "confidences": {
+        "hyp.window_contamination": 0.091,
+        "hyp.laser_aging": 0.881,
+        "hyp.detector_drift": 0.269,
+        "hyp.thermal_tec": 0.5,
+        "hyp.calibration_drift": 0.55
+      }
+    },
+    {
+      "action": "conflict_sweep",
+      "args": {},
+      "rationale": "order onset vs the salient recent event; sanity-check channels",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [
+        "log.reboot"
+      ],
+      "leader": "hyp.laser_aging",
+      "leader_conf": 0.881,
+      "margin": 0.331,
+      "confidences": {
+        "hyp.window_contamination": 0.091,
+        "hyp.laser_aging": 0.881,
+        "hyp.detector_drift": 0.269,
+        "hyp.thermal_tec": 0.5,
+        "hyp.calibration_drift": 0.55
+      }
+    },
+    {
+      "action": "synthesize",
+      "args": {
+        "answer_type": "cause",
+        "root_cause": "part.laser_module"
+      },
+      "rationale": "conclude or abstain from the differential",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "hyp.laser_aging",
+      "leader_conf": 0.881,
+      "margin": 0.331,
+      "confidences": {
+        "hyp.window_contamination": 0.091,
+        "hyp.laser_aging": 0.881,
+        "hyp.detector_drift": 0.269,
+        "hyp.thermal_tec": 0.5,
+        "hyp.calibration_drift": 0.55
+      }
+    }
+  ]
+}

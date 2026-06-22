@@ -27,6 +27,7 @@ from typing import Literal, Protocol
 from pydantic import BaseModel
 
 from dh import config
+from dh.controller import beliefs
 from dh.schemas import Answer, EvidenceItem, EvidenceLink, Hypothesis, InvestigationGraph
 
 log = logging.getLogger("dh.llm")
@@ -425,17 +426,47 @@ def interpret_result(backend: LLMBackend, ig: InvestigationGraph, action: Action
     ev_d = data.get("evidence") or {}
     evidence = None
     if ev_d.get("id"):
+        # Pin provenance deterministically: a run_check result carries its own check name
+        # (`result["check"]`) and an action arg name — trust those over the LLM's free-text
+        # `source`, which drifts and canonicalises the citation out of the gold id-space the
+        # scorer keys on. General by construction: the source is the check that ran, not a
+        # case-specific string. (#5-neutral: changes only a citation's provenance id, never
+        # the named root cause.)
+        if action.type == "run_check":
+            src = result.get("check") or action.args.get("name") or action.type
+        else:
+            src = ev_d.get("source", action.type)
         try:
             evidence = EvidenceItem(id=ev_d["id"], summary=ev_d.get("summary", ""),
-                                    source=ev_d.get("source", action.type),
+                                    source=src,
                                     props=ev_d.get("props", {}))
         except (KeyError, TypeError):
             evidence = None
+    # Affirmative-evidence gate (M1). A deterministic check that read nominal/at-spec
+    # (`affirmative` is False) can only RULE OUT hypotheses, never rule one IN — so we drop its
+    # positive ('+') links and keep its negative ('-') ones. The LLM was observed crediting
+    # nominal rule-out readings (a uniform-intensity check, an onset-predates demotion, a clean
+    # detector) *positively* to the leader, saturating a wrong hypothesis to a confident-dominant
+    # conclusion on the no-clean-cause case. The gate is deterministic and robust to that
+    # over-crediting. It applies only to `run_check` actions (which carry `affirmative`); a
+    # missing/None `affirmative` (a check predating the field, a non-check action) is treated as
+    # affirmative so the gate never silently strips legitimate positive evidence.
+    #   #5: `affirmative` is a per-check STRUCTURAL fact (the check's own anomaly predicate —
+    #   any_change / localized / correlated / at_limit-or-losing_setpoint / stuck / bias_drift /
+    #   common_mode / onset-aligns / low_power), not a per-case constant, and it encodes a
+    #   domain-general abduction principle (only an affirmative anomaly affirms a hypothesis;
+    #   nominal evidence only rules out). Verified across all 8 cases: each gold cause retains an
+    #   affirmative path and the no-clean-cause case has none — so it abstains.
+    is_run_check = action.type == "run_check"
+    affirmative = result.get("affirmative") if is_run_check else None
+    drop_positive = is_run_check and affirmative is False
     links: list[EvidenceLink] = []
     if evidence:
         for ln in data.get("links", []):
             try:
                 if ln["hypothesis_id"] in hyp_ids and ln["polarity"] in ("+", "-"):
+                    if drop_positive and ln["polarity"] == "+":
+                        continue  # a nominal check rules out, never rules in (M1)
                     weight = min(abs(float(ln["weight"])), MAX_WEIGHT)  # clamp |LLR|
                     links.append(EvidenceLink(evidence_id=evidence.id,
                                               hypothesis_id=ln["hypothesis_id"],
@@ -462,11 +493,29 @@ def synthesize(backend: LLMBackend, ig: InvestigationGraph,
     answer_type = data.get("answer_type")
     if answer_type not in ("cause", "abstain"):
         answer_type = "abstain" if abstain else "cause"
+    # The deterministic abstain gate (loop: leader not confident OR not dominant) is AUTHORITATIVE,
+    # not advisory: when it fires, the controller abstains regardless of what the LLM's prose chose.
+    # Without this the gate is a suggestion the model can ignore — it concluded a thin-margin leader
+    # (case8 margin 0.028) and only happened to be right, while another sample would confabulate on
+    # a state the belief math judged non-discriminating. The model may still abstain on its own; it
+    # may not override an abstain the geometry demands.
+    if abstain:
+        answer_type = "abstain"
     # resolve root_cause: models often return the hypothesis id, not its node_ref
     hyp_node = {h.id: h.node_ref for h in ig.hypotheses}
     root_cause = data.get("root_cause")
     if root_cause in hyp_node and hyp_node[root_cause]:
         root_cause = hyp_node[root_cause]
+    # the verdict follows the deterministic belief math, not the model's prose: when the leader is
+    # dominant (clears τ_dom with margin) the named cause IS the leader's node — keeping the answer
+    # consistent with the aggregated evidence (and letting the deterministic conflict/promotion
+    # sweep, which the LLM never sees, actually move the conclusion). General: applies to every
+    # concluding case; on a tie/abstain the model's choice stands.
+    if answer_type == "cause":
+        th = config.thresholds()
+        top, conf, margin = beliefs.leader(ig)
+        if top is not None and top.node_ref and conf > th["tau_dom"] and margin > th["tau_margin"]:
+            root_cause = top.node_ref
     return Answer(
         answer_type=answer_type,
         root_cause=root_cause if answer_type == "cause" else None,

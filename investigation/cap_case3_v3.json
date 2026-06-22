@@ -1,0 +1,312 @@
+{
+  "case_id": "case3",
+  "fault": "window_contamination",
+  "salient_is_cause": false,
+  "ground_truth": {
+    "root_cause": "part.window",
+    "causal_chain": [
+      "part.window",
+      "metric.intensity",
+      "kpi.effective_range"
+    ],
+    "trigger": "log.reboot",
+    "conflicts": [
+      "log.reboot"
+    ],
+    "load_bearing_evidence": [
+      "spatial_intensity_check",
+      "temp_correlation_check",
+      "tec_load_check"
+    ]
+  },
+  "answer": {
+    "answer_type": "cause",
+    "root_cause": "part.window",
+    "causal_chain": [
+      "h1"
+    ],
+    "cited_evidence": [
+      "ev.spatial_intensity_check",
+      "ev.laser_power_check",
+      "ev.detector_health_check",
+      "ev.trigger_demoted"
+    ],
+    "conflicts": [
+      "log.reboot"
+    ],
+    "recommended_action": "Inspect and clean the transmit/receive optical window. ev.spatial_intensity_check shows a non-uniform, spatially localized intensity drop (spread=0.484, localized=true), which is the hallmark of partial window or optic-surface contamination rather than any system-wide degradation. All other hypotheses are eliminated by nominal readings: laser output is stable at baseline (ev.laser_power_check), detector health and temperature are nominal (ev.detector_health_check), and the recent reboot predates\u2014not follows\u2014the degradation onset, making it non-causal (ev.trigger_demoted). After cleaning, re-run spatial intensity check to confirm uniformity is restored and range returns to \u2265120 m baseline."
+  },
+  "score": {
+    "accuracy": 1.0,
+    "localization": 1.0,
+    "evidence_f1": 0.286,
+    "conflict_handling": 1.0,
+    "trigger_discrimination": 1.0,
+    "abstention_calibration": 1.0,
+    "cost_tokens": 60767
+  },
+  "hypotheses": [
+    {
+      "id": "h1",
+      "label": "Window contamination reducing transmitted/received optical power",
+      "log_odds": 2.0,
+      "status": "leading",
+      "node_ref": "part.window"
+    },
+    {
+      "id": "h2",
+      "label": "Laser output power aging / gradual emitter degradation",
+      "log_odds": -3.0,
+      "status": "ruled_out",
+      "node_ref": "part.laser_module"
+    },
+    {
+      "id": "h3",
+      "label": "Detector sensitivity drift reducing SNR at long range",
+      "log_odds": -2.5,
+      "status": "ruled_out",
+      "node_ref": "part.detector"
+    },
+    {
+      "id": "h4",
+      "label": "TEC / thermal regulation failure elevating detector or laser operating temperature",
+      "log_odds": -3.0,
+      "status": "ruled_out",
+      "node_ref": "part.tec"
+    },
+    {
+      "id": "h5",
+      "label": "Calibration / signal-processing parameter drift shifting range-gate or threshold",
+      "log_odds": -2.0,
+      "status": "ruled_out",
+      "node_ref": "sub.calibration"
+    },
+    {
+      "id": "hyp.upstream_power",
+      "label": "Scanner / power (shared upstream cause)",
+      "log_odds": -3.0,
+      "status": "ruled_out",
+      "node_ref": "sub.power"
+    }
+  ],
+  "links": [
+    {
+      "evidence_id": "ev.laser_power_check",
+      "hypothesis_id": "h2",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.laser_power_check",
+      "hypothesis_id": "hyp.upstream_power",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.laser_power_check",
+      "hypothesis_id": "h4",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.detector_health_check",
+      "hypothesis_id": "h4",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.detector_health_check",
+      "hypothesis_id": "h3",
+      "polarity": "-",
+      "weight": 1.5
+    },
+    {
+      "evidence_id": "ev.spatial_intensity_check",
+      "hypothesis_id": "h1",
+      "polarity": "+",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.spatial_intensity_check",
+      "hypothesis_id": "h5",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.spatial_intensity_check",
+      "hypothesis_id": "h2",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev.spatial_intensity_check",
+      "hypothesis_id": "h3",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev.spatial_intensity_check",
+      "hypothesis_id": "h4",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev.spatial_intensity_check",
+      "hypothesis_id": "hyp.upstream_power",
+      "polarity": "-",
+      "weight": 1.0
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev.laser_power_check",
+      "summary": "Laser output power measured at 48.0 mW vs 47.9 mW baseline (+0.1%, ratio 1.0011). Flagged low_power=false, affirmative=false. No sustained power loss; emitter output is stable and at baseline.",
+      "source": "laser_power_check"
+    },
+    {
+      "id": "ev.detector_health_check",
+      "summary": "Detector health check nominal: dark-count rise +0.85% (~1%), detector temperature rise +0.0015 \u00b0C (effectively zero), detector temp channel confirmed live, bias_drift=false, affirmative=false. No isolated detector degradation signature detected.",
+      "source": "detector_health_check"
+    },
+    {
+      "id": "ev.spatial_intensity_check",
+      "summary": "Spatial intensity check across 4 regions returned spread=0.484, localized=true, affirmative=true. The intensity drop is non-uniform and confined to specific spatial zones, a pattern consistent with partial window or optic surface contamination rather than any system-wide degradation.",
+      "source": "spatial_intensity_check"
+    },
+    {
+      "id": "ev.trigger_demoted",
+      "summary": "log.reboot: degradation onset predates it \u2192 coincident, not causal",
+      "source": "onset_vs_event_check"
+    }
+  ],
+  "ig_conflicts": [
+    "log.reboot"
+  ],
+  "trace": [
+    {
+      "action": "seed",
+      "args": {},
+      "rationale": "seed the differential from the symptom",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "h1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "h1": 0.5,
+        "h2": 0.5,
+        "h3": 0.5,
+        "h4": 0.5,
+        "h5": 0.5,
+        "hyp.upstream_power": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "laser_power_check"
+      },
+      "rationale": "No evidence has been collected yet and all hypotheses are equiprobable. The single most discriminating split at this stage is to measure actual laser emitter output power. In an SNR-limited ranging system, range scales roughly as (P_tx)^\u00bd, so an ~8% range loss (~110 m vs 120 m baseline) implies roughly a 15\u201316% deficit in effective optical power-SNR product. A laser_power_check directly tests the transmit side (h2). Result interpretation: (A) Power is DOWN ~15% \u2192 strongly raises h2 (emitter aging) and also implicates h4 as a possible upstream driver (elevated junction temperature depresses output); strongly lowers h1, h3, h5 as primary root cause. (B) Power is NOMINAL \u2192 strongly lowers h2, preserves or raises h3 (detector sensitivity drift), h4 (thermal affecting detector only), h1 (window loss on receive), and h5 (threshold/gate drift). Either outcome moves at least two hypotheses sharply in opposite directions, making this the highest-discrimination first action available. Additionally, any instability or variance in the laser power reading under steady load would flag hyp.upstream_power as a contributor.",
+      "voi": 0.82,
+      "evidence_id": "ev.laser_power_check",
+      "conflicts_added": [],
+      "leader": "h1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "h1": 0.5,
+        "h2": 0.119,
+        "h3": 0.5,
+        "h4": 0.378,
+        "h5": 0.5,
+        "hyp.upstream_power": 0.119
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "detector_health_check"
+      },
+      "rationale": "ev.laser_power_check already confirms transmit power is stable (+0.1%), ruling out h2 and hyp.upstream_power. The three remaining co-equal hypotheses are h1 (window contamination), h3 (detector sensitivity drift), and h5 (calibration/threshold drift), all at log_odds=0.00. An 8% range reduction corresponds to a meaningful SNR loss at the detector; detector_health_check will directly measure responsivity and noise floor. A degraded detector (lower responsivity or elevated dark noise) would strongly raise h3 and lower h1/h5. A nominal detector result would lower h3 and force the fork between h1 (spatial_intensity_check next) and h5 (config_diff next). This single check maximally splits the leading cluster.",
+      "voi": 0.82,
+      "evidence_id": "ev.detector_health_check",
+      "conflicts_added": [],
+      "leader": "h1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "h1": 0.5,
+        "h2": 0.119,
+        "h3": 0.182,
+        "h4": 0.076,
+        "h5": 0.5,
+        "hyp.upstream_power": 0.119
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "spatial_intensity_check"
+      },
+      "rationale": "Both h1 (window contamination) and h5 (calibration/signal-processing parameter drift) are equally probable (log_odds=0.00) and are now the only open hypotheses. Their mechanisms produce distinct signatures in return-signal intensity: h1 would depress optical throughput and reduce measured return intensity uniformly (or spatially) across the field of view at all ranges, while h5 (range-gate or threshold shift) would leave near-field return intensity intact but cut detections at a shorter range than expected. A spatial intensity check directly interrogates the optical chain and produces a result that moves these two hypotheses in opposite directions: uniform/spatially-patterned intensity reduction raises h1 and lowers h5; intact intensity at close-to-mid range lowers h1 and raises h5. Neither existing evidence item (ev.laser_power_check, ev.detector_health_check) addresses the intermediate optical path (window, aperture, coupling optics), so this is not a re-confirmation of already-supported ground.",
+      "voi": 0.88,
+      "evidence_id": "ev.spatial_intensity_check",
+      "conflicts_added": [],
+      "leader": "h1",
+      "leader_conf": 0.881,
+      "margin": 0.762,
+      "confidences": {
+        "h1": 0.881,
+        "h2": 0.047,
+        "h3": 0.076,
+        "h4": 0.047,
+        "h5": 0.119,
+        "hyp.upstream_power": 0.047
+      }
+    },
+    {
+      "action": "conflict_sweep",
+      "args": {},
+      "rationale": "order onset vs the salient recent event; sanity-check channels",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [
+        "log.reboot"
+      ],
+      "leader": "h1",
+      "leader_conf": 0.881,
+      "margin": 0.762,
+      "confidences": {
+        "h1": 0.881,
+        "h2": 0.047,
+        "h3": 0.076,
+        "h4": 0.047,
+        "h5": 0.119,
+        "hyp.upstream_power": 0.047
+      }
+    },
+    {
+      "action": "synthesize",
+      "args": {
+        "answer_type": "cause",
+        "root_cause": "part.window"
+      },
+      "rationale": "conclude or abstain from the differential",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "h1",
+      "leader_conf": 0.881,
+      "margin": 0.762,
+      "confidences": {
+        "h1": 0.881,
+        "h2": 0.047,
+        "h3": 0.076,
+        "h4": 0.047,
+        "h5": 0.119,
+        "hyp.upstream_power": 0.047
+      }
+    }
+  ]
+}

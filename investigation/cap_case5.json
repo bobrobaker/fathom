@@ -1,0 +1,347 @@
+{
+  "case_id": "case5",
+  "fault": "no_clean_cause",
+  "salient_is_cause": null,
+  "ground_truth": {
+    "root_cause": null,
+    "causal_chain": [],
+    "trigger": "log.reboot",
+    "conflicts": [
+      "log.reboot"
+    ],
+    "load_bearing_evidence": []
+  },
+  "answer": {
+    "answer_type": "cause",
+    "root_cause": "part.laser_module",
+    "causal_chain": [
+      "H4"
+    ],
+    "cited_evidence": [
+      "E1",
+      "E2",
+      "E3",
+      "E4"
+    ],
+    "conflicts": [
+      "log.reboot"
+    ],
+    "recommended_action": "Perform a direct, calibrated laser output power measurement (optical power meter at aperture) to quantify emitted power versus factory baseline. Log laser drive current simultaneously and compare to spec. If output power is reduced but drive current is nominal, the laser diode itself is degrading \u2014 schedule laser module replacement. If drive current is also anomalous, inspect the laser driver circuit for oscillation or dropout. Do not attribute onset to the t=8.0 maintenance/reboot event; degradation began at t=7.5 (E1), confirming a pre-existing, progressive laser aging process."
+  },
+  "score": {
+    "accuracy": 0.0,
+    "localization": 0.0,
+    "evidence_f1": 0.0,
+    "conflict_handling": 1.0,
+    "trigger_discrimination": 1.0,
+    "abstention_calibration": 0.0,
+    "cost_tokens": 76993
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "label": "Window contamination \u2014 soiling or smearing introduced during or after last maintenance causing spatially variable transmission loss",
+      "log_odds": -3.0,
+      "status": "ruled_out",
+      "node_ref": "part.window"
+    },
+    {
+      "id": "H2",
+      "label": "Calibration drift \u2014 offset or scale error introduced by a firmware update or recalibration procedure performed at last maintenance",
+      "log_odds": -1.5,
+      "status": "ruled_out",
+      "node_ref": "sub.calibration"
+    },
+    {
+      "id": "H3",
+      "label": "Thermal / TEC fault \u2014 TEC unable to hold laser or detector at set-point under varying ambient load, causing thermally-driven range walk",
+      "log_odds": -1.0,
+      "status": "open",
+      "node_ref": "part.tec"
+    },
+    {
+      "id": "H4",
+      "label": "Laser aging / power instability \u2014 gradual or step-change reduction in emitted optical power producing intermittent range shortfall",
+      "log_odds": 2.0,
+      "status": "leading",
+      "node_ref": "part.laser_module"
+    },
+    {
+      "id": "H5",
+      "label": "Detector drift \u2014 responsivity or bias instability in the receiver causing fluctuating detection threshold and apparent range variation",
+      "log_odds": -1.0,
+      "status": "open",
+      "node_ref": "part.detector"
+    }
+  ],
+  "links": [
+    {
+      "evidence_id": "E1",
+      "hypothesis_id": "H1",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "E1",
+      "hypothesis_id": "H2",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "E1",
+      "hypothesis_id": "H3",
+      "polarity": "+",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "E1",
+      "hypothesis_id": "H4",
+      "polarity": "+",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "E1",
+      "hypothesis_id": "H5",
+      "polarity": "+",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "E2",
+      "hypothesis_id": "H3",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "E2",
+      "hypothesis_id": "H4",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "E2",
+      "hypothesis_id": "H5",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "E3",
+      "hypothesis_id": "H5",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "E3",
+      "hypothesis_id": "H3",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "E3",
+      "hypothesis_id": "H4",
+      "polarity": "+",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "E4",
+      "hypothesis_id": "H1",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "E4",
+      "hypothesis_id": "H4",
+      "polarity": "+",
+      "weight": 1.5
+    },
+    {
+      "evidence_id": "E4",
+      "hypothesis_id": "H3",
+      "polarity": "+",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "E4",
+      "hypothesis_id": "H5",
+      "polarity": "+",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "E4",
+      "hypothesis_id": "H2",
+      "polarity": "+",
+      "weight": 0.5
+    }
+  ],
+  "evidence": [
+    {
+      "id": "E1",
+      "summary": "Degradation onset of effective_max_range_m is at t=7.5, which precedes the log.reboot / last_maintenance event at t=8.0. The maintenance event is therefore coincident, not causal. Any hypothesis whose mechanism requires the maintenance event as the initiating cause is contradicted.",
+      "source": "onset_vs_event_check"
+    },
+    {
+      "id": "E2",
+      "summary": "TEC load check shows diode current at 1.19 A (47% of 2.5 A limit) with diode temperature 25.28 \u00b0C held within the 26.0 \u00b0C setpoint; losing_setpoint=false. The TEC has substantial headroom and is maintaining thermal control \u2014 no sign of TEC saturation or setpoint loss.",
+      "source": "tec_load_check"
+    },
+    {
+      "id": "E3",
+      "summary": "Detector health check returns dark-count rise +0.31% (\u22480%), detector temperature rise +0.008 \u00b0C, detector_temp_live=true (channel is responsive, not stuck), and bias_drift=false. All indicators are fully nominal with no isolated detector bias or responsivity signature. This directly and substantially refutes H5 (detector drift). The live, stable detector temperature provides mild incremental evidence against H3 thermal fault on the receiver side. By elimination \u2014 H1 and H2 already ruled out, H3 largely cleared by E2, H5 now cleared by E3 \u2014 residual suspicion concentrates on H4 (laser aging / power instability).",
+      "source": "detector_health_check"
+    },
+    {
+      "id": "E4",
+      "summary": "Spatial intensity check across 4 regions returns spread=0.072 and localized=false; the intensity drop is uniform across all spatial regions. This directly refutes H1, which requires spatially variable transmission loss from localised window soiling or smearing. A globally uniform drop is instead consistent with a source-side (laser) power reduction (H4), and is also geometrically consistent with whole-beam thermal or detector effects, though those channels are already cleared.",
+      "source": "spatial_intensity_check"
+    },
+    {
+      "id": "ev.trigger_demoted",
+      "summary": "log.reboot: degradation onset predates it \u2192 coincident, not causal",
+      "source": "onset_vs_event_check"
+    }
+  ],
+  "ig_conflicts": [
+    "log.reboot"
+  ],
+  "trace": [
+    {
+      "action": "seed",
+      "args": {},
+      "rationale": "seed the differential from the symptom",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.5,
+        "H2": 0.5,
+        "H3": 0.5,
+        "H4": 0.5,
+        "H5": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "onset_vs_event_check",
+        "event": "last_maintenance"
+      },
+      "rationale": "All five hypotheses are equiprobable (log_odds=0.00) and no evidence has been collected. The symptom is explicitly tied to 'around last maintenance,' making this the salient recent event that must be ordered first. onset_vs_event_check will establish whether the range fluctuation onset predates, coincides with, or postdates the maintenance window. If onset PREDATES maintenance \u2192 H1 and H2 (contamination and calibration drift introduced at maintenance) are strongly disfavoured, shifting probability mass toward H3/H4/H5 (gradual thermal, laser-aging, or detector-drift failures that maintenance did not cause). If onset COINCIDES with or immediately follows maintenance \u2192 H1 and H2 rise sharply while H3/H4/H5 are relatively disfavoured as sole causes. No other single check splits the field more cleanly at this point because all hypotheses currently have equal prior weight and this result partitions them into two non-overlapping causal classes.",
+      "voi": 0.88,
+      "evidence_id": "E1",
+      "conflicts_added": [
+        "log.reboot"
+      ],
+      "leader": "H3",
+      "leader_conf": 0.731,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.119,
+        "H2": 0.119,
+        "H3": 0.731,
+        "H4": 0.731,
+        "H5": 0.731
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "tec_load_check"
+      },
+      "rationale": "H3, H4, and H5 are tied at log_odds=1.00. The single sharpest split is between the thermal mechanism (H3) and the optical-power/detector mechanisms (H4, H5). tec_load_check directly measures whether the TEC is holding its laser/detector set-point under varying ambient load. A nominal result (setpoint maintained, low duty-cycle, low ripple) argues strongly AGAINST H3 and collapses it, leaving H4 and H5 to compete. A fault result (setpoint excursion, rail saturation, or high variance under load) raises H3 decisively above H4 and H5, which have no thermal pathway. No other available check splits all three hypotheses simultaneously with a single measurement. E1 already rules maintenance as the cause, so the onset at t=7.5 is consistent with a gradual thermal degradation \u2014 tec_load_check will confirm or deny that framing.",
+      "voi": 0.87,
+      "evidence_id": "E2",
+      "conflicts_added": [],
+      "leader": "H5",
+      "leader_conf": 0.622,
+      "margin": 0.122,
+      "confidences": {
+        "H1": 0.119,
+        "H2": 0.119,
+        "H3": 0.269,
+        "H4": 0.5,
+        "H5": 0.622
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "detector_health_check"
+      },
+      "rationale": "H3 is now strongly argued against by E2 (TEC has headroom, setpoint held, losing_setpoint=false). The live contest is H4 (laser power instability) vs H5 (detector drift, leading). A detector_health_check directly probes H5: if responsivity, bias voltage, or dark-current are nominal and stable, H5 is deflated and H4 becomes the primary candidate; if the detector shows instability or threshold wander, H5 is confirmed and H4 is deprioritised. No current evidence bears on the detector directly, so this is the highest-information next step \u2014 it raises one hypothesis while simultaneously lowering the other rather than re-confirming already-supported ground.",
+      "voi": 0.85,
+      "evidence_id": "E3",
+      "conflicts_added": [],
+      "leader": "H4",
+      "leader_conf": 0.622,
+      "margin": 0.44,
+      "confidences": {
+        "H1": 0.119,
+        "H2": 0.119,
+        "H3": 0.182,
+        "H4": 0.622,
+        "H5": 0.182
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "spatial_intensity_check"
+      },
+      "rationale": "H1\u2013H3 and H5 are ruled out; H4 (laser aging / power instability) is the sole active hypothesis. The only outstanding question is whether direct optical-power evidence supports it or whether intensity is actually nominal \u2014 which would force a 'no single clean cause' conclusion. spatial_intensity_check measures the emitted intensity profile directly: a uniform, reduced-power signature confirms H4's laser-origin mechanism; spatially structured variation would reopen optics-path causes (partially overlapping H1 territory); flat nominal intensity would argue against H4 and suggest the root cause remains unidentified. This is the highest-leverage remaining check because its result moves H4 substantially in either direction rather than re-confirming already-cleared hypotheses.",
+      "voi": 0.85,
+      "evidence_id": "E4",
+      "conflicts_added": [],
+      "leader": "H4",
+      "leader_conf": 0.881,
+      "margin": 0.612,
+      "confidences": {
+        "H1": 0.047,
+        "H2": 0.182,
+        "H3": 0.269,
+        "H4": 0.881,
+        "H5": 0.269
+      }
+    },
+    {
+      "action": "conflict_sweep",
+      "args": {},
+      "rationale": "order onset vs the salient recent event; sanity-check channels",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H4",
+      "leader_conf": 0.881,
+      "margin": 0.612,
+      "confidences": {
+        "H1": 0.047,
+        "H2": 0.182,
+        "H3": 0.269,
+        "H4": 0.881,
+        "H5": 0.269
+      }
+    },
+    {
+      "action": "synthesize",
+      "args": {
+        "answer_type": "cause",
+        "root_cause": "part.laser_module"
+      },
+      "rationale": "conclude or abstain from the differential",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H4",
+      "leader_conf": 0.881,
+      "margin": 0.612,
+      "confidences": {
+        "H1": 0.047,
+        "H2": 0.182,
+        "H3": 0.269,
+        "H4": 0.881,
+        "H5": 0.269
+      }
+    }
+  ]
+}

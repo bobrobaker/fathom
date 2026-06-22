@@ -1,0 +1,280 @@
+{
+  "case_id": "case7",
+  "fault": "tec_degradation_variant",
+  "salient_is_cause": false,
+  "ground_truth": {
+    "root_cause": "part.tec",
+    "causal_chain": [
+      "part.tec",
+      "metric.diode_temp",
+      "metric.intensity",
+      "kpi.effective_range"
+    ],
+    "trigger": "log.reboot",
+    "conflicts": [
+      "log.reboot"
+    ],
+    "load_bearing_evidence": [
+      "recommend_swap_test",
+      "temp_correlation_check",
+      "tec_load_check",
+      "onset_vs_event_check"
+    ]
+  },
+  "answer": {
+    "answer_type": "cause",
+    "root_cause": "part.tec",
+    "causal_chain": [
+      "H4"
+    ],
+    "cited_evidence": [
+      "ev.laser_power_check_01",
+      "ev.tec_load_check_01"
+    ],
+    "conflicts": [
+      "log.reboot"
+    ],
+    "recommended_action": "Inspect the TEC thermal path to isolate the elevated thermal resistance: (1) measure heat-sink temperature independently to determine whether degradation is in the TEC pump itself or in downstream heat dissipation; (2) clean or replace heat-sink thermal interface material and verify fan/airflow is unobstructed; (3) if heat-sink temperature is nominal but TEC cold-junction remains above setpoint with 18% current headroom, the TEC module efficiency has degraded \u2014 replace TEC. Do NOT simply raise TEC current limit; headroom exists but setpoint cannot be held, confirming thermal-path resistance is the bottleneck, not drive capacity. After remediation, re-verify diode temperature against the 26.0\u00b0C setpoint and re-measure effective range to confirm full recovery. Separately evaluate H1, H3, and H5 to account for any residual range loss beyond the ~5.5% laser-power contribution."
+  },
+  "score": {
+    "accuracy": 1.0,
+    "localization": 1.0,
+    "evidence_f1": 0.333,
+    "conflict_handling": 1.0,
+    "trigger_discrimination": 1.0,
+    "abstention_calibration": 1.0,
+    "cost_tokens": 51063
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "label": "Window / optics contamination reducing transmit/receive throughput",
+      "log_odds": -1.0,
+      "status": "open",
+      "node_ref": "part.window"
+    },
+    {
+      "id": "H2",
+      "label": "Laser output power aging or degradation reducing emitted intensity",
+      "log_odds": -3.0,
+      "status": "ruled_out",
+      "node_ref": "part.laser_module"
+    },
+    {
+      "id": "H3",
+      "label": "Detector responsivity drift reducing sensitivity at range margin",
+      "log_odds": -1.0,
+      "status": "open",
+      "node_ref": "part.detector"
+    },
+    {
+      "id": "H4",
+      "label": "TEC / thermal regulation failure causing temperature-dependent SNR loss",
+      "log_odds": 2.0,
+      "status": "leading",
+      "node_ref": "part.tec"
+    },
+    {
+      "id": "H5",
+      "label": "Calibration or firmware drift shifting range-detection threshold",
+      "log_odds": -1.0,
+      "status": "open",
+      "node_ref": "sub.calibration"
+    },
+    {
+      "id": "hyp.upstream_power",
+      "label": "Scanner / power (shared upstream cause)",
+      "log_odds": -1.5,
+      "status": "ruled_out",
+      "node_ref": "sub.power"
+    }
+  ],
+  "links": [
+    {
+      "evidence_id": "ev.laser_power_check_01",
+      "hypothesis_id": "H2",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.laser_power_check_01",
+      "hypothesis_id": "H1",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.laser_power_check_01",
+      "hypothesis_id": "H3",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.laser_power_check_01",
+      "hypothesis_id": "H5",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.tec_load_check_01",
+      "hypothesis_id": "H4",
+      "polarity": "+",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.tec_load_check_01",
+      "hypothesis_id": "H2",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.tec_load_check_01",
+      "hypothesis_id": "hyp.upstream_power",
+      "polarity": "-",
+      "weight": 1.5
+    },
+    {
+      "evidence_id": "ev.tec_load_check_01",
+      "hypothesis_id": "H1",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.tec_load_check_01",
+      "hypothesis_id": "H3",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.tec_load_check_01",
+      "hypothesis_id": "H5",
+      "polarity": "-",
+      "weight": 0.5
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev.laser_power_check_01",
+      "summary": "Laser output 45.4 mW vs 48.1 mW baseline (\u22125.5% decline confirmed). However, diode temperature 28.2 \u00b0C exceeds setpoint maximum of 26.0 \u00b0C; the check attributes the power reduction to thermal over-drive, NOT laser aging. This partially (but not fully) accounts for the ~8% range loss and redirects causation toward thermal regulation rather than emitter degradation.",
+      "source": "laser_power_check"
+    },
+    {
+      "id": "ev.tec_load_check_01",
+      "summary": "TEC current is 2.04 A \u2014 82% of the 2.5 A limit \u2014 indicating significant sustained thermal drive, yet the diode temperature remains at 28.2 \u00b0C, which is 2.2 \u00b0C above the 26.0 \u00b0C setpoint maximum (losing_setpoint=true). Crucially, the TEC still has current headroom (~18%) but cannot hold setpoint; this rules out simple power-supply starvation and instead implicates TEC thermal-path degradation (e.g., reduced pump efficiency, elevated thermal resistance at the cold junction, or rising heat-sink temperature). This result corroborates ev.laser_power_check_01's thermal attribution of the 5.5% laser power drop and confirms TEC/thermal regulation failure (H4) as the root cause of the ~8% range degradation.",
+      "source": "tec_load_check"
+    },
+    {
+      "id": "ev.trigger_demoted",
+      "summary": "log.reboot: degradation onset predates it \u2192 coincident, not causal",
+      "source": "onset_vs_event_check"
+    }
+  ],
+  "ig_conflicts": [
+    "log.reboot"
+  ],
+  "trace": [
+    {
+      "action": "seed",
+      "args": {},
+      "rationale": "seed the differential from the symptom",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.5,
+        "H2": 0.5,
+        "H3": 0.5,
+        "H4": 0.5,
+        "H5": 0.5,
+        "hyp.upstream_power": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "laser_power_check"
+      },
+      "rationale": "No evidence exists yet; all hypotheses sit at equal prior odds. The single sharpest first cut is a direct measurement of emitted laser output power. If power is nominal \u2192 H2 (laser aging) is strongly argued AGAINST and weight shifts toward H1/H3/H4/H5. If power is measurably low (consistent with ~8% range loss, which maps to a larger fractional power drop depending on the range equation exponent) \u2192 H2 is strongly supported and H1/H3/H4/H5 are relatively disfavoured. This is a transmit-side vs. receive-side / optics / calibration split \u2014 the broadest single discriminator available before any evidence is in hand. A stuck or near-zero-variance readout on the power channel would also flag a lying sensor (channel sanity concern), which would redirect to channel_sanity_check next.",
+      "voi": 0.78,
+      "evidence_id": "ev.laser_power_check_01",
+      "conflicts_added": [],
+      "leader": "H4",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.378,
+        "H2": 0.119,
+        "H3": 0.378,
+        "H4": 0.5,
+        "H5": 0.378,
+        "hyp.upstream_power": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "tec_load_check"
+      },
+      "rationale": "ev.laser_power_check_01 establishes that diode temperature (28.2 \u00b0C) exceeds the 26.0 \u00b0C setpoint maximum and attributes the \u22125.5% laser power drop to thermal over-drive, making H4 (TEC/thermal regulation failure) the current leading hypothesis. However, the laser power loss alone accounts for only ~5.5% of the ~8% range degradation, leaving a gap that H3 (detector responsivity drift) or H1 (optics contamination) could fill. tec_load_check will directly interrogate TEC duty cycle, current draw, and regulation error. If TEC is saturated or faulted, H4 is confirmed as the dominant cause and H1/H3/H5 recede. If TEC load is nominal, the thermal elevation must originate upstream (elevated ambient, coolant, or shared power rail \u2014 hyp.upstream_power) and H4 as a discrete TEC fault is weakened, redirecting focus. Either result materially separates the leading hypotheses from one another rather than re-confirming already-held evidence.",
+      "voi": 0.88,
+      "evidence_id": "ev.tec_load_check_01",
+      "conflicts_added": [],
+      "leader": "H4",
+      "leader_conf": 0.881,
+      "margin": 0.612,
+      "confidences": {
+        "H1": 0.269,
+        "H2": 0.047,
+        "H3": 0.269,
+        "H4": 0.881,
+        "H5": 0.269,
+        "hyp.upstream_power": 0.182
+      }
+    },
+    {
+      "action": "conflict_sweep",
+      "args": {},
+      "rationale": "order onset vs the salient recent event; sanity-check channels",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [
+        "log.reboot"
+      ],
+      "leader": "H4",
+      "leader_conf": 0.881,
+      "margin": 0.612,
+      "confidences": {
+        "H1": 0.269,
+        "H2": 0.047,
+        "H3": 0.269,
+        "H4": 0.881,
+        "H5": 0.269,
+        "hyp.upstream_power": 0.182
+      }
+    },
+    {
+      "action": "synthesize",
+      "args": {
+        "answer_type": "cause",
+        "root_cause": "part.tec"
+      },
+      "rationale": "conclude or abstain from the differential",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H4",
+      "leader_conf": 0.881,
+      "margin": 0.612,
+      "confidences": {
+        "H1": 0.269,
+        "H2": 0.047,
+        "H3": 0.269,
+        "H4": 0.881,
+        "H5": 0.269,
+        "hyp.upstream_power": 0.182
+      }
+    }
+  ]
+}

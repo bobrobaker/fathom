@@ -1,0 +1,253 @@
+{
+  "case_id": "case4",
+  "fault": "calibration_drift",
+  "salient_is_cause": true,
+  "ground_truth": {
+    "root_cause": "sub.calibration",
+    "causal_chain": [
+      "config.cal_table_version",
+      "sub.calibration",
+      "kpi.effective_range"
+    ],
+    "trigger": null,
+    "conflicts": [],
+    "load_bearing_evidence": [
+      "config.cal_table_version",
+      "ticket.cal_regression",
+      "doc.release_v13"
+    ]
+  },
+  "answer": {
+    "answer_type": "cause",
+    "root_cause": "sub.calibration",
+    "causal_chain": [
+      "H5"
+    ],
+    "cited_evidence": [
+      "ev.change_cause_log.cal_update",
+      "ev_spatial_intensity_001",
+      "ev_tec_load_001"
+    ],
+    "conflicts": [],
+    "recommended_action": "Audit the recent sub.calibration config change: diff current threshold, gain-register, and firmware range-processing parameters against the pre-change baseline snapshot. Revert or correct the offending parameter(s) and confirm effective maximum range returns to the 120 m baseline. If a full revert restores range, H2 and H3 can be deprioritized. If residual degradation persists after revert, measure laser peak pulse energy directly (discriminates H2) and detector noise-floor/dark-current under no-signal conditions (discriminates H3)."
+  },
+  "score": {
+    "accuracy": 1.0,
+    "localization": 1.0,
+    "evidence_f1": 0.0,
+    "conflict_handling": 1.0,
+    "trigger_discrimination": 1.0,
+    "abstention_calibration": 1.0,
+    "cost_tokens": 44993
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "label": "Window contamination reducing transmitted/received optical power (~8% loss consistent with partial obscuration)",
+      "log_odds": -2.0,
+      "status": "ruled_out",
+      "node_ref": "part.window"
+    },
+    {
+      "id": "H2",
+      "label": "Laser output power aging or partial facet degradation reducing peak pulse energy",
+      "log_odds": 0.0,
+      "status": "open",
+      "node_ref": "part.laser_module"
+    },
+    {
+      "id": "H3",
+      "label": "Detector responsivity drift (dark-current rise or gain shift) raising effective noise floor and reducing SNR at range",
+      "log_odds": 0.0,
+      "status": "open",
+      "node_ref": "part.detector"
+    },
+    {
+      "id": "H4",
+      "label": "TEC failure or degraded cooling causing elevated detector/laser junction temperature and thermally-induced SNR loss",
+      "log_odds": -1.0,
+      "status": "open",
+      "node_ref": "part.tec"
+    },
+    {
+      "id": "H5",
+      "label": "Calibration / signal-processing drift (threshold, gain register, or firmware parameter) artificially reducing detected range",
+      "log_odds": 2.5,
+      "status": "leading",
+      "node_ref": "sub.calibration"
+    }
+  ],
+  "links": [
+    {
+      "evidence_id": "ev_spatial_intensity_001",
+      "hypothesis_id": "H1",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev_spatial_intensity_001",
+      "hypothesis_id": "H2",
+      "polarity": "+",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev_spatial_intensity_001",
+      "hypothesis_id": "H3",
+      "polarity": "+",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev_spatial_intensity_001",
+      "hypothesis_id": "H4",
+      "polarity": "+",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev_spatial_intensity_001",
+      "hypothesis_id": "H5",
+      "polarity": "+",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev_tec_load_001",
+      "hypothesis_id": "H4",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev_tec_load_001",
+      "hypothesis_id": "H3",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev_tec_load_001",
+      "hypothesis_id": "H2",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev.change_cause_log.cal_update",
+      "hypothesis_id": "H5",
+      "polarity": "+",
+      "weight": 1.5
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_spatial_intensity_001",
+      "summary": "Spatial intensity check across 4 aperture regions shows near-zero inter-region spread (0.0244) and localized=false. The intensity drop is uniform across the full aperture, explicitly ruling out a localized obscuration such as window contamination.",
+      "source": "spatial_intensity_check"
+    },
+    {
+      "id": "ev_tec_load_001",
+      "summary": "TEC current is 1.22 A (49% of the 2.5 A limit), diode junction temperature 25.14 \u00b0C is 0.86 \u00b0C below the 26.0 \u00b0C setpoint ceiling, and losing_setpoint=false. The thermal control loop is operating comfortably within spec with no sign of saturation or thermal runaway. This is a fully nominal result, ruling out TEC failure or degraded cooling as contributors to the observed range loss. It also argues against thermally-driven dark-current rise (a subset of H3) and thermally-accelerated laser facet degradation (a subset of H2), though non-thermal mechanisms for those hypotheses remain open.",
+      "source": "tec_load_check"
+    },
+    {
+      "id": "ev.change_cause_log.cal_update",
+      "summary": "log.cal_update: a recent config change to sub.calibration aligns with the degradation onset \u2192 the change is the cause",
+      "source": "onset_vs_event_check"
+    }
+  ],
+  "ig_conflicts": [],
+  "trace": [
+    {
+      "action": "seed",
+      "args": {},
+      "rationale": "seed the differential from the symptom",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.5,
+        "H2": 0.5,
+        "H3": 0.5,
+        "H4": 0.5,
+        "H5": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "spatial_intensity_check"
+      },
+      "rationale": "All five hypotheses share equal priors and no evidence has been collected yet. The sharpest first split is between H1 (window contamination \u2014 spatially non-uniform partial obscuration of the aperture) and every other hypothesis (H2\u2013H5), all of which predict spatially uniform, full-aperture signal loss. A spatial intensity map across the transmit/receive aperture will produce one of two crisp outcomes: (a) a non-uniform intensity pattern (bright/dark zones, edge occlusion, smear) \u2014 a fingerprint unique to H1 that is inconsistent with laser aging, detector drift, TEC degradation, or a calibration register change; or (b) uniform whole-aperture attenuation \u2014 which argues strongly against H1 and collapses the differential onto H2/H3/H4/H5 for the next round. No hardware intervention is required and the result is immediately interpretable. This check therefore maximally separates the hypothesis space in one step, which no single-hypothesis probe (e.g. tec_load_check or config_diff alone) can match at this stage.",
+      "voi": 0.82,
+      "evidence_id": "ev_spatial_intensity_001",
+      "conflicts_added": [],
+      "leader": "H2",
+      "leader_conf": 0.731,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.119,
+        "H2": 0.731,
+        "H3": 0.731,
+        "H4": 0.731,
+        "H5": 0.731
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "tec_load_check"
+      },
+      "rationale": "H2, H3, H4, and H5 are all at log_odds=1.00 with no evidence yet discriminating among them. H4 (TEC failure / degraded cooling) is the highest-leverage pivot point: if the TEC is running at elevated duty-cycle, saturated, or showing irregular load, that single finding would simultaneously raise H4 AND reframe H2 and H3 as downstream thermal consequences of the same root cause \u2014 consolidating three co-equal hypotheses into one. Conversely, a fully nominal TEC load argues strongly AGAINST H4 and prunes it from the differential, leaving H2 (laser aging), H3 (detector responsivity drift), and H5 (calibration drift) to be separated next. No evidence on file (ev_spatial_intensity_001 is aperture-distribution data only) touches the TEC subsystem, so this check has zero redundancy with existing evidence and maximal expected information gain.",
+      "voi": 0.82,
+      "evidence_id": "ev_tec_load_001",
+      "conflicts_added": [],
+      "leader": "H5",
+      "leader_conf": 0.731,
+      "margin": 0.231,
+      "confidences": {
+        "H1": 0.119,
+        "H2": 0.5,
+        "H3": 0.5,
+        "H4": 0.269,
+        "H5": 0.731
+      }
+    },
+    {
+      "action": "conflict_sweep",
+      "args": {},
+      "rationale": "order onset vs the salient recent event; sanity-check channels",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H5",
+      "leader_conf": 0.924,
+      "margin": 0.424,
+      "confidences": {
+        "H1": 0.119,
+        "H2": 0.5,
+        "H3": 0.5,
+        "H4": 0.269,
+        "H5": 0.924
+      }
+    },
+    {
+      "action": "synthesize",
+      "args": {
+        "answer_type": "cause",
+        "root_cause": "sub.calibration"
+      },
+      "rationale": "conclude or abstain from the differential",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H5",
+      "leader_conf": 0.924,
+      "margin": 0.424,
+      "confidences": {
+        "H1": 0.119,
+        "H2": 0.5,
+        "H3": 0.5,
+        "H4": 0.269,
+        "H5": 0.924
+      }
+    }
+  ]
+}

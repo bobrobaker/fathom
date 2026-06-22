@@ -1,0 +1,343 @@
+{
+  "case_id": "case6",
+  "fault": "detector_bias_drift",
+  "salient_is_cause": null,
+  "ground_truth": {
+    "root_cause": "part.detector",
+    "causal_chain": [
+      "part.detector",
+      "metric.dark_count",
+      "metric.intensity",
+      "kpi.effective_range"
+    ],
+    "trigger": null,
+    "conflicts": [],
+    "load_bearing_evidence": [
+      "detector_health_check",
+      "doc.detector_bias",
+      "err.dark_count",
+      "metric.dark_count"
+    ]
+  },
+  "answer": {
+    "answer_type": "cause",
+    "root_cause": "part.detector",
+    "causal_chain": [
+      "H3"
+    ],
+    "cited_evidence": [
+      "ev_001",
+      "ev_002",
+      "ev_003",
+      "ev_004"
+    ],
+    "conflicts": [],
+    "recommended_action": "Recalibrate detector bias voltage to restore the nominal dark-count operating point. ev_004 shows a 56.2 % dark-count rise that is thermally decoupled (\u03940.026 \u00b0C, detector_temp_live confirmed) with bias_drift explicitly flagged \u2014 this elevates the minimum-detectable-signal threshold system-wide, consistent with the uniform 8 % range loss seen in ev_001. Adjust bias to the manufacturer-specified dark-count floor, verify SNR recovery at 120 m reference target, and log a new detector health baseline. If bias trim cannot restore dark counts within spec, schedule detector replacement. H2 (laser aging) remains open but is not the dominant mechanism; a laser power output measurement can be deferred until after bias correction confirms or fails to fully recover range."
+  },
+  "score": {
+    "accuracy": 1.0,
+    "localization": 1.0,
+    "evidence_f1": 0.25,
+    "conflict_handling": 1.0,
+    "trigger_discrimination": 1.0,
+    "abstention_calibration": 1.0,
+    "cost_tokens": 82245
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "label": "Window contamination \u2014 particulate or film deposit on optic reducing transmitted/received intensity",
+      "log_odds": -2.0,
+      "status": "ruled_out",
+      "node_ref": "part.window"
+    },
+    {
+      "id": "H2",
+      "label": "Laser aging \u2014 gradual output power decline reducing SNR at range",
+      "log_odds": -1.0,
+      "status": "open",
+      "node_ref": "part.laser_module"
+    },
+    {
+      "id": "H3",
+      "label": "Detector drift \u2014 responsivity or dark-current shift degrading minimum-detectable-signal threshold",
+      "log_odds": 3.0,
+      "status": "leading",
+      "node_ref": "part.detector"
+    },
+    {
+      "id": "H4",
+      "label": "Thermal / TEC fault \u2014 elevated or unstable operating temperature causing laser derating or detector noise floor rise",
+      "log_odds": -2.8,
+      "status": "ruled_out",
+      "node_ref": "part.tec"
+    },
+    {
+      "id": "H5",
+      "label": "Calibration drift \u2014 range-gate timing or signal-processing threshold miscalibration attenuating effective range without hardware degradation",
+      "log_odds": -1.5,
+      "status": "ruled_out",
+      "node_ref": "sub.calibration"
+    }
+  ],
+  "links": [
+    {
+      "evidence_id": "ev_001",
+      "hypothesis_id": "H1",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev_001",
+      "hypothesis_id": "H2",
+      "polarity": "+",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev_001",
+      "hypothesis_id": "H3",
+      "polarity": "+",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev_001",
+      "hypothesis_id": "H4",
+      "polarity": "+",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev_001",
+      "hypothesis_id": "H5",
+      "polarity": "+",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev_002",
+      "hypothesis_id": "H4",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev_002",
+      "hypothesis_id": "H2",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev_002",
+      "hypothesis_id": "H3",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev_003",
+      "hypothesis_id": "H5",
+      "polarity": "-",
+      "weight": 1.5
+    },
+    {
+      "evidence_id": "ev_003",
+      "hypothesis_id": "H2",
+      "polarity": "+",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev_003",
+      "hypothesis_id": "H3",
+      "polarity": "+",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev_003",
+      "hypothesis_id": "H4",
+      "polarity": "+",
+      "weight": 0.2
+    },
+    {
+      "evidence_id": "ev_004",
+      "hypothesis_id": "H3",
+      "polarity": "+",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev_004",
+      "hypothesis_id": "H4",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev_004",
+      "hypothesis_id": "H2",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev_004",
+      "hypothesis_id": "H5",
+      "polarity": "-",
+      "weight": 1.0
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_001",
+      "summary": "Spatial intensity check across 4 independent regions yields a spread of 0.050, indicating a statistically uniform intensity reduction with no localized pattern. This directly rules out particulate/film window contamination (which would produce spatially heterogeneous attenuation) and is instead consistent with a system-wide source of degradation \u2014 laser output, detector responsivity, thermal operating point, or calibration \u2014 each of which would affect all spatial channels equally.",
+      "source": "spatial_intensity_check"
+    },
+    {
+      "id": "ev_002",
+      "summary": "TEC load check: diode temperature 25.24 \u00b0C vs setpoint max 26.0 \u00b0C (losing_setpoint=false), TEC current 1.18 A at 47 % of the 2.5 A limit. The thermal control loop is healthy with substantial headroom \u2014 no elevated operating temperature, no setpoint loss, no sign of TEC saturation or instability. This nominally rules out a thermal/TEC fault as the degradation source and also reduces the probability that thermally-accelerated laser aging or thermally-induced detector drift are contributing pathways.",
+      "source": "tec_load_check"
+    },
+    {
+      "id": "ev_003",
+      "summary": "Config diff returns no relevant changes (changed=[], any_change=false). No range-gate timing, signal-processing threshold, or any other calibration-relevant parameter was modified in the configuration store. This directly argues against the 'miscalibration via explicit configuration change' pathway of H5, because a configuration-driven calibration drift would leave a traceable artifact here. By elimination, it marginally increases the relative weight of hardware-intrinsic degradation hypotheses (H2, H3). No salient configuration event is present to correlate with the degradation onset.",
+      "source": "config_diff"
+    },
+    {
+      "id": "ev_004",
+      "summary": "Detector health check shows a 56.2% rise in dark counts (dark_count_rise=0.562) accompanied by a detector temperature rise of only 0.026 \u00b0C \u2014 essentially zero \u2014 with the temperature channel confirmed live (detector_temp_live=true). bias_drift=true is explicitly flagged. The summary diagnoses non-thermal detector bias/gain drift: the dark-current elevation is intrinsic to the detector bias point, not driven by operating temperature. This strongly supports H3 (detector responsivity/dark-current drift) as a primary degradation pathway. It argues against H4 (thermal fault) because the dark-count rise is thermally decoupled. It argues against H2 (laser aging) as the dominant mechanism, since the identified degradation is detector-side. It further disfavours H5 (calibration drift) because the change is hardware-intrinsic rather than a processing/timing artefact.",
+      "source": "detector_health_check"
+    }
+  ],
+  "ig_conflicts": [],
+  "trace": [
+    {
+      "action": "seed",
+      "args": {},
+      "rationale": "seed the differential from the symptom",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.5,
+        "H2": 0.5,
+        "H3": 0.5,
+        "H4": 0.5,
+        "H5": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "spatial_intensity_check"
+      },
+      "rationale": "With no evidence yet and all five hypotheses at equal prior, spatial_intensity_check is the most discriminating single step. It directly measures raw received-signal intensity across the field, which creates clear diverging predictions: (A) If intensity is UNIFORM and REDUCED across all returns, this strongly implicates H2 (laser aging) or H4 (thermal derating of the laser) and argues AGAINST H5 (calibration drift, which would degrade apparent range without reducing raw intensity). (B) If intensity reduction is SPATIALLY NON-UNIFORM or aperture-edge-heavy, this strongly implicates H1 (window contamination / partial obscuration) over H2. (C) If intensity is NOMINAL, this argues strongly against H1 and H2, shifting probability toward H3 (detector responsivity drift), H4 (elevated noise floor), or H5 (threshold/timing miscalibration). A single result therefore simultaneously raises at least one hypothesis and lowers at least two others \u2014 the highest discrimination available before any evidence is gathered.",
+      "voi": 0.83,
+      "evidence_id": "ev_001",
+      "conflicts_added": [],
+      "leader": "H2",
+      "leader_conf": 0.731,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.119,
+        "H2": 0.731,
+        "H3": 0.731,
+        "H4": 0.731,
+        "H5": 0.731
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "tec_load_check"
+      },
+      "rationale": "H2 (laser aging), H3 (detector drift), and H5 (calibration drift) are all at equal log_odds=1.00. H4 (thermal/TEC fault) is structurally the most leveraged hypothesis because an elevated or unstable thermal operating point is a common-cause root that would simultaneously explain H2-like laser derating AND H3-like detector noise-floor rise as downstream thermal effects \u2014 without requiring two independent hardware failure modes. A tec_load_check result is highly bifurcating: (a) if TEC duty-cycle, setpoint error, or thermal margin is abnormal, H4 rises sharply and H2/H3 are reframed as secondary thermal consequences rather than primary aging events; (b) if TEC telemetry is fully nominal, H4 is materially lowered and the differential collapses to independent laser-output vs. detector-responsivity vs. calibration paths, which require separate follow-on checks. No currently held evidence (ev_001 only addresses spatial uniformity) has touched the thermal domain, so this check introduces genuinely new discriminating information rather than re-confirming anything already supported.",
+      "voi": 0.87,
+      "evidence_id": "ev_002",
+      "conflicts_added": [],
+      "leader": "H5",
+      "leader_conf": 0.731,
+      "margin": 0.109,
+      "confidences": {
+        "H1": 0.119,
+        "H2": 0.622,
+        "H3": 0.622,
+        "H4": 0.269,
+        "H5": 0.731
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "config_diff"
+      },
+      "rationale": "H5 (calibration drift, log_odds=1.00) is the leading hypothesis; H2 (laser aging) and H3 (detector drift) are both equally supported at log_odds=0.50. ev_002 has already substantially discounted H4 (thermal). The single most discriminating question is: did range-gate timing or signal-processing threshold parameters change ~1 week ago, coinciding with the degradation onset? config_diff will either (a) surface a calibration/parameter change near the onset, strongly pushing H5 up and H2/H3 down, or (b) show a flat config history, arguing decisively against H5 and redirecting the diagnosis to hardware degradation (H2/H3). Neither detector_health_check nor a laser-power query would move H5 at all, making config_diff uniquely bilateral. A positive result would also flag whether the change is a causal event or a non-causal trigger (onset must align), per onset ordering discipline.",
+      "voi": 0.88,
+      "evidence_id": "ev_003",
+      "conflicts_added": [],
+      "leader": "H2",
+      "leader_conf": 0.731,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.119,
+        "H2": 0.731,
+        "H3": 0.731,
+        "H4": 0.31,
+        "H5": 0.378
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "detector_health_check"
+      },
+      "rationale": "H2 (laser aging) and H3 (detector drift) are tied at log_odds=1.00 and are the two remaining credible hypotheses after H1 was ruled out (ev_001), H4 was substantially discounted (ev_002), and the explicit-config pathway of H5 was argued against (ev_003). The degradation is system-wide and hardware-intrinsic. The single action that most cleanly separates H2 from H3 is a direct measurement of detector state \u2014 responsivity and dark-current level. A nominal result (responsivity within spec, dark current at baseline) strongly argues AGAINST H3 and shifts weight onto H2; a degraded responsivity or elevated dark current directly confirms H3 as the dominant or co-dominant cause. No prior evidence yet touches detector health directly, so this check carries maximum information gain for the current differential. Laser-side evidence (output power, monitor-diode trend) remains unsampled and would be the natural follow-on if detector_health_check returns nominal.",
+      "voi": 0.88,
+      "evidence_id": "ev_004",
+      "conflicts_added": [],
+      "leader": "H3",
+      "leader_conf": 0.953,
+      "margin": 0.684,
+      "confidences": {
+        "H1": 0.119,
+        "H2": 0.269,
+        "H3": 0.953,
+        "H4": 0.057,
+        "H5": 0.182
+      }
+    },
+    {
+      "action": "conflict_sweep",
+      "args": {},
+      "rationale": "order onset vs the salient recent event; sanity-check channels",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H3",
+      "leader_conf": 0.953,
+      "margin": 0.684,
+      "confidences": {
+        "H1": 0.119,
+        "H2": 0.269,
+        "H3": 0.953,
+        "H4": 0.057,
+        "H5": 0.182
+      }
+    },
+    {
+      "action": "synthesize",
+      "args": {
+        "answer_type": "cause",
+        "root_cause": "part.detector"
+      },
+      "rationale": "conclude or abstain from the differential",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H3",
+      "leader_conf": 0.953,
+      "margin": 0.684,
+      "confidences": {
+        "H1": 0.119,
+        "H2": 0.269,
+        "H3": 0.953,
+        "H4": 0.057,
+        "H5": 0.182
+      }
+    }
+  ]
+}

@@ -1,0 +1,356 @@
+{
+  "case_id": "case1",
+  "fault": "tec_degradation",
+  "salient_is_cause": false,
+  "ground_truth": {
+    "root_cause": "part.tec",
+    "causal_chain": [
+      "part.tec",
+      "metric.diode_temp",
+      "metric.laser_power",
+      "metric.intensity",
+      "kpi.effective_range"
+    ],
+    "trigger": "log.reboot",
+    "conflicts": [
+      "metric.detector_temp",
+      "log.reboot"
+    ],
+    "load_bearing_evidence": [
+      "tec_load_check",
+      "temp_correlation_check",
+      "metric.diode_temp",
+      "onset_vs_event_check",
+      "err.tec_load"
+    ]
+  },
+  "answer": {
+    "answer_type": "cause",
+    "root_cause": "part.tec",
+    "causal_chain": [
+      "h4"
+    ],
+    "cited_evidence": [
+      "ev.tec_load_001",
+      "ev.laser_power_001",
+      "ev.common_mode_001",
+      "ev.trigger_demoted",
+      "ev.stuck_detector_temp_C"
+    ],
+    "conflicts": [
+      "log.reboot",
+      "metric.detector_temp"
+    ],
+    "recommended_action": "Service the TEC assembly on the laser emitter. Per ev.tec_load_001, the TEC is drawing 2.27 A (91% of the 2.5 A hard limit) yet cannot hold the diode at its 26\u00b0C setpoint \u2014 the 5\u00b0C overshoot (31\u00b0C actual) produces the thermally-induced \u221212.2% output-power drop confirmed in ev.laser_power_001, which fully accounts for the 8% range degradation without invoking intrinsic emitter aging (h2). Immediate actions: (1) inspect and replace thermal interface material between diode mount and TEC cold side; (2) verify heat-sink airflow and fan operation; (3) reduce enclosure ambient temperature if possible; (4) if TEC cannot recover setpoint after servicing, replace the TEC module. Caution: ev.common_mode_001 shows staggered multi-channel onset spread of 4.25 days \u2014 inconsistent with a single shared upstream event, which rules out hyp.upstream_power as root cause; however, the pattern suggests independent TEC aging across units, warranting a fleet-wide TEC health audit. Disregard log.reboot as causal (ev.trigger_demoted: degradation predates the event). Do not rely on detector_temp_C telemetry (ev.stuck_detector_temp_C: channel stuck, near-zero variance)."
+  },
+  "score": {
+    "accuracy": 1.0,
+    "localization": 1.0,
+    "evidence_f1": 0.4,
+    "conflict_handling": 1.0,
+    "trigger_discrimination": 1.0,
+    "abstention_calibration": 1.0,
+    "cost_tokens": 88151
+  },
+  "hypotheses": [
+    {
+      "id": "h1",
+      "label": "Window contamination \u2014 partial obscuration reducing transmitted and returned optical power",
+      "log_odds": -2.5,
+      "status": "ruled_out",
+      "node_ref": "part.window"
+    },
+    {
+      "id": "h2",
+      "label": "Laser aging / output power decline \u2014 emitter gradual degradation reducing pulse energy",
+      "log_odds": 0.0,
+      "status": "open",
+      "node_ref": "part.laser_module"
+    },
+    {
+      "id": "h3",
+      "label": "Detector drift \u2014 reduced sensitivity or elevated dark current degrading SNR at range",
+      "log_odds": -2.5,
+      "status": "ruled_out",
+      "node_ref": "part.detector"
+    },
+    {
+      "id": "h4",
+      "label": "Thermal / TEC fault \u2014 inadequate temperature regulation shifting laser or detector operating point",
+      "log_odds": 2.5,
+      "status": "leading",
+      "node_ref": "part.tec"
+    },
+    {
+      "id": "h5",
+      "label": "Calibration drift \u2014 signal-processing or range-gate parameters out of nominal, reducing effective detection threshold",
+      "log_odds": -2.5,
+      "status": "ruled_out",
+      "node_ref": "sub.calibration"
+    },
+    {
+      "id": "hyp.upstream_power",
+      "label": "Scanner / power (shared upstream cause)",
+      "log_odds": 0.5,
+      "status": "supported",
+      "node_ref": "sub.power"
+    }
+  ],
+  "links": [
+    {
+      "evidence_id": "ev.laser_power_001",
+      "hypothesis_id": "h2",
+      "polarity": "+",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.laser_power_001",
+      "hypothesis_id": "h4",
+      "polarity": "+",
+      "weight": 1.5
+    },
+    {
+      "evidence_id": "ev.laser_power_001",
+      "hypothesis_id": "hyp.upstream_power",
+      "polarity": "+",
+      "weight": 1.5
+    },
+    {
+      "evidence_id": "ev.laser_power_001",
+      "hypothesis_id": "h1",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.laser_power_001",
+      "hypothesis_id": "h3",
+      "polarity": "-",
+      "weight": 1.5
+    },
+    {
+      "evidence_id": "ev.laser_power_001",
+      "hypothesis_id": "h5",
+      "polarity": "-",
+      "weight": 1.5
+    },
+    {
+      "evidence_id": "ev.tec_load_001",
+      "hypothesis_id": "h4",
+      "polarity": "+",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.tec_load_001",
+      "hypothesis_id": "h2",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.tec_load_001",
+      "hypothesis_id": "hyp.upstream_power",
+      "polarity": "+",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev.tec_load_001",
+      "hypothesis_id": "h3",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.tec_load_001",
+      "hypothesis_id": "h5",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.common_mode_001",
+      "hypothesis_id": "hyp.upstream_power",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.common_mode_001",
+      "hypothesis_id": "h4",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev.common_mode_001",
+      "hypothesis_id": "h1",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.common_mode_001",
+      "hypothesis_id": "h3",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.common_mode_001",
+      "hypothesis_id": "h5",
+      "polarity": "-",
+      "weight": 0.5
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev.laser_power_001",
+      "summary": "Laser output power measured at 42.4 mW vs 48.2 mW baseline (\u221212.2%, low_power=true). Source-side optical output has declined by a magnitude that more than accounts for the observed 8% range degradation, pointing to an emitter-side cause rather than optical path or signal-processing artefacts.",
+      "source": "laser_power_check"
+    },
+    {
+      "id": "ev.tec_load_001",
+      "summary": "TEC current is 2.27 A \u2014 91 % of the 2.5 A hard limit \u2014 while the laser diode sits at 31.0 \u00b0C, which is 5.0 \u00b0C above the 26.0 \u00b0C setpoint. The TEC is saturating and has lost thermal control of the emitter. A diode running 5 \u00b0C hot undergoes a well-characterised thermally-induced efficiency drop; this fully accounts for the \u221212.2 % output-power decline recorded in ev.laser_power_001, re-attributing that signal to thermal misregulation (h4) rather than intrinsic emitter aging (h2). The TEC drawing near-limit current while still failing setpoint is also consistent with a shared upstream thermal or supply-side stress (hyp.upstream_power).",
+      "source": "tec_load_check"
+    },
+    {
+      "id": "ev.common_mode_001",
+      "summary": "Common-mode check across 3 degraded channels shows onset spread of 4.25 days with no common-mode signature (common_mode=false, affirmative=false). Staggered channel degradation across 4+ days is inconsistent with a single simultaneous upstream supply or thermal event, which would be expected to strike channels in near-synchrony. This materially weakens hyp.upstream_power as a shared upstream root cause. The multi-channel staggered pattern also complicates a pure single-zone TEC fault (h4) as sole explanation, though direct measurements in ev.tec_load_001 independently confirm TEC saturation. The spread onset is more consistent with independent or semi-independent degradation processes, lending marginal support to intrinsic emitter aging (h2) across multiple units.",
+      "source": "common_mode_check"
+    },
+    {
+      "id": "ev.trigger_demoted",
+      "summary": "log.reboot: degradation onset predates it \u2192 coincident, not causal",
+      "source": "onset_vs_event_check"
+    },
+    {
+      "id": "ev.stuck_detector_temp_C",
+      "summary": "detector_temp_C is stuck (\u2248zero variance) \u2192 unreliable channel",
+      "source": "channel_sanity_check"
+    }
+  ],
+  "ig_conflicts": [
+    "log.reboot",
+    "metric.detector_temp"
+  ],
+  "trace": [
+    {
+      "action": "seed",
+      "args": {},
+      "rationale": "seed the differential from the symptom",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "h1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "h1": 0.5,
+        "h2": 0.5,
+        "h3": 0.5,
+        "h4": 0.5,
+        "h5": 0.5,
+        "hyp.upstream_power": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "laser_power_check"
+      },
+      "rationale": "No evidence has been collected yet; all hypotheses are at prior parity. The single most discriminating split at this stage is whether laser output power is degraded or nominal. A degraded reading raises h2 (laser aging) and h4 (TEC/thermal shifting the lasing point) while arguing against h1, h3, and h5. A nominal reading eliminates h2, strongly disfavours h4 on the emitter side, and redirects focus to h1 (window), h3 (detector), and h5 (calibration). This check divides the hypothesis space into two roughly equal clusters \u2014 emitter-side versus everything else \u2014 making it the highest-information first action available.",
+      "voi": 0.82,
+      "evidence_id": "ev.laser_power_001",
+      "conflicts_added": [],
+      "leader": "h2",
+      "leader_conf": 0.881,
+      "margin": 0.063,
+      "confidences": {
+        "h1": 0.119,
+        "h2": 0.881,
+        "h3": 0.182,
+        "h4": 0.818,
+        "h5": 0.182,
+        "hyp.upstream_power": 0.818
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "tec_load_check"
+      },
+      "rationale": "ev.laser_power_001 confirms a \u221212.2% laser output drop, consistent with BOTH h2 (intrinsic emitter aging) and h4 (TEC fault shifting the laser's thermal operating point). These two hypotheses are currently indistinguishable from laser power data alone \u2014 a TEC fault can suppress output just as genuine emitter degradation can. tec_load_check directly probes whether the thermoelectric controller is maintaining nominal set-point temperature and duty cycle: (a) if TEC load is within spec and junction temperature is stable, this argues strongly AGAINST h4 and consolidates h2 as the root cause; (b) if TEC load is elevated, saturated, or temperature is drifting, it supports h4 as the primary driver and demotes h2 to a secondary/consequential status. No other available check separates these two leading hypotheses as cleanly.",
+      "voi": 0.88,
+      "evidence_id": "ev.tec_load_001",
+      "conflicts_added": [],
+      "leader": "h4",
+      "leader_conf": 0.953,
+      "margin": 0.028,
+      "confidences": {
+        "h1": 0.119,
+        "h2": 0.5,
+        "h3": 0.119,
+        "h4": 0.953,
+        "h5": 0.119,
+        "hyp.upstream_power": 0.924
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "common_mode_check"
+      },
+      "rationale": "The two live competing hypotheses \u2014 h4 (localised TEC fault: degraded Peltier efficiency or heat-sink blockage on this emitter) and hyp.upstream_power (shared supply/thermal upstream stress affecting multiple subsystems) \u2014 are both consistent with ev.tec_load_001 (TEC at 91% current limit, +5\u00b0C over setpoint) and ev.laser_power_001 (\u221212.2% optical output). No further evidence can sharpen h4 vs hyp.upstream_power without knowing whether the thermal and power stress is isolated to this channel or common across the scanner. common_mode_check directly answers that: if peer channels show concurrent power droop, thermal elevation, or TEC current spikes, hyp.upstream_power rises sharply and h4-as-isolated-fault falls; if only this channel is stressed, h4 rises and a shared upstream cause is effectively excluded. This result moves the two leading hypotheses in opposite directions \u2014 the definition of maximum discrimination.",
+      "voi": 0.88,
+      "evidence_id": "ev.common_mode_001",
+      "conflicts_added": [],
+      "leader": "h4",
+      "leader_conf": 0.924,
+      "margin": 0.302,
+      "confidences": {
+        "h1": 0.076,
+        "h2": 0.5,
+        "h3": 0.076,
+        "h4": 0.924,
+        "h5": 0.076,
+        "hyp.upstream_power": 0.622
+      }
+    },
+    {
+      "action": "conflict_sweep",
+      "args": {},
+      "rationale": "order onset vs the salient recent event; sanity-check channels",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [
+        "log.reboot",
+        "metric.detector_temp"
+      ],
+      "leader": "h4",
+      "leader_conf": 0.924,
+      "margin": 0.302,
+      "confidences": {
+        "h1": 0.076,
+        "h2": 0.5,
+        "h3": 0.076,
+        "h4": 0.924,
+        "h5": 0.076,
+        "hyp.upstream_power": 0.622
+      }
+    },
+    {
+      "action": "synthesize",
+      "args": {
+        "answer_type": "cause",
+        "root_cause": "part.tec"
+      },
+      "rationale": "conclude or abstain from the differential",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "h4",
+      "leader_conf": 0.924,
+      "margin": 0.302,
+      "confidences": {
+        "h1": 0.076,
+        "h2": 0.5,
+        "h3": 0.076,
+        "h4": 0.924,
+        "h5": 0.076,
+        "hyp.upstream_power": 0.622
+      }
+    }
+  ]
+}

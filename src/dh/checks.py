@@ -26,6 +26,17 @@ def _baseline(series: TimeSeries, k: int = 8) -> float:
     return st.mean(series.v[:k])
 
 
+# --- the affirmative-evidence predicate (M1) ---------------------------------
+# A diagnostic check answers one of two questions: did it find a *positive anomaly*
+# consistent with some fault (affirmative — it can rule a hypothesis IN), or did it read
+# nominal/at-spec (it can only rule hypotheses OUT)? This is a domain-general abduction
+# principle: only an affirmative anomaly affirms a hypothesis; nominal evidence never does.
+# Each check below carries an `affirmative` boolean computed from the check's OWN structural
+# outcome (any_change / localized / correlated / at_limit-or-losing_setpoint / stuck /
+# bias_drift / common_mode / onset-aligns / low_power) — a per-check structural fact, not a
+# per-case constant. The interpret layer uses it to drop positive links from a nominal check
+# (a nominal reading credited positively to the leader is the M1 over-crediting bug).
+
 def config_diff(config_nodes: list[Node]) -> dict:
     """Changed config keys vs baseline (§3.3 → "no relevant change" for case #1)."""
     changed = []
@@ -37,6 +48,7 @@ def config_diff(config_nodes: list[Node]) -> dict:
         "check": "config_diff",
         "changed": changed,
         "any_change": bool(changed),
+        "affirmative": bool(changed),  # a real config change can rule a change-cause IN
         "summary": "no relevant config change" if not changed
         else f"{len(changed)} config key(s) changed: {[c['key'] for c in changed]}",
     }
@@ -52,6 +64,7 @@ def spatial_intensity_check(region_series: list[TimeSeries]) -> dict:
         "spread": spread,
         "n_regions": len(finals),
         "localized": localized,
+        "affirmative": localized,  # a localized drop rules a window/optics fault IN; uniform only rules out
         "summary": "intensity drop is localized (suggests window/optics)" if localized
         else "intensity drop is uniform across regions (rules out window contamination)",
     }
@@ -74,23 +87,51 @@ def temp_correlation_check(
         "abs_r": abs(r),
         "sign": "negative" if r < 0 else "positive",
         "correlated": abs(r) >= threshold,
+        "affirmative": abs(r) >= threshold,  # a real correlation rules a thermal coupling IN
         "summary": f"{signal_a.signal} vs {signal_b.signal}: r={r:.2f} "
         f"({'correlated' if abs(r) >= threshold else 'no correlation'})",
     }
 
 
-def tec_load_check(tec_current: TimeSeries, limit: float) -> dict:
-    """Current TEC load vs its limit (§3.3 → "92% of limit" for case #1)."""
+def tec_load_check(tec_current: TimeSeries, limit: float,
+                   diode_temp: TimeSeries | None = None) -> dict:
+    """Current TEC load vs its limit, plus the thermal-control discriminator (§3.3).
+
+    Raw load (`frac_of_limit`/`at_limit`) is a graded signal that can sit *just under* a
+    binary threshold on a near-symmetric variant (case #7), so it alone does not separate a
+    failing TEC from an aging laser. The decisive, magnitude-bearing tell is whether the TEC
+    is *losing control of the setpoint*: the TEC's job is to hold the diode at its control
+    setpoint, so a diode held ABOVE setpoint while TEC current is elevated uniquely implicates
+    the TEC — an aging laser does not push the diode past the cooler's setpoint, the cooler
+    simply absorbs it. This `losing_setpoint` flag is a structural property of the thermal
+    loop (true only when the cooler is the bottleneck), not a per-case tuning: it is False on
+    every non-thermal fault (the diode stays at setpoint) and on a common-mode power fault
+    (elevated current but diode in spec), and True only when the TEC itself is the cause."""
     current = tec_current.v[-1]
     frac = current / limit if limit else 0.0
-    return {
+    out = {
         "check": "tec_load_check",
         "current": current,
         "limit": limit,
         "frac_of_limit": frac,
         "at_limit": frac >= 0.85,
+        "affirmative": frac >= 0.85,  # at-limit rules a TEC fault IN; refined by losing_setpoint below
         "summary": f"TEC current {current:.2f} A is {frac * 100:.0f}% of the {limit} A limit",
     }
+    if diode_temp is not None:
+        setpoint_max = (diode_temp.spec or {}).get("max")
+        diode_recent = _recent(diode_temp)
+        elevated = frac >= 0.60  # working harder than a healthy idle load
+        losing = bool(setpoint_max is not None and diode_recent > setpoint_max and elevated)
+        out["diode_temp"] = diode_recent
+        out["diode_setpoint_max"] = setpoint_max
+        out["losing_setpoint"] = losing
+        out["affirmative"] = bool(out["at_limit"] or losing)  # at-limit OR losing-setpoint rules TEC IN
+        if losing:
+            out["summary"] += (f"; diode held at {diode_recent:.1f} C ABOVE its "
+                               f"{setpoint_max} C setpoint while TEC current is elevated "
+                               "→ TEC is losing thermal control (implicates the TEC, not the laser)")
+    return out
 
 
 def channel_sanity_check(series: TimeSeries, min_var: float = 1e-6) -> dict:
@@ -102,6 +143,7 @@ def channel_sanity_check(series: TimeSeries, min_var: float = 1e-6) -> dict:
         "signal": series.signal,
         "variance": var,
         "stuck": stuck,
+        "affirmative": stuck,  # a stuck channel rules an unreliable-sensor finding IN
         "summary": f"{series.signal} variance≈{var:.2e} → "
         f"{'unreliable (stuck channel)' if stuck else 'looks live'}",
     }
@@ -136,6 +178,7 @@ def detector_health_check(
         "detector_temp_rise": temp_rise,
         "detector_temp_live": temp_live,
         "bias_drift": bias_drift,
+        "affirmative": bias_drift,  # a bias/gain drift rules a detector fault IN; nominal only rules out
         "summary": f"dark-count {rise * 100:+.0f}% with detector temp {temp_rise:+.1f}C "
         f"({'live' if temp_live else 'stuck'}) → {why}",
     }
@@ -166,6 +209,7 @@ def common_mode_check(series: list[TimeSeries], tol: float = 1.5,
         "n_degraded": len(moved),
         "onset_spread": spread,
         "common_mode": common_mode,
+        "affirmative": common_mode,  # a common-mode signature rules a shared upstream cause IN
         "summary": f"{len(moved)} degraded channel(s), onset spread {spread:.2f}d → "
         + ("common-mode (one upstream cause, not independent faults)" if common_mode
            else "no common-mode signature"),
@@ -215,7 +259,64 @@ def onset_vs_event_check(series: TimeSeries, event_t: float, event_label: str = 
         "event_t": event_t,
         "event_label": event_label,
         "onset_predates_event": predates,
+        "affirmative": not predates,  # onset ALIGNS with the event → the event can be ruled IN as cause
         "summary": f"degradation onset≈t={onset_t:g} "
         f"{'precedes' if predates else 'follows'} {event_label} at t={event_t:g}"
         + (f" → {event_label} is coincident, not causal" if predates else ""),
+    }
+
+
+# Sustained-decline threshold for laser emitter power. The laser-aging signature is a recent
+# emitter-power level held BELOW baseline (a transient dip that recovered is not aging). Chosen
+# from the real data: across the 8 cases the recent/baseline ratio is ≤0.945 on every genuine
+# power-decline case (laser aging, TEC degradation, common-mode power sag) and ≥0.996 on every
+# flat case (window, calibration, no-clean-cause, detector bias) — a wide, well-separated gap, so
+# a 0.97 cut (a ≥3% sustained drop) is unambiguous and not knob-tuned to any single case.
+LASER_POWER_DECLINE_RATIO = 0.97
+
+
+def laser_power_check(laser_power: TimeSeries, diode_temp: TimeSeries | None = None) -> dict:
+    """Direct emitter-power discriminator: is laser output power sustained BELOW baseline because
+    the *laser itself is aging* — as opposed to a downstream/thermal power loss?
+
+    The other cheap checks can only *eliminate* alternatives for a laser-aging fault (window,
+    detector, TEC, calibration all read nominal); none affirms the laser positively. This check
+    supplies that affirmative signal by measuring emitter power directly (recent vs baseline mean).
+    But low emitter power alone is NOT laser-specific — a TEC losing the setpoint also drops output
+    power as a downstream effect (case #7/#1). The discriminator is the diode temperature: laser
+    aging drops power with the diode held AT its control setpoint (nominal), whereas a thermal cause
+    drops power with the diode ELEVATED above setpoint. So `affirmative` (laser aging) requires BOTH
+    a sustained decline AND a nominal diode — the mirror of `tec_load_check.losing_setpoint`. A
+    transient dip that recovered leaves recent≈baseline (the no_clean_cause case), and a decline
+    with an elevated diode is thermal, not laser — neither affirms the laser. Structural, not
+    per-case: it reads the decline ratio and the diode-vs-setpoint relation, no case constants.
+    `declined` reports the raw power-loss fact for the LLM regardless."""
+    base, recent = _baseline(laser_power), _recent(laser_power)
+    ratio = recent / base if base else 1.0
+    declined = ratio <= LASER_POWER_DECLINE_RATIO
+    diode_nominal = True
+    diode_recent = setpoint_max = None
+    if diode_temp is not None:
+        setpoint_max = (diode_temp.spec or {}).get("max")
+        diode_recent = _recent(diode_temp)
+        if setpoint_max is not None:
+            diode_nominal = diode_recent <= setpoint_max
+    low_power = declined and diode_nominal  # laser AGING: power down AND diode at setpoint
+    return {
+        "check": "laser_power_check",
+        "baseline_mW": base,
+        "recent_mW": recent,
+        "ratio": ratio,
+        "rel_change": ratio - 1.0,
+        "declined": declined,
+        "diode_temp": diode_recent,
+        "diode_setpoint_max": setpoint_max,
+        "diode_nominal": diode_nominal,
+        "low_power": low_power,
+        "affirmative": low_power,  # power decline WITH a nominal diode rules laser aging IN
+        "summary": f"laser power {recent:.1f} mW vs baseline {base:.1f} mW "
+        f"({(ratio - 1.0) * 100:+.1f}%) → "
+        + ("sustained decline with diode at setpoint (laser aging)" if low_power
+           else "thermally-induced decline (diode above setpoint — not laser aging)" if declined
+           else "at/near baseline (no sustained power loss)"),
     }
