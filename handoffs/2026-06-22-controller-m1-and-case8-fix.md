@@ -3,7 +3,7 @@ project: fathom
 goal: Make case5 (abstain) and case8 (common-mode) succeed LIVE by fixing M1 (interpret
   over-crediting) and the case8 seeding/granularity bug — using the spike+audit pattern, #5-safe.
 created: 2026-06-22
-status: DONE — case5 + case8 both robustly PASS live (round 3). case8 sub.power margin 0.77; case5 abstain via authoritative gate.
+status: case5+case8 robust live; but round-3 REGRESSED case7 (laser_power_check credits laser decoy on TEC fault). Net 7/8. Fix proposed (diode-aware laser_power_check), awaiting go.
 
 ## UPDATE 2026-06-22 (round 3 — HARDENING done, live confirm blocked)
 Hardening committed (suite 189 green). Two changes on `investigate-controller`:

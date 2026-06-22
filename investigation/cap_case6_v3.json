@@ -1,0 +1,294 @@
+{
+  "case_id": "case6",
+  "fault": "detector_bias_drift",
+  "salient_is_cause": null,
+  "ground_truth": {
+    "root_cause": "part.detector",
+    "causal_chain": [
+      "part.detector",
+      "metric.dark_count",
+      "metric.intensity",
+      "kpi.effective_range"
+    ],
+    "trigger": null,
+    "conflicts": [],
+    "load_bearing_evidence": [
+      "detector_health_check",
+      "doc.detector_bias",
+      "err.dark_count",
+      "metric.dark_count"
+    ]
+  },
+  "answer": {
+    "answer_type": "cause",
+    "root_cause": "part.detector",
+    "causal_chain": [
+      "H5"
+    ],
+    "cited_evidence": [
+      "ev.detector_health_01",
+      "ev.laser_power_01",
+      "ev.config_diff_01"
+    ],
+    "conflicts": [],
+    "recommended_action": "Audit and recalibrate the detector bias supply: a 56% dark-count surge with only +0.026 \u00b0C thermal change (ev.detector_health_01, bias_drift=true) indicates a bias-voltage or gain-register shift rather than a thermal event. Measure actual APD reverse-bias voltage against nominal; adjust or replace the bias regulator if out-of-spec. If bias supply is confirmed stable, the APD itself has drifted \u2014 schedule detector module replacement. Confirm dark-count rate returns to baseline and effective range recovers to \u2265120 m before closing H5. H1 (window contamination) remains open and should be cleared concurrently with a visual/optical-power-throughput check, but the detector-localised evidence makes it a secondary check rather than the primary action."
+  },
+  "score": {
+    "accuracy": 1.0,
+    "localization": 1.0,
+    "evidence_f1": 0.286,
+    "conflict_handling": 1.0,
+    "trigger_discrimination": 1.0,
+    "abstention_calibration": 1.0,
+    "cost_tokens": 67822
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "label": "Window contamination \u2014 partial obscuration of optics reducing transmitted/received signal power",
+      "log_odds": -1.0,
+      "status": "open",
+      "node_ref": "part.window"
+    },
+    {
+      "id": "H2",
+      "label": "Calibration drift \u2014 range-scale or offset error introduced by firmware/config change or parameter decay",
+      "log_odds": -2.5,
+      "status": "ruled_out",
+      "node_ref": "sub.calibration"
+    },
+    {
+      "id": "H3",
+      "label": "Laser aging \u2014 gradual output power decline reducing SNR at distance",
+      "log_odds": -3.0,
+      "status": "ruled_out",
+      "node_ref": "part.laser_module"
+    },
+    {
+      "id": "H4",
+      "label": "Thermal/TEC fault \u2014 elevated or uncontrolled junction temperature degrading laser efficiency and/or detector sensitivity",
+      "log_odds": -3.0,
+      "status": "ruled_out",
+      "node_ref": "part.tec"
+    },
+    {
+      "id": "H5",
+      "label": "Detector drift \u2014 responsivity or dark-current shift reducing effective sensitivity at threshold",
+      "log_odds": 2.0,
+      "status": "leading",
+      "node_ref": "part.detector"
+    },
+    {
+      "id": "hyp.upstream_power",
+      "label": "Scanner / power (shared upstream cause)",
+      "log_odds": -2.5,
+      "status": "ruled_out",
+      "node_ref": "sub.power"
+    }
+  ],
+  "links": [
+    {
+      "evidence_id": "ev.laser_power_01",
+      "hypothesis_id": "H3",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.laser_power_01",
+      "hypothesis_id": "H4",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.laser_power_01",
+      "hypothesis_id": "hyp.upstream_power",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.config_diff_01",
+      "hypothesis_id": "H2",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.detector_health_01",
+      "hypothesis_id": "H5",
+      "polarity": "+",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.detector_health_01",
+      "hypothesis_id": "H4",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.detector_health_01",
+      "hypothesis_id": "H3",
+      "polarity": "-",
+      "weight": 1.5
+    },
+    {
+      "evidence_id": "ev.detector_health_01",
+      "hypothesis_id": "H1",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev.detector_health_01",
+      "hypothesis_id": "H2",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.detector_health_01",
+      "hypothesis_id": "hyp.upstream_power",
+      "polarity": "-",
+      "weight": 0.5
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev.laser_power_01",
+      "summary": "Laser output 47.9 mW vs baseline 48.0 mW (\u22120.34%); flagged non-low-power. Change is negligible relative to the ~8% range degradation under investigation. Laser source is at-spec.",
+      "source": "laser_power_check"
+    },
+    {
+      "id": "ev.config_diff_01",
+      "summary": "config_diff returned no relevant changes (any_change=false, changed=[]). No firmware update, range-scale edit, or offset parameter modification is present in the configuration history. This eliminates the config/firmware-change sub-cause of calibration drift; parameter decay remains theoretically open but the primary mechanism for H2 is now unsupported.",
+      "source": "config_diff"
+    },
+    {
+      "id": "ev.detector_health_01",
+      "summary": "Dark-count rate rose +56% while detector temperature increased only +0.026 \u00b0C with a confirmed live sensor (detector_temp_live=true); bias_drift=true. A 56% dark-count surge with negligible thermal change indicates non-thermal detector bias/gain drift. Elevated dark current raises the noise floor, compressing the SNR margin at distance and is fully consistent with the observed ~8% effective-range reduction. The result explicitly excludes thermal elevation as the mechanism, and the detector-specific localisation argues against laser, optical, or upstream-supply causes.",
+      "source": "detector_health_check"
+    }
+  ],
+  "ig_conflicts": [],
+  "trace": [
+    {
+      "action": "seed",
+      "args": {},
+      "rationale": "seed the differential from the symptom",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.5,
+        "H2": 0.5,
+        "H3": 0.5,
+        "H4": 0.5,
+        "H5": 0.5,
+        "hyp.upstream_power": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "laser_power_check"
+      },
+      "rationale": "No evidence has been collected yet and all hypotheses are at equal prior. A laser_power_check is the single most discriminating first step: (a) if measured output power is nominal it strongly argues *against* H3 (laser aging) and the laser-side branch of H4 (TEC/thermal \u2192 laser efficiency loss) and hyp.upstream_power, collapsing the differential toward H2/H5/H1; (b) if power is measurably degraded (~15% drop would explain ~8% range loss assuming range \u221d \u221aP) it elevates H3 and H4 and triggers the thermal/TEC path next. This single result cleaves the hypothesis space in half \u2014 source-side causes vs. receiver/calibration-side causes \u2014 without redundantly re-examining anything already known.",
+      "voi": 0.82,
+      "evidence_id": "ev.laser_power_01",
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.5,
+        "H2": 0.5,
+        "H3": 0.119,
+        "H4": 0.119,
+        "H5": 0.5,
+        "hyp.upstream_power": 0.119
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "config_diff"
+      },
+      "rationale": "Three hypotheses are equally open (H1 window contamination, H2 calibration drift, H5 detector drift \u2014 all at log_odds 0.00). Laser source is confirmed at-spec (ev.laser_power_01), so optical-source explanations are weakened. The most efficient single discriminator now is config_diff: a calibration-parameter or firmware change is the only candidate that would produce a uniform ~8% range-scale or offset error without touching laser power or introducing spatial intensity variation. If a parameter change is found whose timestamp aligns with degradation onset (~1 week ago), H2 rises sharply and H1/H5 fall; if the config is clean, H2 is largely eliminated and the contest narrows to H1 vs H5, driving the next action to spatial_intensity_check or detector_health_check. No prior evidence speaks to config state, so this check adds maximum new information.",
+      "voi": 0.82,
+      "evidence_id": "ev.config_diff_01",
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.5,
+        "H2": 0.119,
+        "H3": 0.119,
+        "H4": 0.119,
+        "H5": 0.5,
+        "hyp.upstream_power": 0.119
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "detector_health_check"
+      },
+      "rationale": "H1 (window contamination) and H5 (detector drift) are the only two open hypotheses, both at log_odds=0.00. Laser output is at-spec (ev.laser_power_01) and config is unchanged (ev.config_diff_01), so the degradation must originate either in the optical path (H1) or the detector subsystem (H5). detector_health_check interrogates responsivity and dark-current directly \u2014 independent of the transmit optical path \u2014 giving a clean internal/external split: a nominal result rules out H5 and strongly implicates H1, while an anomalous result (elevated dark current or reduced responsivity consistent with ~8% SNR loss) confirms H5 and argues against H1. No existing evidence has touched the detector, so this is the highest-information-gain action available.",
+      "voi": 0.88,
+      "evidence_id": "ev.detector_health_01",
+      "conflicts_added": [],
+      "leader": "H5",
+      "leader_conf": 0.881,
+      "margin": 0.612,
+      "confidences": {
+        "H1": 0.269,
+        "H2": 0.076,
+        "H3": 0.047,
+        "H4": 0.047,
+        "H5": 0.881,
+        "hyp.upstream_power": 0.076
+      }
+    },
+    {
+      "action": "conflict_sweep",
+      "args": {},
+      "rationale": "order onset vs the salient recent event; sanity-check channels",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H5",
+      "leader_conf": 0.881,
+      "margin": 0.612,
+      "confidences": {
+        "H1": 0.269,
+        "H2": 0.076,
+        "H3": 0.047,
+        "H4": 0.047,
+        "H5": 0.881,
+        "hyp.upstream_power": 0.076
+      }
+    },
+    {
+      "action": "synthesize",
+      "args": {
+        "answer_type": "cause",
+        "root_cause": "part.detector"
+      },
+      "rationale": "conclude or abstain from the differential",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H5",
+      "leader_conf": 0.881,
+      "margin": 0.612,
+      "confidences": {
+        "H1": 0.269,
+        "H2": 0.076,
+        "H3": 0.047,
+        "H4": 0.047,
+        "H5": 0.881,
+        "hyp.upstream_power": 0.076
+      }
+    }
+  ]
+}

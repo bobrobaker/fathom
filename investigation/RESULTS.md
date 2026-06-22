@@ -324,6 +324,35 @@ case8 is now a genuinely dominant conclusion, not a coin-flip; case5 abstains de
 Combined deterministic suite: **189 passed.** Cost note (Row 7) stands and is slightly worse: the
 correct-but-exploratory behavior runs closer to full budget (case5 ran all 8 steps → 173k tokens).
 
+### Round-3 REGRESSION found — case7 (the regression question, answered)
+
+The full live regression sweep under round-3 code (n=1, budget 8) found **case7 regressed**:
+
+| case | round-3 live | vs prior |
+|---|---|---|
+| case1 tec | `part.tec` acc 1.0 | ✓ no regression |
+| case2 laser | `part.laser_module` acc 1.0 | ✓ (the laser_power_check dependency held — LLM ran it) |
+| case3 window | `part.window` acc 1.0 | ✓ |
+| case4 calibration | `sub.calibration` acc 1.0 | ✓ |
+| case6 detector | `part.detector` acc 1.0 | ✓ |
+| **case7 tec-variant** | **`part.laser_module` acc 0.0** | **✗ REGRESSED (was part.tec)** |
+| case5 no-clean-cause | abstain acc 1.0 | ✓ (round-3) |
+| case8 common-mode | `sub.power` acc 1.0 margin 0.77 | ✓ (round-3) |
+
+**Mechanism (verified, `cap_case7_v3.json`):** the round-3 `laser_power_check` is a non-specific
+"source-side power loss" affirmative. On case7 (a TEC fault) emitter power drops as a *downstream*
+effect, so `laser_power_check` fired affirmative and the LLM credited the **laser decoy +2.0**; the
+controller concluded at step 2 **before ever running `tec_load_check`** (the `losing_setpoint` TEC
+discriminator never fired). So the M1 fix that rescued case2/case5 **broke case7** — the exact
+risk flagged as code-review finding #3. Net round-3 live: **7/8** (case7 lost).
+
+**Proposed fix (not yet applied):** make `laser_power_check` diode-aware — its affirmative
+(laser-aging) signal requires power decline AND diode temp *nominal* (at setpoint). A power drop
+with an *elevated* diode is thermal (the TEC's `losing_setpoint` case), not laser aging, so it must
+not affirm the laser. Mirrors `losing_setpoint`; structural/#5-safe. Expected: case7 no longer
+credits laser → keeps investigating → concludes `part.tec`; case2 (diode nominal) still affirms
+laser; case5/case8 unaffected. Needs a live re-confirm of case7 + case2/case5/case8.
+
 ### Still NOT live-re-confirmed under round-3 code
 case1,2,3,4,6,7 were not re-run live after the round-3 changes (the authoritative gate + explain-away
 change behavior on every case). The 189-suite is the regression evidence; the standing live risks are

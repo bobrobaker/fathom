@@ -1,0 +1,343 @@
+{
+  "case_id": "case4",
+  "fault": "calibration_drift",
+  "salient_is_cause": true,
+  "ground_truth": {
+    "root_cause": "sub.calibration",
+    "causal_chain": [
+      "config.cal_table_version",
+      "sub.calibration",
+      "kpi.effective_range"
+    ],
+    "trigger": null,
+    "conflicts": [],
+    "load_bearing_evidence": [
+      "config.cal_table_version",
+      "ticket.cal_regression",
+      "doc.release_v13"
+    ]
+  },
+  "answer": {
+    "answer_type": "cause",
+    "root_cause": "sub.calibration",
+    "causal_chain": [
+      "hyp.calibration_drift"
+    ],
+    "cited_evidence": [
+      "ev.config_diff_01",
+      "ev.change_cause_log.cal_update",
+      "ev.laser_power_check_01",
+      "ev.spatial_intensity_check_01",
+      "ev.detector_health_check_01"
+    ],
+    "conflicts": [],
+    "recommended_action": "Revert cal_table_version from v13 to v12 and confirm range restores to ~120 m baseline. If confirmed, audit the v13 calibration table for misconfigured range-gate offsets or echo-detection intensity thresholds before any re-deployment. Do not re-enable v13 until the specific parameter delta responsible for the ~8% apparent range loss is identified and corrected."
+  },
+  "score": {
+    "accuracy": 1.0,
+    "localization": 1.0,
+    "evidence_f1": 0.0,
+    "conflict_handling": 1.0,
+    "trigger_discrimination": 1.0,
+    "abstention_calibration": 1.0,
+    "cost_tokens": 72505
+  },
+  "hypotheses": [
+    {
+      "id": "hyp.window_contamination",
+      "label": "Window contamination attenuating outbound/return beam (~8% throughput loss consistent with partial fouling)",
+      "log_odds": -2.5,
+      "status": "ruled_out",
+      "node_ref": "part.window"
+    },
+    {
+      "id": "hyp.laser_aging",
+      "label": "Laser emitter output power declining (gradual aging or drive-current drift reducing peak intensity)",
+      "log_odds": -3.0,
+      "status": "ruled_out",
+      "node_ref": "part.laser_module"
+    },
+    {
+      "id": "hyp.detector_drift",
+      "label": "Detector responsivity or threshold drift reducing effective SNR at long range",
+      "log_odds": -3.0,
+      "status": "ruled_out",
+      "node_ref": "part.detector"
+    },
+    {
+      "id": "hyp.thermal_tec_fault",
+      "label": "TEC under-cooling or thermal runaway shifting laser wavelength or detector dark current, degrading range",
+      "log_odds": -3.0,
+      "status": "ruled_out",
+      "node_ref": "part.tec"
+    },
+    {
+      "id": "hyp.calibration_drift",
+      "label": "Calibration / firmware parameter drift (range-gate offset or intensity threshold misconfiguration) producing apparent range loss",
+      "log_odds": 3.0,
+      "status": "leading",
+      "node_ref": "sub.calibration"
+    },
+    {
+      "id": "hyp.upstream_power",
+      "label": "Scanner / power (shared upstream cause)",
+      "log_odds": -2.5,
+      "status": "ruled_out",
+      "node_ref": "sub.power"
+    }
+  ],
+  "links": [
+    {
+      "evidence_id": "ev.laser_power_check_01",
+      "hypothesis_id": "hyp.laser_aging",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.laser_power_check_01",
+      "hypothesis_id": "hyp.upstream_power",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.laser_power_check_01",
+      "hypothesis_id": "hyp.thermal_tec_fault",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev.spatial_intensity_check_01",
+      "hypothesis_id": "hyp.window_contamination",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.detector_health_check_01",
+      "hypothesis_id": "hyp.detector_drift",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.detector_health_check_01",
+      "hypothesis_id": "hyp.thermal_tec_fault",
+      "polarity": "-",
+      "weight": 1.5
+    },
+    {
+      "evidence_id": "ev.config_diff_01",
+      "hypothesis_id": "hyp.calibration_drift",
+      "polarity": "+",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.config_diff_01",
+      "hypothesis_id": "hyp.laser_aging",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev.config_diff_01",
+      "hypothesis_id": "hyp.detector_drift",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev.config_diff_01",
+      "hypothesis_id": "hyp.window_contamination",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.config_diff_01",
+      "hypothesis_id": "hyp.thermal_tec_fault",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.config_diff_01",
+      "hypothesis_id": "hyp.upstream_power",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.change_cause_log.cal_update",
+      "hypothesis_id": "hyp.calibration_drift",
+      "polarity": "+",
+      "weight": 1.5
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev.laser_power_check_01",
+      "summary": "Laser output power measured at 48.0 mW vs baseline 47.9 mW (+0.1%, ratio 1.0015). Flagged low_power=false; no sustained power loss detected. Emitter is operating at/near baseline.",
+      "source": "laser_power_check"
+    },
+    {
+      "id": "ev.spatial_intensity_check_01",
+      "summary": "Intensity drop is uniform across all 4 spatial regions (spread=0.024, localized=false). Spatially non-uniform fouling \u2014 the hallmark of window contamination \u2014 is absent. Uniform degradation instead points toward a source- or detector-level effect that acts globally on the beam path.",
+      "source": "spatial_intensity_check"
+    },
+    {
+      "id": "ev.detector_health_check_01",
+      "summary": "Detector health check nominal: dark-count rise \u2248 -0.003% (indistinguishable from zero), detector temp rise \u2248 -0.007 \u00b0C (stable), bias_drift=false, detector_temp channel confirmed live. No isolated detector bias or responsivity signature detected.",
+      "source": "detector_health_check"
+    },
+    {
+      "id": "ev.config_diff_01",
+      "summary": "Config diff shows exactly one changed key: cal_table_version promoted from v12 to v13. A calibration table update can shift range-gate offsets, echo-detection thresholds, or intensity correction curves globally \u2014 directly producing an apparent range loss without any change to optical hardware. The magnitude (~8% range loss) is consistent with a misconfigured intensity threshold or gate offset in v13. All hardware channels (emitter power, detector bias, thermal) checked nominal, leaving calibration as the only unaccounted variable; this finding closes that gap.",
+      "source": "config_diff"
+    },
+    {
+      "id": "ev.change_cause_log.cal_update",
+      "summary": "log.cal_update: a recent config change to sub.calibration aligns with the degradation onset \u2192 the change is the cause",
+      "source": "onset_vs_event_check"
+    }
+  ],
+  "ig_conflicts": [],
+  "trace": [
+    {
+      "action": "seed",
+      "args": {},
+      "rationale": "seed the differential from the symptom",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "hyp.window_contamination",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "hyp.window_contamination": 0.5,
+        "hyp.laser_aging": 0.5,
+        "hyp.detector_drift": 0.5,
+        "hyp.thermal_tec_fault": 0.5,
+        "hyp.calibration_drift": 0.5,
+        "hyp.upstream_power": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "laser_power_check"
+      },
+      "rationale": "With all six hypotheses at equal prior and zero evidence collected, the single measurement that splits the field most cleanly is direct laser output power. A result showing ~8% power loss would strongly raise hyp.laser_aging and hyp.upstream_power (and is consistent with hyp.thermal_tec_fault driving wavelength or current drift), while simultaneously arguing AGAINST the receive-side and optical-path hypotheses (hyp.detector_drift, hyp.window_contamination, hyp.calibration_drift). Conversely, a NOMINAL power reading rules out hyp.laser_aging as the primary driver, collapses hyp.upstream_power probability, and redirects attention entirely to the receive path, optical path, or calibration \u2014 a clean binary split. No other single check divides this many hypotheses in both directions simultaneously.",
+      "voi": 0.82,
+      "evidence_id": "ev.laser_power_check_01",
+      "conflicts_added": [],
+      "leader": "hyp.window_contamination",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "hyp.window_contamination": 0.5,
+        "hyp.laser_aging": 0.119,
+        "hyp.detector_drift": 0.5,
+        "hyp.thermal_tec_fault": 0.269,
+        "hyp.calibration_drift": 0.5,
+        "hyp.upstream_power": 0.119
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "spatial_intensity_check"
+      },
+      "rationale": "Three hypotheses are tied at log_odds=0.00 (window_contamination, detector_drift, calibration_drift). Laser power is confirmed nominal (ev.laser_power_check_01), so the attenuation must lie elsewhere. A spatial_intensity_check is maximally discriminating across all three: (a) window contamination produces spatially non-uniform or aperture-wide intensity suppression in the return map, consistent with partial fouling; (b) detector drift produces a spatially uniform SNR reduction independent of beam direction; (c) calibration drift produces no intensity anomaly at all \u2014 only a range-gate or threshold offset \u2014 leaving the intensity map nominal. A single result therefore raises one hypothesis and lowers the others, which no re-confirmation of the already-ruled-out laser path would achieve.",
+      "voi": 0.88,
+      "evidence_id": "ev.spatial_intensity_check_01",
+      "conflicts_added": [],
+      "leader": "hyp.detector_drift",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "hyp.window_contamination": 0.119,
+        "hyp.laser_aging": 0.119,
+        "hyp.detector_drift": 0.5,
+        "hyp.thermal_tec_fault": 0.269,
+        "hyp.calibration_drift": 0.5,
+        "hyp.upstream_power": 0.119
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "detector_health_check"
+      },
+      "rationale": "Laser output is confirmed nominal (ev.laser_power_check_01) and window fouling is ruled out by uniform spatial degradation (ev.spatial_intensity_check_01). The two leading open hypotheses are hyp.detector_drift (log_odds=0.00) and hyp.calibration_drift (log_odds=0.00). A detector_health_check directly probes responsivity, dark-current baseline, and threshold settings in a single pass: (A) if the detector shows measurable responsivity loss or threshold creep, it strongly raises hyp.detector_drift and argues against hyp.calibration_drift and hyp.thermal_tec_fault as sole causes; (B) if the detector is fully nominal, it substantially lowers hyp.detector_drift and redirects attention to hyp.calibration_drift and hyp.thermal_tec_fault \u2014 the complementary next checks. Either outcome moves the two top-ranked hypotheses in opposite directions, maximising discrimination per action.",
+      "voi": 0.88,
+      "evidence_id": "ev.detector_health_check_01",
+      "conflicts_added": [],
+      "leader": "hyp.calibration_drift",
+      "leader_conf": 0.5,
+      "margin": 0.381,
+      "confidences": {
+        "hyp.window_contamination": 0.119,
+        "hyp.laser_aging": 0.119,
+        "hyp.detector_drift": 0.119,
+        "hyp.thermal_tec_fault": 0.076,
+        "hyp.calibration_drift": 0.5,
+        "hyp.upstream_power": 0.119
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "config_diff"
+      },
+      "rationale": "All hardware-side hypotheses (window contamination, laser aging, detector drift, TEC fault, upstream power) are ruled out by direct measurement. The sole remaining open hypothesis is hyp.calibration_drift \u2014 a range-gate offset, intensity threshold, or firmware parameter change producing the ~8% apparent range loss without any physical emitter or detector signature. config_diff is the single most discriminating action: a changed parameter (range-gate, detection threshold, SNR floor) would directly confirm calibration drift as root cause; a clean diff with no parameter movement would falsify it and force re-opening of the differential. No other check targets this hypothesis; re-running hardware checks would only re-confirm already-ruled-out paths.",
+      "voi": 0.92,
+      "evidence_id": "ev.config_diff_01",
+      "conflicts_added": [],
+      "leader": "hyp.calibration_drift",
+      "leader_conf": 0.881,
+      "margin": 0.805,
+      "confidences": {
+        "hyp.window_contamination": 0.076,
+        "hyp.laser_aging": 0.047,
+        "hyp.detector_drift": 0.047,
+        "hyp.thermal_tec_fault": 0.047,
+        "hyp.calibration_drift": 0.881,
+        "hyp.upstream_power": 0.076
+      }
+    },
+    {
+      "action": "conflict_sweep",
+      "args": {},
+      "rationale": "order onset vs the salient recent event; sanity-check channels",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "hyp.calibration_drift",
+      "leader_conf": 0.953,
+      "margin": 0.877,
+      "confidences": {
+        "hyp.window_contamination": 0.076,
+        "hyp.laser_aging": 0.047,
+        "hyp.detector_drift": 0.047,
+        "hyp.thermal_tec_fault": 0.047,
+        "hyp.calibration_drift": 0.953,
+        "hyp.upstream_power": 0.076
+      }
+    },
+    {
+      "action": "synthesize",
+      "args": {
+        "answer_type": "cause",
+        "root_cause": "sub.calibration"
+      },
+      "rationale": "conclude or abstain from the differential",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "hyp.calibration_drift",
+      "leader_conf": 0.953,
+      "margin": 0.877,
+      "confidences": {
+        "hyp.window_contamination": 0.076,
+        "hyp.laser_aging": 0.047,
+        "hyp.detector_drift": 0.047,
+        "hyp.thermal_tec_fault": 0.047,
+        "hyp.calibration_drift": 0.953,
+        "hyp.upstream_power": 0.076
+      }
+    }
+  ]
+}

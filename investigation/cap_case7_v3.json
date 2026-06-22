@@ -1,0 +1,275 @@
+{
+  "case_id": "case7",
+  "fault": "tec_degradation_variant",
+  "salient_is_cause": false,
+  "ground_truth": {
+    "root_cause": "part.tec",
+    "causal_chain": [
+      "part.tec",
+      "metric.diode_temp",
+      "metric.intensity",
+      "kpi.effective_range"
+    ],
+    "trigger": "log.reboot",
+    "conflicts": [
+      "log.reboot"
+    ],
+    "load_bearing_evidence": [
+      "recommend_swap_test",
+      "temp_correlation_check",
+      "tec_load_check",
+      "onset_vs_event_check"
+    ]
+  },
+  "answer": {
+    "answer_type": "cause",
+    "root_cause": "part.laser_module",
+    "causal_chain": [
+      "h2"
+    ],
+    "cited_evidence": [
+      "ev.laser_power_check_001",
+      "ev.common_mode_check_001",
+      "ev.trigger_demoted"
+    ],
+    "conflicts": [
+      "log.reboot"
+    ],
+    "recommended_action": "h2 (laser aging) is confirmed as the primary cause: ev.laser_power_check_001 documents a sustained \u22125.5% source-side emitter power loss (45.4 mW vs 48.1 mW baseline), which is physically consistent with the observed range degradation. However, this power loss alone accounts for only ~2\u20134% range reduction, leaving a residual ~4\u20136% gap unexplained \u2014 h3 (detector responsivity drift) remains a viable co-contributor and h4 (TEC/thermal degradation as the mechanism driving the laser power loss) remains open. Two actions are required in priority order: (1) Measure per-channel APD responsivity and bias to quantify h3 and close the residual range budget; (2) Retrieve per-channel TEC setpoint-vs-actual junction-temperature logs to determine whether h4 is the root mechanism behind the laser power decline (thermal excursion \u2192 laser depression) versus intrinsic end-of-life aging \u2014 this distinction is critical: h4 implies TEC repair may partially restore output, while pure h2 aging implies laser replacement. The staggered 4-day onset spread (ev.common_mode_check_001) and the coincident-but-non-causal reboot (ev.trigger_demoted) confirm per-channel independent drift and rule out any single shared upstream event."
+  },
+  "score": {
+    "accuracy": 0.0,
+    "localization": 0.0,
+    "evidence_f1": 0.286,
+    "conflict_handling": 1.0,
+    "trigger_discrimination": 1.0,
+    "abstention_calibration": 1.0,
+    "cost_tokens": 59624
+  },
+  "hypotheses": [
+    {
+      "id": "h1",
+      "label": "Window contamination (external/internal fouling reducing transmitted power)",
+      "log_odds": -1.5,
+      "status": "ruled_out",
+      "node_ref": "part.window"
+    },
+    {
+      "id": "h2",
+      "label": "Laser aging / output power decline reducing emitted energy budget",
+      "log_odds": 2.0,
+      "status": "leading",
+      "node_ref": "part.laser_module"
+    },
+    {
+      "id": "h3",
+      "label": "Detector responsivity drift reducing receive sensitivity",
+      "log_odds": -0.5,
+      "status": "open",
+      "node_ref": "part.detector"
+    },
+    {
+      "id": "h4",
+      "label": "Thermal/TEC degradation causing operating-temperature excursion that depresses laser or detector performance",
+      "log_odds": 0.0,
+      "status": "open",
+      "node_ref": "part.tec"
+    },
+    {
+      "id": "h5",
+      "label": "Calibration / signal-processing drift biasing range threshold or SNR estimate downward",
+      "log_odds": -2.5,
+      "status": "ruled_out",
+      "node_ref": "sub.calibration"
+    },
+    {
+      "id": "hyp.upstream_power",
+      "label": "Scanner / power (shared upstream cause)",
+      "log_odds": -2.5,
+      "status": "ruled_out",
+      "node_ref": "sub.power"
+    }
+  ],
+  "links": [
+    {
+      "evidence_id": "ev.common_mode_check_001",
+      "hypothesis_id": "hyp.upstream_power",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.common_mode_check_001",
+      "hypothesis_id": "h5",
+      "polarity": "-",
+      "weight": 1.5
+    },
+    {
+      "evidence_id": "ev.common_mode_check_001",
+      "hypothesis_id": "h4",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev.laser_power_check_001",
+      "hypothesis_id": "h1",
+      "polarity": "-",
+      "weight": 1.5
+    },
+    {
+      "evidence_id": "ev.laser_power_check_001",
+      "hypothesis_id": "h2",
+      "polarity": "+",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.laser_power_check_001",
+      "hypothesis_id": "h3",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.laser_power_check_001",
+      "hypothesis_id": "h4",
+      "polarity": "+",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev.laser_power_check_001",
+      "hypothesis_id": "h5",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev.laser_power_check_001",
+      "hypothesis_id": "hyp.upstream_power",
+      "polarity": "-",
+      "weight": 0.5
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev.common_mode_check_001",
+      "summary": "2 channels are degraded with a 4-day onset spread; the check explicitly returns common_mode=false. Staggered per-channel onset argues against any single simultaneous shared cause (upstream power, shared thermal event, or shared calibration stage). Independently-drifting per-channel components (window fouling, laser aging, detector drift) are consistent with this pattern.",
+      "source": "common_mode_check"
+    },
+    {
+      "id": "ev.laser_power_check_001",
+      "summary": "Laser output power measured at 45.4 mW vs 48.1 mW baseline (\u22125.5%), confirmed as a sustained, source-side emitter power loss. Physical decline at the emitter directly implicates laser aging (h2) or thermally-induced laser depression (h4). Because the measurement is at the source (before any optical window), window fouling (h1) cannot account for this reading \u2014 h1 as a sole/primary cause is weakened. A 5.5% emitter power loss translates to a partial range penalty (\u22482\u20134% range reduction depending on scaling regime), leaving a residual ~4\u20136% range gap unexplained and keeping h3 (detector drift) viable as a co-contributor rather than fully exonerated. The result is a real physical decline, arguing against h5 (calibration/processing threshold artifact). The per-channel, source-localized nature further corroborates rejection of a shared upstream cause (hyp.upstream_power).",
+      "source": "laser_power_check"
+    },
+    {
+      "id": "ev.trigger_demoted",
+      "summary": "log.reboot: degradation onset predates it \u2192 coincident, not causal",
+      "source": "onset_vs_event_check"
+    }
+  ],
+  "ig_conflicts": [
+    "log.reboot"
+  ],
+  "trace": [
+    {
+      "action": "seed",
+      "args": {},
+      "rationale": "seed the differential from the symptom",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "h1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "h1": 0.5,
+        "h2": 0.5,
+        "h3": 0.5,
+        "h4": 0.5,
+        "h5": 0.5,
+        "hyp.upstream_power": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "common_mode_check"
+      },
+      "rationale": "With all six hypotheses at equal prior and zero evidence collected, the highest-leverage first move is to determine whether the ~8 % range loss is confined to a single channel/aperture or appears simultaneously across multiple channels. A positive common-mode result would strongly raise hyp.upstream_power (shared laser bus, power-supply rail, or scanner optics) while depressing h1\u2013h5 (which are each localized component failures). A negative result \u2014 degradation on only one channel \u2014 eliminates hyp.upstream_power and focuses the differential squarely on h1\u2013h5. No other available check bifurcates the hypothesis space this cleanly without prior evidence: laser_power_check or tec_load_check would only probe one leaf of the tree at a time, whereas common_mode_check answers 'systemic vs. isolated' in a single step.",
+      "voi": 0.88,
+      "evidence_id": "ev.common_mode_check_001",
+      "conflicts_added": [],
+      "leader": "h1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "h1": 0.5,
+        "h2": 0.5,
+        "h3": 0.5,
+        "h4": 0.269,
+        "h5": 0.182,
+        "hyp.upstream_power": 0.119
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "laser_power_check"
+      },
+      "rationale": "h1, h2, and h3 are all tied at log_odds=0.00. The single cleanest split is to measure per-channel emitted laser power directly. If laser output on the degraded channels is nominally on-spec, h2 (laser aging) is substantially ruled out and the field narrows to h1 (window fouling\u2014external loss before the receiver) vs h3 (detector responsivity drift\u2014internal receive-side loss). If laser power is measurably depressed on the same channels that show range degradation (with onset alignment), h2 is strongly implicated and h1/h3 recede. This single measurement therefore moves h2 in the opposite direction from h1/h3, maximising separation. It also partially informs h4: a laser power drop correlated with TEC load or temperature would reopen h4. No laser-power evidence has yet been retrieved (ev.common_mode_check_001 is the only evidence on record and addresses only the shared-cause axis, not the transmit/receive/window axis).",
+      "voi": 0.83,
+      "evidence_id": "ev.laser_power_check_001",
+      "conflicts_added": [],
+      "leader": "h2",
+      "leader_conf": 0.881,
+      "margin": 0.381,
+      "confidences": {
+        "h1": 0.182,
+        "h2": 0.881,
+        "h3": 0.378,
+        "h4": 0.5,
+        "h5": 0.076,
+        "hyp.upstream_power": 0.076
+      }
+    },
+    {
+      "action": "conflict_sweep",
+      "args": {},
+      "rationale": "order onset vs the salient recent event; sanity-check channels",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [
+        "log.reboot"
+      ],
+      "leader": "h2",
+      "leader_conf": 0.881,
+      "margin": 0.381,
+      "confidences": {
+        "h1": 0.182,
+        "h2": 0.881,
+        "h3": 0.378,
+        "h4": 0.5,
+        "h5": 0.076,
+        "hyp.upstream_power": 0.076
+      }
+    },
+    {
+      "action": "synthesize",
+      "args": {
+        "answer_type": "cause",
+        "root_cause": "part.laser_module"
+      },
+      "rationale": "conclude or abstain from the differential",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "h2",
+      "leader_conf": 0.881,
+      "margin": 0.381,
+      "confidences": {
+        "h1": 0.182,
+        "h2": 0.881,
+        "h3": 0.378,
+        "h4": 0.5,
+        "h5": 0.076,
+        "hyp.upstream_power": 0.076
+      }
+    }
+  ]
+}
