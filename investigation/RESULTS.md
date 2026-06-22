@@ -1,5 +1,17 @@
 # Why the controller underperformed — audit, spiked fixes, fix-audit
 
+> **CURRENT STATE (read first) — FINAL: 8/8 live accuracy (n=1), 0 regressions; M1 fixed.** This
+> document is a **chronological log** across four rounds. Earlier sections state interim conclusions
+> that LATER rounds supersede — do not quote an early section as the result:
+> - "Live confirmation" (4/8 → 6/8), "One judgment for sign-off" ("M1 … remains unfixed"), and "The
+>   honest takeaway" (4/8 → 6/8) are **rounds 1–2 and SUPERSEDED** by **Round 3** (M1 fixed via the
+>   affirmative-evidence gate; case5 + case8 pass) and **Round 4** (case7 regression fixed → **8/8**).
+> - **M1 is fixed** — the affirmative-evidence gate deterministically prevents nominal checks from
+>   adding positive support, so case5 abstains *because nothing is affirmed* (not "correct-but-gated
+>   with M1 deferred", which was the round-2 state). The standing caveat is **n=1 variance**, not an
+>   unfixed M1.
+> The Round-4 table (search "Round 4") and the final tally are authoritative.
+
 Investigation of the spike's thesis-negative result (controller accuracy 4/8; capability lead
 mechanical; most expensive). Branch `investigate-controller`. Each shortcoming below was audited,
 fixed with a **general** mechanism change (not case-tuning — see the per-row #5 justification),
@@ -194,6 +206,11 @@ earlier), i.e. cost is gated by the deferred accuracy fix, not a standalone cost
 ---
 
 ## One judgment for sign-off
+
+> **Superseded by Round 3 (2026-06-22):** the "M1 remains unfixed" caveat below was the round-2 state.
+> M1 was subsequently fixed (affirmative-evidence gate), so the leader-anchored verdict now amplifies a
+> belief state whose nominal-evidence over-crediting is structurally prevented. The sign-off judgment
+> (cause-naming authority moved to the belief math) still stands; the "M1 unfixed" risk no longer does.
 
 The **leader-anchored verdict** (synthesize names the belief leader, not the LLM's free-text
 choice, when the leader is dominant) is the one change that is more than a bugfix: it shifts
@@ -400,7 +417,11 @@ unchanged: case2's dependence on the LLM running `laser_power_check`, and any ca
 falls ≤ tau_margin would now be *forced* to abstain by the authoritative gate (deterministic spikes
 on case1/4/5/7/8 still conclude/abstain correctly, so no scripted regression).
 
-### The honest takeaway
+### The honest takeaway (rounds 1–2 — SUPERSEDED by Round 3/4; see the top banner)
+> This paragraph is the **round-1/2** takeaway, left for provenance. It says 4/8 → 6/8 with case5
+> (M1) and case8 still failing — both were fixed in Round 3, and the case7 regression in Round 4, for
+> a **final 8/8**. Read the Round-4 section + the top banner for the current result.
+
 The investigation found and fixed **real, general, #5-defensible mechanism bugs** (M2/M3
 sweep→beliefs + symmetric promotion, M4 margin gate, M5 evidence-availability, the synthesis
 disconnect, the citation-source contract) and lifted live accuracy **4/8 → 6/8 with no
