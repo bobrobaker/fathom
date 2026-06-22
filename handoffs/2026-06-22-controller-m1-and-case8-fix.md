@@ -3,8 +3,28 @@ project: fathom
 goal: Make case5 (abstain) and case8 (common-mode) succeed LIVE by fixing M1 (interpret
   over-crediting) and the case8 seeding/granularity bug — using the spike+audit pattern, #5-safe.
 created: 2026-06-22
-status: open
+status: goal met live (n=1) but case8 FRAGILE; hardening + v2 regression unverified
 branch: investigate-controller (worktree /home/bolun/projects/fathom-investigate)
+---
+
+## UPDATE 2026-06-22 (round 2 done — read `investigation/RESULTS.md` "Round 2" section)
+Both fixes built (spike+audit), integrated, live-confirmed. Commits f96ece6 (integrate),
+51a07e9 (live results). Suite 189 passed.
+- **case5 → PASS live, robust** (abstains; M1 affirmative-evidence gate in `interpret_result` +
+  per-check `affirmative` flag in `checks.py` + new `laser_power_check`).
+- **case8 → PASS live but FRAGILE** (concludes sub.power, margin only **0.028**). Seeding-coverage
+  (`_seed_upstream_coverage`) + granularity-match fixes landed. Two residual problems: (1) the new
+  `laser_power_check` credits the laser DECOY on case8 (+2.0) because the common-mode power sag drops
+  laser power — only partly countered by the −1.5 common-mode demotion; (2) the abstain gate is
+  **advisory** (`synthesize` keeps the LLM's answer_type even when `abstain=True`), so case8 passed
+  only because the LLM overrode an abstain instruction and named the right leader.
+- **Cost regression:** M1 fix makes runs ~2.5× pricier (no early-stop on a confident-wrong leader).
+- **NOT verified:** v2 regression on case1,2,3,4,6,7 (trusting the 189-suite per user); esp. case2's
+  new dependence on the LLM running `laser_power_check` (else false-abstain).
+- **To harden case8 (next):** suppress laser_power_check credit to surface channels under a
+  common-mode signature, and/or strengthen the common-mode demotion to give sub.power a real margin;
+  then decide whether to ENFORCE the abstain gate (would make case5 robust; needs case8 margin >0.20
+  first or it breaks case8).
 ---
 
 # Fathom controller — fix M1 + case8, drive case5 & case8 to live success
