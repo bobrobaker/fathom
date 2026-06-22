@@ -80,24 +80,38 @@ def _case5():
     return generate(spec.fault, list(spec.mechanisms), seed=spec.seed)
 
 
-def test_dispersed_state_has_conf_above_tau_min_but_low_margin():
-    """The failure state: leader conf clears tau_min, margin does NOT clear tau_margin."""
+# NOTE (post-M1): this spike originally manufactured the dispersed-but-confident state by
+# crediting two hypotheses POSITIVELY off NOMINAL checks (tec_load_check / temp_correlation_check
+# read at-spec on case5) — which is precisely the M1 over-crediting bug. The M1 affirmative-
+# evidence gate now strips those positive links upstream, so on case5 no nominal check can lend
+# positive support at all and the leader never clears tau_min. The margin-aware gate (this spike's
+# subject) remains correct and is still demonstrated on a genuine state below
+# (`test_margin_gate_does_not_break_a_clean_cause`, which rides REAL affirmative tec checks).
+
+
+def test_m1_gate_strips_nominal_positive_support_on_case5():
+    """Post-M1: the formerly-manufactured dispersed state cannot form — the affirmative gate
+    strips the nominal checks' positive links, so the leader does not clear tau_min and there is
+    no confident-dominant lead. (Before M1 this state was the failure the margin gate caught.)"""
     case = _case5()
     env = LidarEnvironment(case)
     ans = diagnose(env, backend=_backend(SYNTH_CAUSE), budget=4)
-    top, conf, margin = beliefs.leader(ans.final_graph)
+    _top, conf, margin = beliefs.leader(ans.final_graph)
     th = config.thresholds()
-    assert conf > th["tau_min"]        # conf-only gate would NOT abstain
-    assert margin <= th["tau_margin"]  # but the differential is not dominant
+    # nominal checks lent no positive support -> leader stuck at the prior, below tau_min
+    assert conf <= th["tau_min"]
+    # and no positive link survived from the nominal checks
+    assert [ln for ln in ans.final_graph.links if ln.polarity == "+"] == []
 
 
-def test_conf_only_gate_concludes_wrongly_today():
-    """Current code (conf-only abstain gate) concludes a cause on the abstain case -> calib 0."""
+def test_m1_gate_drives_case5_abstain():
+    """Current code abstains on case5: with the nominal positives stripped (M1) the leader is
+    not confident-dominant, so the gate abstains (= gold)."""
     case = _case5()
     env = LidarEnvironment(case)
-    ans = diagnose(env, backend=_backend(SYNTH_CAUSE), budget=4)
+    ans = diagnose(env, backend=_backend(SYNTH_ABSTAIN), budget=4)
     assert case.ground_truth.answer_type == "abstain"
-    assert ans.answer_type == "cause"  # WRONG: abstention_calibration would score 0
+    assert ans.answer_type == "abstain"  # abstention_calibration -> 1
 
 
 def test_margin_aware_gate_would_abstain():

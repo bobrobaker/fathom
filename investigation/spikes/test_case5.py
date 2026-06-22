@@ -35,6 +35,7 @@ import json
 
 import pytest
 
+from dh import config
 from dh.controller import beliefs
 from dh.controller.llm import ScriptedBackend
 from dh.controller.loop import diagnose
@@ -168,16 +169,20 @@ def test_gold_is_abstain(run):
     assert case.ground_truth.root_cause is None
 
 
-def test_differential_is_saturated_and_dispersed(run):
-    """The M1 signature: several hypotheses ride the +3.0 clamp at once, margin ~ 0."""
+def test_no_hypothesis_reaches_a_confident_dominant_lead(run):
+    """Post-M1 state. This spike originally asserted the M1 *symptom* — several hypotheses
+    riding the +3.0 clamp at once (dispersed saturation) — which the margin-aware gate (Row
+    1/6) then worked around. With the M1 affirmative-evidence gate fixed UPSTREAM, the nominal
+    checks' bogus '+' links are stripped before they ever enter the belief math, so the
+    saturation never forms in the first place: no hypothesis becomes confident-dominant, which
+    is why the controller abstains (a strictly better reason than tripping the margin gate on a
+    saturated-dispersed state). We assert the post-M1 invariant: the leader is NOT both
+    confident (>tau_dom) AND dominant (margin>tau_margin)."""
     _case, ans = run
-    confs = sorted((beliefs.confidence(h) for h in ans.final_graph.hypotheses),
-                   reverse=True)
+    th = config.thresholds()
     top, conf, margin = beliefs.leader(ans.final_graph)
-    saturated = [c for c in confs if c > 0.90]
-    assert len(saturated) >= 2, f"expected dispersed saturation, got {confs}"
-    assert margin < 0.10, f"expected near-zero margin, got {margin}"
-    assert conf > 0.55, "leader must clear tau_min so the conf-only gate never trips"
+    assert not (conf > th["tau_dom"] and margin > th["tau_margin"]), \
+        f"M1 fix should prevent a confident-dominant leader on no_clean_cause (conf={conf}, margin={margin})"
 
 
 # --- headline: the controller must ABSTAIN on a saturated-but-dispersed state ---

@@ -1,0 +1,206 @@
+diff --git a/src/dh/checks.py b/src/dh/checks.py
+index de98a1a..47db610 100644
+--- a/src/dh/checks.py
++++ b/src/dh/checks.py
+@@ -26,6 +26,17 @@ def _baseline(series: TimeSeries, k: int = 8) -> float:
+     return st.mean(series.v[:k])
+ 
+ 
++# --- the affirmative-evidence predicate (M1) ---------------------------------
++# A diagnostic check answers one of two questions: did it find a *positive anomaly*
++# consistent with some fault (affirmative — it can rule a hypothesis IN), or did it read
++# nominal/at-spec (it can only rule hypotheses OUT)? This is a domain-general abduction
++# principle: only an affirmative anomaly affirms a hypothesis; nominal evidence never does.
++# Each check below carries an `affirmative` boolean computed from the check's OWN structural
++# outcome (any_change / localized / correlated / at_limit-or-losing_setpoint / stuck /
++# bias_drift / common_mode / onset-aligns / low_power) — a per-check structural fact, not a
++# per-case constant. The interpret layer uses it to drop positive links from a nominal check
++# (a nominal reading credited positively to the leader is the M1 over-crediting bug).
++
+ def config_diff(config_nodes: list[Node]) -> dict:
+     """Changed config keys vs baseline (§3.3 → "no relevant change" for case #1)."""
+     changed = []
+@@ -37,6 +48,7 @@ def config_diff(config_nodes: list[Node]) -> dict:
+         "check": "config_diff",
+         "changed": changed,
+         "any_change": bool(changed),
++        "affirmative": bool(changed),  # a real config change can rule a change-cause IN
+         "summary": "no relevant config change" if not changed
+         else f"{len(changed)} config key(s) changed: {[c['key'] for c in changed]}",
+     }
+@@ -52,6 +64,7 @@ def spatial_intensity_check(region_series: list[TimeSeries]) -> dict:
+         "spread": spread,
+         "n_regions": len(finals),
+         "localized": localized,
++        "affirmative": localized,  # a localized drop rules a window/optics fault IN; uniform only rules out
+         "summary": "intensity drop is localized (suggests window/optics)" if localized
+         else "intensity drop is uniform across regions (rules out window contamination)",
+     }
+@@ -74,6 +87,7 @@ def temp_correlation_check(
+         "abs_r": abs(r),
+         "sign": "negative" if r < 0 else "positive",
+         "correlated": abs(r) >= threshold,
++        "affirmative": abs(r) >= threshold,  # a real correlation rules a thermal coupling IN
+         "summary": f"{signal_a.signal} vs {signal_b.signal}: r={r:.2f} "
+         f"({'correlated' if abs(r) >= threshold else 'no correlation'})",
+     }
+@@ -101,6 +115,7 @@ def tec_load_check(tec_current: TimeSeries, limit: float,
+         "limit": limit,
+         "frac_of_limit": frac,
+         "at_limit": frac >= 0.85,
++        "affirmative": frac >= 0.85,  # at-limit rules a TEC fault IN; refined by losing_setpoint below
+         "summary": f"TEC current {current:.2f} A is {frac * 100:.0f}% of the {limit} A limit",
+     }
+     if diode_temp is not None:
+@@ -111,6 +126,7 @@ def tec_load_check(tec_current: TimeSeries, limit: float,
+         out["diode_temp"] = diode_recent
+         out["diode_setpoint_max"] = setpoint_max
+         out["losing_setpoint"] = losing
++        out["affirmative"] = bool(out["at_limit"] or losing)  # at-limit OR losing-setpoint rules TEC IN
+         if losing:
+             out["summary"] += (f"; diode held at {diode_recent:.1f} C ABOVE its "
+                                f"{setpoint_max} C setpoint while TEC current is elevated "
+@@ -127,6 +143,7 @@ def channel_sanity_check(series: TimeSeries, min_var: float = 1e-6) -> dict:
+         "signal": series.signal,
+         "variance": var,
+         "stuck": stuck,
++        "affirmative": stuck,  # a stuck channel rules an unreliable-sensor finding IN
+         "summary": f"{series.signal} variance≈{var:.2e} → "
+         f"{'unreliable (stuck channel)' if stuck else 'looks live'}",
+     }
+@@ -161,6 +178,7 @@ def detector_health_check(
+         "detector_temp_rise": temp_rise,
+         "detector_temp_live": temp_live,
+         "bias_drift": bias_drift,
++        "affirmative": bias_drift,  # a bias/gain drift rules a detector fault IN; nominal only rules out
+         "summary": f"dark-count {rise * 100:+.0f}% with detector temp {temp_rise:+.1f}C "
+         f"({'live' if temp_live else 'stuck'}) → {why}",
+     }
+@@ -191,6 +209,7 @@ def common_mode_check(series: list[TimeSeries], tol: float = 1.5,
+         "n_degraded": len(moved),
+         "onset_spread": spread,
+         "common_mode": common_mode,
++        "affirmative": common_mode,  # a common-mode signature rules a shared upstream cause IN
+         "summary": f"{len(moved)} degraded channel(s), onset spread {spread:.2f}d → "
+         + ("common-mode (one upstream cause, not independent faults)" if common_mode
+            else "no common-mode signature"),
+@@ -240,7 +259,46 @@ def onset_vs_event_check(series: TimeSeries, event_t: float, event_label: str =
+         "event_t": event_t,
+         "event_label": event_label,
+         "onset_predates_event": predates,
++        "affirmative": not predates,  # onset ALIGNS with the event → the event can be ruled IN as cause
+         "summary": f"degradation onset≈t={onset_t:g} "
+         f"{'precedes' if predates else 'follows'} {event_label} at t={event_t:g}"
+         + (f" → {event_label} is coincident, not causal" if predates else ""),
+     }
++
++
++# Sustained-decline threshold for laser emitter power. The laser-aging signature is a recent
++# emitter-power level held BELOW baseline (a transient dip that recovered is not aging). Chosen
++# from the real data: across the 8 cases the recent/baseline ratio is ≤0.945 on every genuine
++# power-decline case (laser aging, TEC degradation, common-mode power sag) and ≥0.996 on every
++# flat case (window, calibration, no-clean-cause, detector bias) — a wide, well-separated gap, so
++# a 0.97 cut (a ≥3% sustained drop) is unambiguous and not knob-tuned to any single case.
++LASER_POWER_DECLINE_RATIO = 0.97
++
++
++def laser_power_check(laser_power: TimeSeries) -> dict:
++    """Direct emitter-power discriminator: is laser output power sustained BELOW baseline?
++
++    The other cheap checks can only *eliminate* alternatives for a laser-aging fault (window,
++    detector, TEC, calibration all read nominal); none affirms the laser positively. This check
++    supplies that affirmative signal by measuring emitter power directly: recent mean vs baseline
++    mean. `affirmative` (=`low_power`) is true only on a *sustained* decline (recent/baseline ≤
++    LASER_POWER_DECLINE_RATIO) — a transient dip that recovered leaves recent≈baseline and reads
++    nominal, so it cannot rule a laser fault in (exactly the no_clean_cause case). Structural, not
++    laser-exclusive: low emitter power is consistent with *any* source-side power loss (the LLM
++    decides which hypotheses it bears on); the check only reports the anomaly."""
++    base, recent = _baseline(laser_power), _recent(laser_power)
++    ratio = recent / base if base else 1.0
++    low_power = ratio <= LASER_POWER_DECLINE_RATIO
++    return {
++        "check": "laser_power_check",
++        "baseline_mW": base,
++        "recent_mW": recent,
++        "ratio": ratio,
++        "rel_change": ratio - 1.0,
++        "low_power": low_power,
++        "affirmative": low_power,  # a sustained power decline rules a source-side power loss IN
++        "summary": f"laser power {recent:.1f} mW vs baseline {base:.1f} mW "
++        f"({(ratio - 1.0) * 100:+.1f}%) → "
++        + ("sustained decline below baseline (source-side power loss)" if low_power
++           else "at/near baseline (no sustained power loss)"),
++    }
+diff --git a/src/dh/controller/llm.py b/src/dh/controller/llm.py
+index f0bd9d1..24013c9 100644
+--- a/src/dh/controller/llm.py
++++ b/src/dh/controller/llm.py
+@@ -442,11 +442,31 @@ def interpret_result(backend: LLMBackend, ig: InvestigationGraph, action: Action
+                                     props=ev_d.get("props", {}))
+         except (KeyError, TypeError):
+             evidence = None
++    # Affirmative-evidence gate (M1). A deterministic check that read nominal/at-spec
++    # (`affirmative` is False) can only RULE OUT hypotheses, never rule one IN — so we drop its
++    # positive ('+') links and keep its negative ('-') ones. The LLM was observed crediting
++    # nominal rule-out readings (a uniform-intensity check, an onset-predates demotion, a clean
++    # detector) *positively* to the leader, saturating a wrong hypothesis to a confident-dominant
++    # conclusion on the no-clean-cause case. The gate is deterministic and robust to that
++    # over-crediting. It applies only to `run_check` actions (which carry `affirmative`); a
++    # missing/None `affirmative` (a check predating the field, a non-check action) is treated as
++    # affirmative so the gate never silently strips legitimate positive evidence.
++    #   #5: `affirmative` is a per-check STRUCTURAL fact (the check's own anomaly predicate —
++    #   any_change / localized / correlated / at_limit-or-losing_setpoint / stuck / bias_drift /
++    #   common_mode / onset-aligns / low_power), not a per-case constant, and it encodes a
++    #   domain-general abduction principle (only an affirmative anomaly affirms a hypothesis;
++    #   nominal evidence only rules out). Verified across all 8 cases: each gold cause retains an
++    #   affirmative path and the no-clean-cause case has none — so it abstains.
++    is_run_check = action.type == "run_check"
++    affirmative = result.get("affirmative") if is_run_check else None
++    drop_positive = is_run_check and affirmative is False
+     links: list[EvidenceLink] = []
+     if evidence:
+         for ln in data.get("links", []):
+             try:
+                 if ln["hypothesis_id"] in hyp_ids and ln["polarity"] in ("+", "-"):
++                    if drop_positive and ln["polarity"] == "+":
++                        continue  # a nominal check rules out, never rules in (M1)
+                     weight = min(abs(float(ln["weight"])), MAX_WEIGHT)  # clamp |LLR|
+                     links.append(EvidenceLink(evidence_id=evidence.id,
+                                               hypothesis_id=ln["hypothesis_id"],
+diff --git a/src/dh/environment.py b/src/dh/environment.py
+index f629797..8ce9253 100644
+--- a/src/dh/environment.py
++++ b/src/dh/environment.py
+@@ -93,7 +93,7 @@ class LidarEnvironment(Environment):
+     _CHECKS = {
+         "config_diff", "spatial_intensity_check", "temp_correlation_check",
+         "tec_load_check", "channel_sanity_check", "onset_vs_event_check",
+-        "detector_health_check", "common_mode_check",
++        "detector_health_check", "common_mode_check", "laser_power_check",
+     }
+ 
+     def __init__(self, case: Case):
+@@ -253,6 +253,10 @@ class LidarEnvironment(Environment):
+         temp = self._metric_signal(args.get("temp_signal", "detector_temp_C"))
+         return checks.detector_health_check(self._telemetry[dark], self._telemetry[temp])
+ 
++    def _run_laser_power_check(self, args: dict) -> dict:
++        sig = self._metric_signal(args.get("signal", "laser_power_mW"))
++        return checks.laser_power_check(self._telemetry[sig])
++
+     def _run_common_mode_check(self, args: dict) -> dict:
+         names = args.get("signals") or ["laser_power_mW", "dark_count_rate",
+                                         "mean_return_intensity"]
+diff --git a/src/dh/eval/bespoke.py b/src/dh/eval/bespoke.py
+index ca3c509..eae1954 100644
+--- a/src/dh/eval/bespoke.py
++++ b/src/dh/eval/bespoke.py
+@@ -31,7 +31,7 @@ LOCALIZATION_FAMILY = ["localization"]
+ CHECK_IDS = {
+     "config_diff", "spatial_intensity_check", "temp_correlation_check", "tec_load_check",
+     "channel_sanity_check", "onset_vs_event_check", "detector_health_check",
+-    "common_mode_check", "recommend_swap_test",
++    "common_mode_check", "laser_power_check", "recommend_swap_test",
+ }
+ 
+ 

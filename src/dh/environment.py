@@ -93,7 +93,7 @@ class LidarEnvironment(Environment):
     _CHECKS = {
         "config_diff", "spatial_intensity_check", "temp_correlation_check",
         "tec_load_check", "channel_sanity_check", "onset_vs_event_check",
-        "detector_health_check", "common_mode_check",
+        "detector_health_check", "common_mode_check", "laser_power_check",
     }
 
     def __init__(self, case: Case):
@@ -252,6 +252,10 @@ class LidarEnvironment(Environment):
         dark = self._metric_signal(args.get("dark_signal", "dark_count_rate"))
         temp = self._metric_signal(args.get("temp_signal", "detector_temp_C"))
         return checks.detector_health_check(self._telemetry[dark], self._telemetry[temp])
+
+    def _run_laser_power_check(self, args: dict) -> dict:
+        sig = self._metric_signal(args.get("signal", "laser_power_mW"))
+        return checks.laser_power_check(self._telemetry[sig])
 
     def _run_common_mode_check(self, args: dict) -> dict:
         names = args.get("signals") or ["laser_power_mW", "dark_count_rate",

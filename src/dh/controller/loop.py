@@ -29,7 +29,7 @@ from dh.controller.llm import (
     synthesize,
 )
 from dh.environment import Environment, NotSupported
-from dh.schemas import Answer, EvidenceItem, EvidenceLink, InvestigationGraph
+from dh.schemas import Answer, EvidenceItem, EvidenceLink, Hypothesis, InvestigationGraph
 
 # Deterministic weight for the change-is-cause promotion (mirrors the demote side). Sized like a
 # strong-but-not-saturating discriminator (≈ one concordant LLM item, |LLR|≈1.5) so it makes a
@@ -72,6 +72,38 @@ def _seed_candidates(env: Environment) -> list[dict]:
             if p.type in ("part_type", "part_version"):  # not config (those part_of a subsystem too)
                 candidates[p.id] = p.name
     return [{"id": i, "name": n} for i, n in candidates.items()]
+
+
+def _seed_upstream_coverage(ig: InvestigationGraph, env: Environment,
+                            candidates: list[dict]) -> None:
+    """Guarantee that common *upstream* causes are in the differential, whatever the LLM picked.
+
+    The LLM may seed the differential at part granularity and silently omit a shared upstream
+    subsystem — but a single upstream cause is precisely what a common-mode failure looks like, so
+    if it is not a hypothesis the promotion sweep has nothing to credit and the surface decoys win.
+    This closes the gap structurally: for every subsystem in the `_seed_candidates` menu that the
+    LLM omitted, add it as a hypothesis (at prior, no evidence) **iff** it is an `affects`-ancestor
+    of some subsystem already in the differential — i.e. an upstream convergence point a single
+    cause could occupy. It is NOT keyed to any case/subsystem: it reads the candidate menu the
+    navigation already surfaced and the graph's own `affects` topology. A purely downstream omitted
+    candidate is not added (no spurious hypotheses); an added upstream hypothesis sits at prior and
+    is ruled out by negative evidence unless a promotion credits it — so it can only *enable* the
+    right answer, never manufacture a wrong one (#5)."""
+    case = getattr(env, "_case", None)
+    if case is None:
+        return
+    cand_subs = {c["id"] for c in candidates if c["id"].startswith("sub.")}
+    have = {s for h in ig.hypotheses if (s := _subsystem_of(case, h.node_ref))}
+    missing = cand_subs - have
+    if not missing:
+        return
+    # the subsystems already represented are the ones an upstream cause must converge on
+    upstream = set().union(*(_affects_ancestors(case, s) for s in have)) if have else set()
+    names = {c["id"]: c.get("name", c["id"]) for c in candidates}
+    for sid in sorted(missing & upstream):
+        ig.hypotheses.append(Hypothesis(
+            id=f"hyp.upstream_{sid.split('.')[-1]}",
+            label=f"{names.get(sid, sid)} (shared upstream cause)", node_ref=sid))
 
 
 def _playbook_text(env: Environment) -> str | None:
@@ -155,8 +187,34 @@ def _signal_to_metric_id(env: Environment, signal: str) -> str:
     return signal
 
 
-_CM_PROMOTE_WEIGHT = 1.5    # |LLR| for the shared upstream cause (≈7× odds; clears τ_dom with margin)
-_CM_DECOY_WEIGHT = 0.8      # |LLR| against each surface decoy (common-mode argues against indep faults)
+# The common-mode signature is one piece of evidence with a symmetric reading: it is exactly as
+# strong FOR the convergent upstream cause as it is AGAINST each surface channel being an
+# *independent* fault (the channels co-moved, so the per-channel positive credits are consequences,
+# not separate causes). So the promote and the decoy-demote share one weight — a single |LLR| sized
+# like a strong-but-not-saturating discriminator (≈7× odds). Using equal magnitudes is the
+# principled choice, not a tuning knob: an asymmetric pair would assert the same datum means more in
+# one direction than the other.
+_CM_WEIGHT = 1.5
+_CM_PROMOTE_WEIGHT = _CM_WEIGHT  # |LLR| for the shared upstream cause
+_CM_DECOY_WEIGHT = _CM_WEIGHT    # |LLR| against each surface decoy (the independent-fault reading)
+
+
+def _subsystem_of(case, node_ref: str | None) -> str | None:
+    """The subsystem a part/config belongs to (`part_of`), or the node itself if it already is a
+    subsystem. Lets a promotion match hypotheses regardless of the granularity the LLM seeded at
+    (`part.detector` vs `sub.detector`) — the same part_of family the eval canonicalises over."""
+    if not node_ref:
+        return None
+    for e in case.graph.edges:
+        if e.type == "part_of" and e.src == node_ref:
+            return e.dst
+    return node_ref if node_ref.startswith("sub.") else None
+
+
+def _hyps_in_subsystems(ig: InvestigationGraph, case, subs: set[str]) -> list:
+    """Hypotheses whose node_ref is one of `subs` OR is `part_of`/within one of them."""
+    return [h for h in ig.hypotheses
+            if h.node_ref in subs or _subsystem_of(case, h.node_ref) in subs]
 
 
 def _affects_ancestors(case, node_id: str) -> set[str]:
@@ -267,16 +325,20 @@ def _promote_common_mode(ig: InvestigationGraph, env: Environment, known_ids) ->
         ig.evidence.append(EvidenceItem(
             id=ev_id, source="common_mode_check",
             summary=cm.get("summary", "common-mode signature: one upstream cause, not independent faults")))
-    target_subs = promoted
-    for h in ig.hypotheses:
-        if h.node_ref in target_subs:
-            if not any(ln.evidence_id == ev_id and ln.hypothesis_id == h.id for ln in ig.links):
-                ig.links.append(EvidenceLink(evidence_id=ev_id, hypothesis_id=h.id,
-                                             polarity="+", weight=_CM_PROMOTE_WEIGHT))
-        elif h.node_ref in deg_subs:  # the surface decoys the common-mode reading argues against
-            if not any(ln.evidence_id == ev_id and ln.hypothesis_id == h.id for ln in ig.links):
-                ig.links.append(EvidenceLink(evidence_id=ev_id, hypothesis_id=h.id,
-                                             polarity="-", weight=_CM_DECOY_WEIGHT))
+    # Match by subsystem family, not exact node_ref: a hypothesis seeded at PART granularity
+    # (e.g. `part.detector`) is part_of a degraded subsystem (`sub.detector`) and a `part.X`
+    # upstream-cause hypothesis is part_of the promoted subsystem. Without this the promotion
+    # fires but attaches zero links whenever the LLM seeded parts rather than subsystems.
+    target_hyps = _hyps_in_subsystems(ig, case, promoted)
+    decoy_hyps = [h for h in _hyps_in_subsystems(ig, case, deg_subs) if h not in target_hyps]
+    for h in target_hyps:
+        if not any(ln.evidence_id == ev_id and ln.hypothesis_id == h.id for ln in ig.links):
+            ig.links.append(EvidenceLink(evidence_id=ev_id, hypothesis_id=h.id,
+                                         polarity="+", weight=_CM_PROMOTE_WEIGHT))
+    for h in decoy_hyps:  # the surface decoys the common-mode reading argues against
+        if not any(ln.evidence_id == ev_id and ln.hypothesis_id == h.id for ln in ig.links):
+            ig.links.append(EvidenceLink(evidence_id=ev_id, hypothesis_id=h.id,
+                                         polarity="-", weight=_CM_DECOY_WEIGHT))
 
 
 def _change_cause_subsystem(env: Environment, event_id: str) -> str | None:
@@ -309,13 +371,19 @@ def _change_cause_subsystem(env: Environment, event_id: str) -> str | None:
     return None
 
 
-def _promote_change_cause(ig: InvestigationGraph, event_id: str, subsystem_id: str) -> None:
+def _promote_change_cause(ig: InvestigationGraph, env: Environment, event_id: str,
+                          subsystem_id: str) -> None:
     """Credit the hypothesis implicated by an aligned recent change with a positive belief link.
 
-    Match the hypothesis by `node_ref`: the subsystem itself, or any config/part that is the
-    subsystem (the differential may carry either granularity). Idempotent — re-running adds no
+    Match the hypothesis by subsystem family — its node_ref is the subsystem itself OR is a
+    config/part `part_of` it (the differential may carry either granularity; a part-granularity
+    seed would otherwise miss the subsystem-level change cause). Idempotent — re-running adds no
     duplicate link/evidence. Adds to belief math (a link), not just the synthesize prompt."""
-    targets = [h for h in ig.hypotheses if h.node_ref == subsystem_id]
+    case = getattr(env, "_case", None)
+    if case is None:
+        targets = [h for h in ig.hypotheses if h.node_ref == subsystem_id]
+    else:
+        targets = _hyps_in_subsystems(ig, case, {subsystem_id})
     if not targets:
         return
     evid = f"ev.change_cause_{event_id}"
@@ -376,7 +444,7 @@ def _finalize_conflicts(ig: InvestigationGraph, env: Environment, known_ids) -> 
             else:
                 sub = _change_cause_subsystem(env, latest.id)
                 if sub is not None:
-                    _promote_change_cause(ig, latest.id, sub)
+                    _promote_change_cause(ig, env, latest.id, sub)
 
     # 2) flag any stuck/lying channel
     try:
@@ -413,8 +481,9 @@ def diagnose(
     known_ids = env.node_ids() if hasattr(env, "node_ids") else None  # type: ignore[attr-defined]
 
     ig = InvestigationGraph(symptom=env.symptom())
-    ig.hypotheses = seed_hypotheses(backend, ig.symptom, _seed_candidates(env),
-                                    _playbook_text(env))
+    candidates = _seed_candidates(env)
+    ig.hypotheses = seed_hypotheses(backend, ig.symptom, candidates, _playbook_text(env))
+    _seed_upstream_coverage(ig, env, candidates)  # don't let the LLM drop an upstream cause
     beliefs.update_beliefs(ig, prior)
     _snapshot(ig)
     _trace_step(ig, action="seed", args=None, rationale="seed the differential from the symptom",

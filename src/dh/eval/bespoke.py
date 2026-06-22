@@ -31,7 +31,7 @@ LOCALIZATION_FAMILY = ["localization"]
 CHECK_IDS = {
     "config_diff", "spatial_intensity_check", "temp_correlation_check", "tec_load_check",
     "channel_sanity_check", "onset_vs_event_check", "detector_health_check",
-    "common_mode_check", "recommend_swap_test",
+    "common_mode_check", "laser_power_check", "recommend_swap_test",
 }
 
 

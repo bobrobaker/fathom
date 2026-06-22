@@ -442,11 +442,31 @@ def interpret_result(backend: LLMBackend, ig: InvestigationGraph, action: Action
                                     props=ev_d.get("props", {}))
         except (KeyError, TypeError):
             evidence = None
+    # Affirmative-evidence gate (M1). A deterministic check that read nominal/at-spec
+    # (`affirmative` is False) can only RULE OUT hypotheses, never rule one IN — so we drop its
+    # positive ('+') links and keep its negative ('-') ones. The LLM was observed crediting
+    # nominal rule-out readings (a uniform-intensity check, an onset-predates demotion, a clean
+    # detector) *positively* to the leader, saturating a wrong hypothesis to a confident-dominant
+    # conclusion on the no-clean-cause case. The gate is deterministic and robust to that
+    # over-crediting. It applies only to `run_check` actions (which carry `affirmative`); a
+    # missing/None `affirmative` (a check predating the field, a non-check action) is treated as
+    # affirmative so the gate never silently strips legitimate positive evidence.
+    #   #5: `affirmative` is a per-check STRUCTURAL fact (the check's own anomaly predicate —
+    #   any_change / localized / correlated / at_limit-or-losing_setpoint / stuck / bias_drift /
+    #   common_mode / onset-aligns / low_power), not a per-case constant, and it encodes a
+    #   domain-general abduction principle (only an affirmative anomaly affirms a hypothesis;
+    #   nominal evidence only rules out). Verified across all 8 cases: each gold cause retains an
+    #   affirmative path and the no-clean-cause case has none — so it abstains.
+    is_run_check = action.type == "run_check"
+    affirmative = result.get("affirmative") if is_run_check else None
+    drop_positive = is_run_check and affirmative is False
     links: list[EvidenceLink] = []
     if evidence:
         for ln in data.get("links", []):
             try:
                 if ln["hypothesis_id"] in hyp_ids and ln["polarity"] in ("+", "-"):
+                    if drop_positive and ln["polarity"] == "+":
+                        continue  # a nominal check rules out, never rules in (M1)
                     weight = min(abs(float(ln["weight"])), MAX_WEIGHT)  # clamp |LLR|
                     links.append(EvidenceLink(evidence_id=evidence.id,
                                               hypothesis_id=ln["hypothesis_id"],
