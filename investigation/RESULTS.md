@@ -247,6 +247,59 @@ claim, not the exact magnitude.
   (surface common upstream subsystems as hypotheses) + node-ref granularity reconciliation before
   the promotion can land.** Fixable, but more than the current patch.
 
+## Round 2 — fixing M1 + case8 (the two that failed live)
+
+Per the goal "make case5 and case8 succeed live," two further fixes were built (spike+audit), integrated, and **live-confirmed**:
+
+- **M1 fix — affirmative-evidence gate** (`investigation/audits/m1.md`, patch `m1.diff`). Each check
+  in `checks.py` carries a structural `affirmative` flag ("found a positive anomaly"); in
+  `interpret_result`, a `run_check` whose result is NOT affirmative can no longer mint POSITIVE
+  links — nominal evidence rules out, never rules in. Plus a new `laser_power_check` so laser (which
+  was diagnosed only by elimination — exactly what let case5 confabulate) has a real affirmative
+  signal. #5: a domain-general abduction principle, per-check structural predicates, no case keys.
+- **case8 fix — seeding coverage + granularity match** (`investigation/audits/case8_v2.md`, patch
+  `case8_v2.diff`). `_seed_upstream_coverage` guarantees a common upstream subsystem the LLM omits
+  (live, it seeds parts and never proposes `sub.power`) is added as a hypothesis iff it's an
+  affects-ancestor of a seeded subsystem; promotions now match `part.*` hypotheses to `sub.*`
+  targets via `part_of`. #5: keyed on graph topology, fires only on case8 across the 8.
+
+Combined deterministic suite: **189 passed, 1 skipped, 1 xfailed.**
+
+### Live results (round 2, n=1, budget 8)
+- **case5 → PASS (robust):** `answer=abstain`, acc 1.0. With no affirmative anomaly, no hypothesis
+  gets confident; the controller abstains. The M1 gate works live.
+- **case8 → PASS but FRAGILE:** `answer=cause root=sub.power`, acc 1.0 — BUT margin is **0.028**
+  (`sub.power` 0.953 vs `laser_aging` decoy 0.924). Two honest problems:
+  1. **The new `laser_power_check` credits the laser decoy on case8.** The common-mode power sag
+     genuinely drops laser power, so `laser_power_check` fires affirmative → +2.0 to `laser_aging`;
+     the LLM adds +2.0 from its own common_mode reading; the deterministic common-mode demotion
+     (−1.5) only partly counters → laser ends at 0.924. The M1 fix (good for case2) and the
+     common-mode case interact adversely here.
+  2. **The abstain gate is advisory, not enforced.** `synthesize` keeps the LLM's `answer_type`
+     even when the gate computed `abstain=True`. case8's gate said abstain (margin 0.028 ≤ 0.20);
+     the LLM overrode it and named `sub.power` (correct). Had it obeyed — as it did on case5 —
+     case8 would have abstained → acc 0. **So case8's live pass rests on the LLM disobeying an
+     advisory abstain instruction and happening to name the right leader.**
+
+### Cost regression (real, expected)
+Fixing M1 makes the controller **~2.5× more expensive** (case5: 191k vs 77k tokens; ~10–15 min/live
+run). Cause: it no longer saturates a wrong leader early, so it explores to budget instead of
+early-stopping on a confident-wrong conclusion. Correctness costs exploration — this worsens the
+"controller is most expensive" finding (Row 7), honestly.
+
+### What is NOT verified (user opted to trust the suite)
+Round-2 fixes (esp. the M1 gate and `laser_power_check`) change behavior on ALL cases, but
+case1,2,3,4,6,7 were **not** live-re-confirmed under v2 — the 189-passing deterministic suite is the
+regression evidence. The flagged live risk is **case2**: post-M1, laser concludes ONLY if the LLM
+runs `laser_power_check`; if it doesn't, case2 falsely abstains. Unverified live.
+
+### To make case8 robust (next iteration, not yet done)
+Either (a) suppress `laser_power_check`'s credit to surface channels when a common-mode signature is
+present (the power loss is explained by the upstream cause, not an independent laser fault), and/or
+(b) strengthen the common-mode decoy demotion so `sub.power` is dominant by a real margin (>0.20),
+and (c) decide whether the abstain gate should be **enforced** (authoritative) rather than advisory
+— which would make case5 robust but would currently break case8 until (a)/(b) lift its margin.
+
 ### The honest takeaway
 The investigation found and fixed **real, general, #5-defensible mechanism bugs** (M2/M3
 sweep→beliefs + symmetric promotion, M4 margin gate, M5 evidence-availability, the synthesis

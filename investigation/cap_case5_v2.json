@@ -1,0 +1,522 @@
+{
+  "case_id": "case5",
+  "fault": "no_clean_cause",
+  "salient_is_cause": null,
+  "ground_truth": {
+    "root_cause": null,
+    "causal_chain": [],
+    "trigger": "log.reboot",
+    "conflicts": [
+      "log.reboot"
+    ],
+    "load_bearing_evidence": []
+  },
+  "answer": {
+    "answer_type": "abstain",
+    "root_cause": null,
+    "causal_chain": [],
+    "cited_evidence": [
+      "ev.onset_vs_reboot",
+      "ev.laser_power_nominal",
+      "ev.tec_load_nominal",
+      "ev.detector_health_nominal",
+      "ev.common_mode_negative",
+      "ev.channel_sanity_detector_temp",
+      "ev.spatial_intensity_nominal",
+      "ev.config_diff_negative",
+      "ev.trigger_demoted"
+    ],
+    "conflicts": [
+      "log.reboot"
+    ],
+    "recommended_action": "All six candidate hypotheses are independently ruled out by direct measurement: laser output is nominal (ev.laser_power_nominal), TEC loop has ample headroom and holds setpoint (ev.tec_load_nominal, ev.channel_sanity_detector_temp), detector dark-current and bias are stable (ev.detector_health_nominal), no config or firmware change is present (ev.config_diff_negative), intensity degradation is spatially uniform ruling out optic smear (ev.spatial_intensity_nominal), and no common-mode multi-channel signature exists (ev.common_mode_negative). Critically, degradation onset at t\u22487.5 predates the maintenance reboot at t=8.0, so maintenance is non-causal (ev.onset_vs_reboot). The symptom is real but no instrumented failure mode explains it. Recommended next steps: (1) Capture raw return waveforms at full temporal resolution during the next fluctuation to inspect pulse shape, return-energy distribution, and timing jitter \u2014 these may reveal a mechanical or intermittent signal-path anomaly (e.g., loose optical mount, vibration-induced beam walk) not visible in steady-state telemetry. (2) Inspect the optical bench for any mechanical loosening predating t=7.5. (3) Correlate fluctuation timing with environmental vibration or platform motion logs to test a vibration-induced misalignment hypothesis not covered by the current hypothesis set."
+  },
+  "score": {
+    "accuracy": 1.0,
+    "localization": 1.0,
+    "evidence_f1": 0.0,
+    "conflict_handling": 1.0,
+    "trigger_discrimination": 1.0,
+    "abstention_calibration": 1.0,
+    "cost_tokens": 191567
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "label": "Window contamination introduced at or around maintenance (smear/residue on optic causing intermittent scatter)",
+      "log_odds": -3.0,
+      "status": "ruled_out",
+      "node_ref": "part.window"
+    },
+    {
+      "id": "H2",
+      "label": "Calibration drift or misconfiguration post-maintenance (parameter/firmware mismatch causing range offset)",
+      "log_odds": -3.0,
+      "status": "ruled_out",
+      "node_ref": "sub.calibration"
+    },
+    {
+      "id": "H3",
+      "label": "Laser aging / output power degradation producing intermittent low-SNR returns",
+      "log_odds": -3.0,
+      "status": "ruled_out",
+      "node_ref": "part.laser_module"
+    },
+    {
+      "id": "H4",
+      "label": "TEC/thermal instability causing detector operating-point drift under varying load",
+      "log_odds": -3.0,
+      "status": "ruled_out",
+      "node_ref": "part.tec"
+    },
+    {
+      "id": "H5",
+      "label": "Detector dark-current or gain drift independent of thermal control",
+      "log_odds": -3.0,
+      "status": "ruled_out",
+      "node_ref": "part.detector"
+    },
+    {
+      "id": "hyp.upstream_power",
+      "label": "Scanner / power (shared upstream cause)",
+      "log_odds": -3.0,
+      "status": "ruled_out",
+      "node_ref": "sub.power"
+    }
+  ],
+  "links": [
+    {
+      "evidence_id": "ev.onset_vs_reboot",
+      "hypothesis_id": "H1",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.onset_vs_reboot",
+      "hypothesis_id": "H2",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.laser_power_nominal",
+      "hypothesis_id": "H3",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.laser_power_nominal",
+      "hypothesis_id": "hyp.upstream_power",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.laser_power_nominal",
+      "hypothesis_id": "H4",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.laser_power_nominal",
+      "hypothesis_id": "H5",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.tec_load_nominal",
+      "hypothesis_id": "H4",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.detector_health_nominal",
+      "hypothesis_id": "H5",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.detector_health_nominal",
+      "hypothesis_id": "H4",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev.detector_health_nominal",
+      "hypothesis_id": "H3",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.common_mode_negative",
+      "hypothesis_id": "hyp.upstream_power",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.common_mode_negative",
+      "hypothesis_id": "H2",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.common_mode_negative",
+      "hypothesis_id": "H3",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.common_mode_negative",
+      "hypothesis_id": "H4",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev.common_mode_negative",
+      "hypothesis_id": "H1",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev.common_mode_negative",
+      "hypothesis_id": "H5",
+      "polarity": "-",
+      "weight": 0.5
+    },
+    {
+      "evidence_id": "ev.channel_sanity_detector_temp",
+      "hypothesis_id": "H4",
+      "polarity": "-",
+      "weight": 1.5
+    },
+    {
+      "evidence_id": "ev.channel_sanity_detector_temp",
+      "hypothesis_id": "H5",
+      "polarity": "-",
+      "weight": 1.0
+    },
+    {
+      "evidence_id": "ev.channel_sanity_detector_temp",
+      "hypothesis_id": "H1",
+      "polarity": "-",
+      "weight": 0.3
+    },
+    {
+      "evidence_id": "ev.channel_sanity_detector_temp",
+      "hypothesis_id": "H2",
+      "polarity": "-",
+      "weight": 0.3
+    },
+    {
+      "evidence_id": "ev.channel_sanity_detector_temp",
+      "hypothesis_id": "H3",
+      "polarity": "-",
+      "weight": 0.3
+    },
+    {
+      "evidence_id": "ev.channel_sanity_detector_temp",
+      "hypothesis_id": "hyp.upstream_power",
+      "polarity": "-",
+      "weight": 0.3
+    },
+    {
+      "evidence_id": "ev.spatial_intensity_nominal",
+      "hypothesis_id": "H1",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.config_diff_negative",
+      "hypothesis_id": "H2",
+      "polarity": "-",
+      "weight": 2.0
+    },
+    {
+      "evidence_id": "ev.config_diff_negative",
+      "hypothesis_id": "hyp.upstream_power",
+      "polarity": "-",
+      "weight": 0.5
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev.onset_vs_reboot",
+      "summary": "Degradation of effective_max_range_m began at t\u22487.5, which predates log.reboot at t=8.0 by ~0.5 time units. The reboot is therefore coincident with maintenance, not a causal trigger. Any hypothesis that requires the cause to have been introduced at or after maintenance is disfavoured.",
+      "source": "onset_vs_event_check"
+    },
+    {
+      "id": "ev.laser_power_nominal",
+      "summary": "Laser output power measured at 48.2 mW vs baseline 48.1 mW (+0.17%); ratio 1.0017, low_power=false. Output is stable and at-spec with no sustained loss. This directly contradicts a laser-aging or output-degradation cause, and argues against any shared upstream power fault affecting the laser rail.",
+      "source": "laser_power_check"
+    },
+    {
+      "id": "ev.tec_load_nominal",
+      "summary": "TEC current is 1.19 A \u2014 47% of the 2.5 A limit \u2014 with no saturation (at_limit=false). Diode temperature is 25.28 \u00b0C against a setpoint max of 26.0 \u00b0C, and losing_setpoint=false, confirming the thermal control loop is actively maintaining the operating point with ample headroom. There is no evidence of TEC saturation, thermal runaway, or loss of setpoint under the current load, which directly argues against load-driven detector operating-point drift as the source of range fluctuation.",
+      "source": "tec_load_check"
+    },
+    {
+      "id": "ev.detector_health_nominal",
+      "summary": "Detector health check is fully nominal: dark-count rise is ~0.31% (effectively zero), detector temperature rise is ~0.008\u00b0C (effectively zero), bias_drift=false, and the channel is confirmed live (detector_temp_live=true). No isolated detector bias, dark-current elevation, or gain-drift signature is present. This directly refutes H5 (detector dark-current or gain drift independent of thermal control) \u2014 the last remaining open hypothesis \u2014 and provides additional corroboration against H4 (thermal-driven detector operating-point drift).",
+      "source": "detector_health_check"
+    },
+    {
+      "id": "ev.common_mode_negative",
+      "summary": "Common-mode check found 0 degraded channels with onset spread of 0.00 days and common_mode=false. No shared degradation signature exists across channels. This is the strongest available argument against a shared upstream cause (hyp.upstream_power), which by definition requires simultaneous multi-channel impact. It also argues against H2 (firmware/parameter misconfiguration, which would propagate uniformly to all channels) and H3 (shared laser rail degradation, already ruled out on power grounds). H1 (per-channel optic smear), H4 (single detector TEC), and H5 (per-channel bias/gain drift) are less strongly disfavoured because those failure modes could in principle be single-channel; nonetheless the clean zero-degraded-channel result provides mild additional evidence against any systemic component of those hypotheses.",
+      "source": "common_mode_check"
+    },
+    {
+      "id": "ev.channel_sanity_detector_temp",
+      "summary": "Channel sanity check confirms detector_temp_C is live and not stuck: variance \u2248 5.05e-03, stuck=false. The signal is responsive under changing conditions, validating the reliability of all prior detector_temp_C readings (including those underpinning ev.tec_load_nominal and ev.detector_health_nominal). A live, non-stuck thermal channel means any genuine thermal operating-point excursion would have been captured; its absence in prior checks is therefore trustworthy and not an artefact of a frozen sensor. This provides additional mild evidence against H4 (thermal instability would plausibly manifest as anomalous variance or drift in this channel) and confirms the evidentiary weight of the detector health nominal result that already ruled out H5.",
+      "source": "channel_sanity_check"
+    },
+    {
+      "id": "ev.spatial_intensity_nominal",
+      "summary": "Spatial intensity check across 4 regions returns spread=0.072, localized=false, affirmative=false. The intensity drop is uniform across all spatial regions. Window contamination (smear or residue on the optic) would produce a spatially localized intensity deficit confined to the region subtended by the contaminant; the observed uniformity directly and strongly refutes H1. Uniformity is weakly consistent with global or systemic causes (laser output degradation, calibration offset, thermal operating-point drift, detector gain drift, upstream power fault) because those failure modes would attenuate returns uniformly across the field \u2014 however all such hypotheses are already independently ruled out by prior evidence, so this result provides only mild incremental support to them.",
+      "source": "spatial_intensity_check"
+    },
+    {
+      "id": "ev.config_diff_negative",
+      "summary": "Config diff returned no changed parameters (changed=[], any_change=false, affirmative=false). No configuration file, firmware parameter, or calibration coefficient was modified at or around maintenance. This is a direct and strong refutation of H2 (calibration drift or misconfiguration post-maintenance): that hypothesis requires a parameter or firmware change as its causal mechanism, and none is present. The result is neutral for all remaining hypotheses (H1, H3, H4, H5, hyp.upstream_power) whose failure modes do not depend on software or configuration state; it provides weak additional evidence against hyp.upstream_power insofar as a power-rail misconfiguration would also have appeared here.",
+      "source": "config_diff"
+    },
+    {
+      "id": "ev.trigger_demoted",
+      "summary": "log.reboot: degradation onset predates it \u2192 coincident, not causal",
+      "source": "onset_vs_event_check"
+    }
+  ],
+  "ig_conflicts": [
+    "log.reboot"
+  ],
+  "trace": [
+    {
+      "action": "seed",
+      "args": {},
+      "rationale": "seed the differential from the symptom",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.5,
+        "H2": 0.5,
+        "H3": 0.5,
+        "H4": 0.5,
+        "H5": 0.5,
+        "hyp.upstream_power": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "onset_vs_event_check",
+        "event": "last_maintenance"
+      },
+      "rationale": "No evidence has been collected yet, and all hypotheses sit at equal prior. The symptom is described as occurring 'around' the last maintenance \u2014 but that temporal framing is ambiguous. Before attributing cause to maintenance (H1 window contamination, H2 calibration misconfiguration), we must establish whether the range fluctuation onset strictly post-dates maintenance or predates it. If onset predates maintenance, H1 and H2 are demoted to non-causal (maintenance may be a trigger or coincidence), and weight shifts to chronic/independent mechanisms (H3 laser aging, H4 TEC drift, H5 dark-current drift, hyp.upstream_power). If onset aligns with or follows maintenance, H1 and H2 are elevated and the independent-degradation hypotheses are relatively suppressed. This single check partitions the hypothesis space along its most informative axis without requiring any channel measurement, and avoids the error of assuming the salient recent event is causal before verifying temporal ordering.",
+      "voi": 0.88,
+      "evidence_id": "ev.onset_vs_reboot",
+      "conflicts_added": [
+        "log.reboot"
+      ],
+      "leader": "H3",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.119,
+        "H2": 0.119,
+        "H3": 0.5,
+        "H4": 0.5,
+        "H5": 0.5,
+        "hyp.upstream_power": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "laser_power_check"
+      },
+      "rationale": "H1 and H2 are ruled out; the four remaining open hypotheses (H3, H4, H5, hyp.upstream_power) are equally weighted. H3 (laser aging/power degradation) is the only hypothesis that directly predicts reduced SNR \u2192 intermittent effective-range drop, and its pre-maintenance onset (ev.onset_vs_reboot) is consistent with gradual aging rather than a maintenance-triggered event. A laser_power_check is the sharpest single test here: (a) if laser output is measurably degraded, H3 is strongly confirmed and H4/H5/upstream are disfavoured as primary causes; (b) if laser output is nominal and stable, H3 is effectively ruled out and probability mass shifts cleanly onto the thermal/detector cluster (H4, H5) and upstream_power \u2014 narrowing the differential from four to three and focusing the next round on thermal vs. detector discrimination. No other single check at this stage simultaneously excludes the most physically direct explanation while sharply redirecting suspicion.",
+      "voi": 0.85,
+      "evidence_id": "ev.laser_power_nominal",
+      "conflicts_added": [],
+      "leader": "H4",
+      "leader_conf": 0.378,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.119,
+        "H2": 0.119,
+        "H3": 0.119,
+        "H4": 0.378,
+        "H5": 0.378,
+        "hyp.upstream_power": 0.119
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "tec_load_check"
+      },
+      "rationale": "H4 (TEC/thermal instability \u2192 detector operating-point drift under varying load) and H5 (detector dark-current or gain drift independent of thermal control) are the only open hypotheses and are currently at equal log-odds (-0.50 each). The causal chain in H4 requires the TEC to be failing to maintain setpoint under load, producing temperature excursions that shift the detector operating point; H5 predicts the detector drifts even when TEC is well-controlled. tec_load_check directly probes the H4 mechanism: elevated duty-cycle, load spikes, or temperature deviation from setpoint under varying conditions would raise H4 and lower H5; a nominal, stable TEC trace rules out H4's prerequisite and forces H5 as the surviving explanation. No prior evidence addresses TEC state (ev.laser_power_nominal and ev.onset_vs_reboot are silent on TEC), so this is new information. The check result moves the two leading hypotheses in opposite directions \u2014 maximum expected discrimination.",
+      "voi": 0.87,
+      "evidence_id": "ev.tec_load_nominal",
+      "conflicts_added": [],
+      "leader": "H5",
+      "leader_conf": 0.378,
+      "margin": 0.258,
+      "confidences": {
+        "H1": 0.119,
+        "H2": 0.119,
+        "H3": 0.119,
+        "H4": 0.076,
+        "H5": 0.378,
+        "hyp.upstream_power": 0.119
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "detector_health_check"
+      },
+      "rationale": "H5 (detector dark-current or gain drift independent of thermal control) is the sole remaining open hypothesis. H3 is ruled out by ev.laser_power_nominal (laser output stable at 48.2 mW), H4 is ruled out by ev.tec_load_nominal (TEC holding setpoint at 25.28 \u00b0C with 53% headroom), and ev.onset_vs_reboot places degradation onset at t\u22487.5 \u2014 before the maintenance reboot at t=8.0 \u2014 disfavouring any maintenance-introduced cause. The one untested discriminating question is whether the detector itself exhibits elevated or drifting dark current, bias-point shift, or gain instability that is independent of the thermal control loop. detector_health_check directly probes dark current, responsivity/gain, and internal detector diagnostics. A nominal result closes H5 and forces a new hypothesis branch (e.g. optical-path scatter, multi-path, or external scene artefact); an anomalous result confirms H5 as the root cause. No other currently available check separates the field further at this point.",
+      "voi": 0.88,
+      "evidence_id": "ev.detector_health_nominal",
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.119,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.119,
+        "H2": 0.119,
+        "H3": 0.076,
+        "H4": 0.047,
+        "H5": 0.076,
+        "hyp.upstream_power": 0.119
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "common_mode_check"
+      },
+      "rationale": "Every individual-component hypothesis (H1\u2013H5, hyp.upstream_power) has been ruled out by direct measurement. The symptom onset at t\u22487.5 predates the reboot/maintenance at t=8.0, ruling out a maintenance-introduced cause. The only remaining discriminating question is whether the range fluctuation is isolated to this channel (pointing to an as-yet-unidentified single-channel mechanism) or correlated across multiple channels (pointing to a shared environmental/infrastructure driver not captured by steady-state power or thermal checks). A common_mode_check directly tests this partition: if other channels co-vary with the effective_max_range_m degradation, it elevates a shared upstream/environmental hypothesis that all previous checks missed; if the pattern is channel-specific with other channels clean, it confirms an isolated residual cause and closes the common-mode branch. No prior evidence addresses cross-channel correlation, so this check has maximum discriminating value given the current evidence set.",
+      "voi": 0.82,
+      "evidence_id": "ev.common_mode_negative",
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.047,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.047,
+        "H2": 0.047,
+        "H3": 0.047,
+        "H4": 0.047,
+        "H5": 0.047,
+        "hyp.upstream_power": 0.047
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "channel_sanity_check"
+      },
+      "rationale": "Every enumerated hypothesis has been ruled out by direct component checks (ev.laser_power_nominal, ev.tec_load_nominal, ev.detector_health_nominal, ev.common_mode_negative, ev.onset_vs_reboot), yet the intermittent effective_max_range_m symptom is unresolved. When all physical-mechanism hypotheses are exhausted the correct next step is a measurement-integrity audit, not re-testing already-refuted causes. A channel exhibiting near-zero variance under changing load is a stuck or lying sensor; if present, it could allow real per-channel signal degradation to escape detection while each sub-system check independently returns nominal \u2014 the stuck readout would suppress true variance and produce false-nominal reports. A positive result (stuck/lying channel identified) opens an entirely new causal branch \u2014 sensor or readout-path hardware fault \u2014 not represented in the current hypothesis set and would require re-evaluating the trustworthiness of prior nominal readings. A negative result (all channels sane) closes that branch, confirms sub-system telemetry integrity, and forces the investigation toward a pre-existing optical-path or environmental cause consistent with ev.onset_vs_reboot (degradation onset predating maintenance at t\u22487.5 vs reboot at t=8.0). No other remaining unrun check (spatial_intensity_check, config_diff, temp_correlation_check) has this property of potentially invalidating prior evidence while simultaneously opening a new hypothesis branch.",
+      "voi": 0.72,
+      "evidence_id": "ev.channel_sanity_detector_temp",
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.047,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.047,
+        "H2": 0.047,
+        "H3": 0.047,
+        "H4": 0.047,
+        "H5": 0.047,
+        "hyp.upstream_power": 0.047
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "spatial_intensity_check"
+      },
+      "rationale": "All six formal hypotheses are ruled out by direct measurement: laser power is nominal (ev.laser_power_nominal), TEC/thermal control has headroom (ev.tec_load_nominal), detector bias and dark-current are stable (ev.detector_health_nominal), the thermal channel is confirmed live not stuck (ev.channel_sanity_detector_temp), no common-mode degradation exists (ev.common_mode_negative), and onset predates maintenance ruling out maintenance-introduced causes (ev.onset_vs_reboot). The single remaining unexplored diagnostic dimension is the optical path geometry and return-signal spatial distribution. A scan-angle-dependent intensity anomaly, beam-pointing wander, or partial field-of-view obstruction pre-existing before maintenance could produce intermittent effective-range loss without disturbing laser power, detector bias, TEC load, or any common-mode channel \u2014 meaning every prior check would correctly return nominal while the fault persists. This check is the highest-discrimination available action because: (a) a spatially anomalous result would establish a new localized optical/mechanical hypothesis (beam mis-pointing or partial FOV obstruction) and raise its log-odds substantially while the 'no clean cause' conclusion is deferred; (b) a nominal result is not a re-confirmation of any prior check \u2014 it closes the optical domain and provides the strongest available evidence that no single root cause exists, warranting a multi-factor or environmental conclusion. No other remaining available check (config_diff, temp_correlation_check) targets a domain as orthogonal to all prior evidence.",
+      "voi": 0.78,
+      "evidence_id": "ev.spatial_intensity_nominal",
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.047,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.047,
+        "H2": 0.047,
+        "H3": 0.047,
+        "H4": 0.047,
+        "H5": 0.047,
+        "hyp.upstream_power": 0.047
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "config_diff"
+      },
+      "rationale": "Every hypothesis is currently ruled out, yet a real intermittent range degradation exists with onset at t\u22487.5 \u2014 predating the maintenance reboot at t=8.0. The only remaining untested discriminator is whether a configuration or firmware parameter changed before that onset. H2 was dismissed on the basis that misconfiguration would propagate uniformly to all channels (ev.common_mode_negative), but a single-channel parameter change would not appear in a common-mode screen. config_diff is the sole check not yet executed that can either (a) surface a pre-t=7.5 parameter delta \u2014 partially resurrecting H2 in a single-channel form \u2014 or (b) return clean and confirm that no configuration artefact exists, moving the conclusion firmly toward 'no single identifiable clean cause.' All other checks have been exhausted and their hypotheses independently ruled out through multiple lines of evidence; this is the last live discriminating avenue before closing with a multi-factor or indeterminate verdict.",
+      "voi": 0.72,
+      "evidence_id": "ev.config_diff_negative",
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.047,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.047,
+        "H2": 0.047,
+        "H3": 0.047,
+        "H4": 0.047,
+        "H5": 0.047,
+        "hyp.upstream_power": 0.047
+      }
+    },
+    {
+      "action": "conflict_sweep",
+      "args": {},
+      "rationale": "order onset vs the salient recent event; sanity-check channels",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.047,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.047,
+        "H2": 0.047,
+        "H3": 0.047,
+        "H4": 0.047,
+        "H5": 0.047,
+        "hyp.upstream_power": 0.047
+      }
+    },
+    {
+      "action": "synthesize",
+      "args": {
+        "answer_type": "abstain",
+        "root_cause": null
+      },
+      "rationale": "conclude or abstain from the differential",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.047,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.047,
+        "H2": 0.047,
+        "H3": 0.047,
+        "H4": 0.047,
+        "H5": 0.047,
+        "hyp.upstream_power": 0.047
+      }
+    }
+  ]
+}
