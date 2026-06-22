@@ -69,10 +69,10 @@ invariant held:** all four solvers run on the pinned model for any one compariso
 
 ## 6. Cost is a CLI-derived estimate, calibrated and symmetric (B10)
 
-Tokens are chars/4 of the content each solver sends, metered identically for all four
-(`MeteredBackend`). The headless CLI is invoked with tools stripped and its default system prompt
-replaced, so little hidden scaffolding remains; the fixed system-prompt portion is tracked
-separately (`scaffold_tokens` → `content_tokens` is the API-equivalent estimate) and cancels in
-cross-solver comparisons. Every cost figure is labelled a CLI-derived estimate. The swappable
-CLI↔API backend exists so exact counts (and a validation of the calibration) are available the
-moment API access does.
+Tokens are metered identically for all four solvers (`MeteredBackend`). **Corrected 2026-06-22:**
+the headless CLI carries a ~21k-token cached prefix (Claude Code harness + tool defs + global
+`CLAUDE.md`) per call — the earlier "little hidden scaffolding remains" claim was false. The meter
+now records the real per-call `usage` (uncached input / cache-creation / cache-read / output) and
+exposes a price-weighted `cost_tokens`; the ~21k prefix is identical across all solvers, so it
+cancels in cross-solver comparisons. See `2026-06-22-claude-cli-prompt-cache.md`. The swappable
+CLI↔API backend exists so exact counts are also available the moment API access does.

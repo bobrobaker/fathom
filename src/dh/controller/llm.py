@@ -72,26 +72,66 @@ class AnthropicBackend:
 
 
 class CLIBackend:
-    """Headless `claude -p`: tools stripped, system prompt replaced, project context
-    excluded (scratch cwd). Subscription auth, no API key. The spike's default."""
+    """Headless `claude -p`: system prompt replaced, tools + project context excluded,
+    subscription auth (no API key). The spike's default.
+
+    A default `claude -p` call carries a ~21k-token system-prompt prefix (Claude Code harness +
+    built-in tool definitions + global `~/.claude/CLAUDE.md`), even for a 3-token prompt. We
+    delete it rather than cache it, with two flags (measured with `--output-format json`):
+      - `--tools ""` removes the built-in tool *definitions* from context entirely (~14-17k).
+        NOTE: `--allowed-tools ""` does NOT — it only removes tool *permissions*, leaving the
+        definitions in the prompt. The controller has its own Python action system and never used
+        Claude Code's tools, so this is pure dead weight; removing it is behaviour-neutral
+        (verified: a full live diagnose still resolves correctly).
+      - `--setting-sources project,local` excludes the `user` source → drops the global
+        `~/.claude/CLAUDE.md` (~3.2k). With `--tools ""` alone, CLAUDE.md still loads (~3.5k).
+    Together these take the per-call prefix from ~21k to ~150 tokens — there is essentially no
+    scaffolding left, so per-call cost becomes the *actual prompt content* (uncached input +
+    output), not a fixed overhead. This supersedes the earlier stable-cwd prompt-cache approach
+    (which only made the 21k prefix a cheap cache_read); with the prefix gone there is nothing
+    large enough to cache (<2048-token cacheable minimum), so caching is moot.
+
+    Subscription auth survives both flags — credentials in `~/.claude/.credentials.json` are read
+    independently of `--tools`/`--setting-sources` (no API key, no separate token). We do NOT pass
+    `--bare` (forces an API key → metered, off subscription), `--strict-mcp-config`, or
+    `--exclude-dynamic-system-prompt-sections`. The stable scratch cwd (below) is retained only to
+    keep any project `CLAUDE.md` out of context, not for caching. See
+    docs/decisions/2026-06-22-claude-cli-prompt-cache.md.
+
+    `--output-format json` is used so the real per-call `usage` (input / cache_creation / read /
+    output) is captured into `last_usage` for honest metering; the assistant text is the JSON
+    `result` field."""
     name = "cli"
+
+    # A stable scratch cwd under the system temp dir (not a repo) so no project CLAUDE.md leaks
+    # into context. (No longer load-bearing for caching — the prefix is now ~150 tokens.)
+    _SCRATCH = os.path.join(tempfile.gettempdir(), "fathom-cli-scratch")
 
     def __init__(self, model: str, exe: str | None = None, timeout_s: int = 180):
         self._exe = exe or os.environ.get("LLM_CLI", "claude")
         self._model = model
         self._timeout = int(os.environ.get("LLM_CLI_TIMEOUT", timeout_s))
+        os.makedirs(self._SCRATCH, exist_ok=True)
+        self.last_usage: dict | None = None
 
     def complete(self, prompt: str, *, system: str | None = None, max_tokens: int = 1024) -> str:
-        argv = [self._exe, "-p", prompt, "--allowed-tools", "",
-                "--output-format", "text", "--model", self._model]
+        argv = [self._exe, "-p", prompt, "--tools", "",
+                "--setting-sources", "project,local",
+                "--output-format", "json", "--model", self._model]
         if system:
             argv += ["--system-prompt", system]
-        with tempfile.TemporaryDirectory() as cwd:
-            proc = subprocess.run(argv, cwd=cwd, capture_output=True, text=True,
-                                  timeout=self._timeout)
+        proc = subprocess.run(argv, cwd=self._SCRATCH, capture_output=True, text=True,
+                              timeout=self._timeout)
         if proc.returncode != 0:
             raise RuntimeError(f"claude CLI failed ({proc.returncode}): {proc.stderr[:400]}")
-        return proc.stdout.strip()
+        try:
+            payload = json.loads(proc.stdout)
+        except json.JSONDecodeError as e:
+            raise RuntimeError(f"claude CLI returned non-JSON: {proc.stdout[:400]}") from e
+        if payload.get("is_error"):
+            raise RuntimeError(f"claude CLI error result: {str(payload.get('result'))[:400]}")
+        self.last_usage = payload.get("usage") or {}
+        return (payload.get("result") or "").strip()
 
 
 class ScriptedBackend:
@@ -113,31 +153,71 @@ class ScriptedBackend:
 
 
 class MeteredBackend:
-    """Wraps any backend to accumulate approximate token cost (chars/4) for the eval.
+    """Wraps any backend to accumulate per-call token cost for the eval.
 
-    A *CLI-derived estimate* by design — the headless CLI exposes no usage API, so we count
-    chars/4 of the content we control (the user prompt + the system prompt we pass). Because the
-    CLI is invoked with tools stripped and its default system prompt replaced (see CLIBackend),
-    little hidden scaffolding remains, so this approximates API *input* tokens. The system-prompt
-    portion — the fixed per-call overhead — is tracked separately (`scaffold_tokens`) so a report
-    can subtract it for a content-only, API-equivalent estimate and show it is small and constant
-    across solvers (B10). The same meter wraps every solver, so any residual overhead cancels in
-    the cross-solver comparison. Counts are ~model-agnostic (chars/4), not billing-accurate."""
+    When the inner backend exposes real per-call `usage` (CLIBackend does, via
+    `--output-format json`), we record the true counts — uncached input, cache-creation,
+    cache-read, and output tokens. This replaces the old chars/4 content estimate, which
+    undercounted real input ~15x by ignoring the ~21k-token cached harness/tool prefix every
+    call carries. Backends with no `last_usage` (ScriptedBackend in the test gates) fall back
+    to chars/4 of the content we control.
+
+    The ~21k prefix is identical across every solver, so it cancels in the cross-solver
+    comparison; the per-call WIN of the stable-cwd cache fix (see CLIBackend) is a shift from
+    `cache_creation` (~1.25-2x base price) to `cache_read` (~0.1x), NOT a drop in raw token count
+    — raw input/call is ~21k either way. So a fair cost figure must price-weight the breakdown:
+    `cost_tokens` does, and the raw components are exposed so a report can apply its own price
+    model. `cached_tokens` tracks the reused prefix; `content_tokens` nets it out.
+
+    Pricing multipliers are base-input-token equivalents for the pinned model **claude-sonnet-4-6**
+    ($3 input / $15 output per 1M): output 5.0x; cache_read 0.1x; cache_creation 1.25x (5m TTL) /
+    2.0x (1h TTL) — the 5m/1h split is read from `usage.cache_creation`, so the figure self-adjusts
+    to whichever TTL the CLI used (observed: 1h). If the model pin changes (config.yaml), re-check
+    OUTPUT_MULT against that model's output/input price ratio."""
+    OUTPUT_MULT = 5.0          # claude-sonnet-4-6: $15 output / $3 input
+    CACHE_READ_MULT = 0.1
+    CACHE_WRITE_5M_MULT = 1.25
+    CACHE_WRITE_1H_MULT = 2.0
+
     def __init__(self, inner: LLMBackend):
         self.inner = inner
         self.name = f"metered:{inner.name}"
-        self.in_tokens = 0
+        self.uncached_in_tokens = 0   # input_tokens — uncached new input (prompt + uncached prefix)
+        self.created_5m_tokens = 0    # cache_creation written with a 5m TTL (~1.25x)
+        self.created_1h_tokens = 0    # cache_creation written with a 1h TTL (~2.0x)
+        self.cached_tokens = 0        # cache_read_input_tokens — the reused prefix (~0.1x)
         self.out_tokens = 0
-        self.scaffold_tokens = 0   # system-prompt tokens — the fixed per-call CLI scaffolding
         self.calls = 0
 
     def complete(self, prompt: str, *, system: str | None = None, max_tokens: int = 1024) -> str:
-        self.in_tokens += (len(prompt) + len(system or "")) // 4
-        self.scaffold_tokens += len(system or "") // 4
         self.calls += 1
         out = self.inner.complete(prompt, system=system, max_tokens=max_tokens)
-        self.out_tokens += len(out) // 4
+        usage = getattr(self.inner, "last_usage", None)
+        if usage:
+            self.uncached_in_tokens += usage.get("input_tokens", 0)
+            self.cached_tokens += usage.get("cache_read_input_tokens", 0)
+            self.out_tokens += usage.get("output_tokens", 0)
+            created = usage.get("cache_creation_input_tokens", 0)
+            breakdown = usage.get("cache_creation") or {}
+            self.created_5m_tokens += breakdown.get("ephemeral_5m_input_tokens", 0)
+            # any creation not attributed to 5m is 1h (conservative when the breakdown is absent)
+            self.created_1h_tokens += (breakdown.get("ephemeral_1h_input_tokens")
+                                       if "ephemeral_1h_input_tokens" in breakdown
+                                       else created - breakdown.get("ephemeral_5m_input_tokens", 0))
+        else:  # no usage API (e.g. ScriptedBackend) — estimate from content we control
+            self.uncached_in_tokens += (len(prompt) + len(system or "")) // 4
+            self.out_tokens += len(out) // 4
         return out
+
+    @property
+    def created_tokens(self) -> int:
+        """Total cache-creation input tokens (5m + 1h TTL)."""
+        return self.created_5m_tokens + self.created_1h_tokens
+
+    @property
+    def in_tokens(self) -> int:
+        """Raw input tokens processed (uncached + cache-creation + cache-read)."""
+        return self.uncached_in_tokens + self.created_tokens + self.cached_tokens
 
     @property
     def total_tokens(self) -> int:
@@ -145,8 +225,18 @@ class MeteredBackend:
 
     @property
     def content_tokens(self) -> int:
-        """API-equivalent estimate: total net of the fixed system-prompt scaffolding (B10)."""
-        return self.total_tokens - self.scaffold_tokens
+        """Marginal tokens net of the reused cached prefix (cache_read), which is ~0.1x cost."""
+        return self.total_tokens - self.cached_tokens
+
+    @property
+    def cost_tokens(self) -> int:
+        """Price-weighted cost in base-input-token equivalents — the figure that reflects the
+        cache fix. See class docstring for multipliers (pinned to claude-sonnet-4-6)."""
+        return int(self.uncached_in_tokens
+                   + self.created_5m_tokens * self.CACHE_WRITE_5M_MULT
+                   + self.created_1h_tokens * self.CACHE_WRITE_1H_MULT
+                   + self.cached_tokens * self.CACHE_READ_MULT
+                   + self.out_tokens * self.OUTPUT_MULT)
 
 
 def get_backend(model: str | None = None) -> LLMBackend | None:

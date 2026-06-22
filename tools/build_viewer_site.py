@@ -53,7 +53,7 @@ def main() -> None:
         meter = MeteredBackend(base)
         print(f"# running {cid} ({spec.fault}) ...", file=sys.stderr)
         ans = diagnose(LidarEnvironment(case), backend=meter, budget=args.budget)
-        sc = score(ans, case, solver="controller", tokens=meter.total_tokens)
+        sc = score(ans, case, solver="controller", tokens=meter.cost_tokens)
         gt = case.ground_truth  # eval-side annotations for rendering only (never controller context)
         bundles.append(case_bundle(
             ans.final_graph, case_id=cid, title=TITLES.get(cid, cid), caption=spec.purpose,

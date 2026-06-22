@@ -19,10 +19,13 @@ interface (`src/dh/controller/llm.py`) with three backends, selected by `get_bac
 
 - **No API key is available**, but a logged-in `claude` CLI is. The CLI carries the
   subscription **auth token**, so it can complete prompts without a key.
-- **Prompt/tool-stripped, not bare.** `--allowed-tools ""` removes tools; `--system-prompt`
-  *replaces* Claude Code's default system prompt with our small role-bounded prompt (spec
-  §6.6); running from a temp cwd keeps the project's `CLAUDE.md`/context out. A "bare" mode
-  that also strips auth would defeat the purpose — we deliberately keep auth.
+- **Prompt-replaced, not bare.** `--allowed-tools ""` removes tool *permissions* (note: it does
+  NOT strip the tool *definitions* from context — measured 2026-06-22); `--system-prompt`
+  *replaces* Claude Code's default system prompt with our small role-bounded prompt (spec §6.6);
+  running from a scratch cwd keeps the project's `CLAUDE.md`/context out. A "bare" mode that also
+  strips auth would defeat the purpose — we deliberately keep auth. **The scratch cwd must be a
+  single STABLE path reused across calls, not a fresh temp dir per call** — see
+  `2026-06-22-claude-cli-prompt-cache.md` (a fresh cwd busts the prompt cache, ~2.7x cost).
 - **Determinism for the gate.** `test_controller_tec` and `test_llm` drive a
   `ScriptedBackend` (canned structured outputs), so the loop logic is verified
   reproducibly. Live-model quality is measured separately by the eval (M6+), where
@@ -30,8 +33,9 @@ interface (`src/dh/controller/llm.py`) with three backends, selected by `get_bac
 - **One swap to go live with a key.** When a key appears, `get_backend()` prefers
   `AnthropicBackend` automatically; nothing else changes.
 
-Verified working: headless `claude -p ... --allowed-tools "" --output-format text` returns
-clean parseable JSON in ~3–4 s on subscription auth, including with `--system-prompt`.
+Verified working: headless `claude -p ... --allowed-tools "" --output-format json` returns
+clean parseable JSON in ~3–4 s on subscription auth, including with `--system-prompt`. (Switched
+text→json on 2026-06-22 to capture real `usage` for honest metering.)
 
 ## Reference
 

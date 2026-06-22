@@ -28,11 +28,18 @@ usually sharing files, invariants, or tests.
 
 `<----- Ongoing phase ----->`
 
-**Status:** spike vertical built (M0–M9); spike-completion in progress per
-`handoffs/2026-06-16-spike-audit-response.md` — all 8 cases authored, baselines
-strengthened, scoring/abstention/conflict-surfacing hardened, findings + showpiece in
-flight. Final numbers pending the live A3 variance run. See
-`docs/decisions/2026-06-16-spike-completion-implementation-calls.md`.
+**Status:** machinery complete (M0–M9); the **2026-06-16 spike audit is folded** and its
+critical path narrowed to **A3 → A4 → showpiece** (see *Remaining critical path* below).
+The audit's rigor changes are in and tested — strict accuracy + separate localization,
+strengthened `bare_llm`, per-case capability-binding gate, scoring id-space symmetry, model
+pinned (A8 → Sonnet), conflict sweep model-independent; the benchmark is a **footnote, not a
+generalization claim** (FEVER deferred to Phase 4). **The analytical deliverable is complete at
+n=1:** the eval ran for record at a single run per case (the ≥3-run variance pass A3 was
+**declined for cost, 2026-06-22**), `docs/findings.md` §4 reports the honest **thesis-negative**
+result, and the case-#1 accuracy regression **did not reproduce** (controller acc=1.0 at n=1). The
+**showpiece viewer** is the only un-built critical-path item left. Decision records (authoritative — this tracker only points at them):
+`handoffs/2026-06-16-spike-audit-response.md` (audit replies + resolved calls),
+`docs/decisions/2026-06-16-*`, `docs/debt.md`.
 
 **Deliverable:** a runnable repo (per `spike_build_plan.md`, milestones M0→M9)
 producing — the **bespoke eval report** (`controller` vs `shortcut`/`bare_llm`/`react`,
@@ -77,6 +84,27 @@ Non-negotiables (`00_README` §"Non-negotiable rules"):
 - [~] M8 — benchmark harness + scoring built; real MuSiQue n=20→n=100 run deferred (A5, time-boxed, not a ship-blocker; same decision as M4.5)
 - [x] M9 — viewer (`ig.json` export + static `index.html`, evidence-colored, step slider)
 
+**Remaining critical path (the cold-start "what next"):** the analytical deliverable is **complete
+at n=1**; only the showpiece viewer remains. Settled steps kept for provenance:
+
+1. ~~Live ≥3-run variance eval (A3)~~ — **declined for cost (2026-06-22).** Deliverable is **n=1**,
+   single run per case (`reports/bespoke.md`), variance uncharacterized and flagged in
+   `docs/findings.md` §3. A later session can run `tools/run_eval.py --all --runs 3` for the
+   variance pass — close other `claude` sessions first (subscription CLI collapses under
+   concurrent sessions). Not a ship gate.
+2. ~~Case-#1 accuracy regression~~ — **did not reproduce** at n=1 (controller acc=1.0 on case #1).
+   No fix applied; the "it flipped 0→1 before" caveat is carried in `docs/findings.md` §3. Closed.
+3. ~~Write the findings doc (A4)~~ — **shipped (n=1)** into `docs/findings.md` §4: per-case ×
+   per-metric (capability family decomposed, not a single mean), the honest thesis-negative result,
+   the cost premium, two families apart. **#5 held** — the capability "mean lead" is disowned as a
+   saturation artifact, not reported as a win.
+4. **Build the showpiece viewer** — `handoffs/fathom_visualizer_spec.md`; replay-only, needs the
+   authored cases + a completed eval (both exist). The minimal case-#1 viewer (S4) exists; this is
+   the polished, hostable multi-case demo. **The only remaining critical-path build.**
+
+Deferred / time-boxed (report-only, never ship gates): real MuSiQue n=20 (A5); the VOI ablation
+(`docs/decisions/2026-06-16-voi-ablation-before-formalizing.md`).
+
 **Validation:** `.venv/bin/pytest` (the milestone done-when gates: `test_schemas`,
 `test_generator`, `test_checks`, `test_controller_tec`), plus the bespoke eval report
 rendering and the viewer opening on case #1's export.
@@ -89,6 +117,10 @@ eval (≥9 cases, capability-bound, anti-shortcut-balanced, ≥3 runs, variance 
 strong & fair baselines; clean separate-family reporting whatever the outcome; the
 viewer rendering case #1. Thesis-**confirmation T1–T4** (the controller actually wins)
 is the hoped-for result, *not* the ship gate.
+
+**Note (2026-06-22):** the S1 "≥3 runs, variance reported" sub-criterion was **consciously
+descoped to n=1** (A3 declined for cost); the variance pass is the only S1 gap and is re-runnable
+later. All other S1–S4 criteria are met.
 
 ---
 
@@ -115,7 +147,10 @@ numbers calibrated; the generator standing alone as a clean engineering artifact
 spike's LLM-scored version, richer tool/retrieval interfaces (optionally MCP),
 controller/environment separation preserved — and the showpiece **live Investigation-
 Graph viewer** (hypotheses appearing/recoloring, the demoted trigger, honest
-abstention), reading the same IG state object. `full_build_spec.md` §4, §6.
+abstention), reading the same IG state object. `full_build_spec.md` §4, §6. Formal VOI is
+**gated behind a spike-scale ablation** (LLM-scalar vs entropy-over-outcomes vs random-order)
+— built only if scoring earns its place
+(`docs/decisions/2026-06-16-voi-ablation-before-formalizing.md`).
 
 **Exit:** the harness runs the full case set; the live viewer is the portfolio's lead demo.
 
