@@ -3,7 +3,37 @@ project: fathom
 goal: Make case5 (abstain) and case8 (common-mode) succeed LIVE by fixing M1 (interpret
   over-crediting) and the case8 seeding/granularity bug — using the spike+audit pattern, #5-safe.
 created: 2026-06-22
-status: goal met live (n=1) but case8 FRAGILE; hardening + v2 regression unverified
+status: HARDENING DONE + deterministically verified; live confirm BLOCKED by subscription session limit (resume below)
+
+## UPDATE 2026-06-22 (round 3 — HARDENING done, live confirm blocked)
+Hardening committed (suite 189 green). Two changes on `investigate-controller`:
+1. **Explain-away** (`loop.py::_promote_common_mode`): under a confirmed common-mode signature the
+   degraded surface channels are SYMPTOMS, so their misattributed positive links are removed before
+   the demotion. Deterministic replay of the ACTUAL live case8 link pattern (`cap_case8_v2.json`)
+   → `sub.power` leads conf 0.953, **margin 0.028 → 0.453**; laser decoy −1.50. VERIFIED.
+2. **Authoritative abstain gate** (`llm.py::synthesize`): `if abstain: answer_type="abstain"` — the
+   deterministic gate is no longer overridable by the LLM's prose. Side effect (good): case7 without
+   its discriminator now ABSTAINS instead of confidently naming the decoy; its spike assertion was
+   updated to document this better failure mode.
+Also added per-step `log.info` in `diagnose` + `logging.basicConfig` in `capture.py` for live visibility.
+
+**LIVE CONFIRM BLOCKED — subscription session limit.** case8 v3 live run died: `claude CLI failed
+(1)` (empty stderr) on propose/synthesize after step 1 — the controller's `claude -p` shares the
+user's subscription bucket, which hit its session limit. `cap_case8_v3.json` is GARBAGE (degraded
+abstain from the error), ignore it. A trivial probe worked (near the boundary) but a full ~18-call
+run won't until the limit resets.
+
+**RESUME when the session limit resets:** run, serialized, one at a time, ~12 min each:
+  `cd /home/bolun/projects/fathom-investigate`
+  `PYTHONPATH=$PWD/src .../.venv/bin/python investigation/capture.py case8 --budget 8 --out investigation/cap_case8_v3.json`
+  then `... capture.py case5 ... --out investigation/cap_case5_v3.json`
+Expect: case8 → conclude `sub.power`, margin ~0.45 (NOT the fragile 0.028); case5 → abstain (now via
+the AUTHORITATIVE gate). Optionally case2 (the laser_power_check live-dependency risk). Check the
+CLI is healthy first: `claude -p "ok" --setting-sources project,local --output-format json --model claude-sonnet-4-6`.
+Then update `investigation/RESULTS.md` Round-2/3 with the live-confirmed numbers.
+
+---
+### (prior) status: goal met live (n=1) but case8 FRAGILE; hardening + v2 regression unverified
 branch: investigate-controller (worktree /home/bolun/projects/fathom-investigate)
 ---
 
