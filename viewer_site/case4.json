@@ -1,0 +1,823 @@
+{
+  "symptom": "Effective maximum range has degraded ~8% over the past week (about 110 m vs a 120 m baseline). Diagnose the root cause.",
+  "trigger": null,
+  "root_cause": "sub.calibration",
+  "final_status": "concluded",
+  "steps": [
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "h1",
+          "label": "Window contamination / fouling attenuating outgoing or return signal",
+          "node_ref": "part.window",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "h2",
+          "label": "Calibration or firmware drift reducing effective sensitivity / range gate",
+          "node_ref": "sub.calibration",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "h3",
+          "label": "Laser output power aging or degradation reducing peak emitted intensity",
+          "node_ref": "part.laser_module",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "h4",
+          "label": "Detector responsivity drift (dark current rise, gain loss) reducing SNR",
+          "node_ref": "part.detector",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "h5",
+          "label": "TEC module under-performing, elevating detector or laser junction temperature and degrading efficiency",
+          "node_ref": "part.tec",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        }
+      ],
+      "evidence": [],
+      "links": []
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "h1",
+          "label": "Window contamination / fouling attenuating outgoing or return signal",
+          "node_ref": "part.window",
+          "log_odds": -0.2,
+          "confidence": 0.45,
+          "status": "open"
+        },
+        {
+          "id": "h2",
+          "label": "Calibration or firmware drift reducing effective sensitivity / range gate",
+          "node_ref": "sub.calibration",
+          "log_odds": -0.2,
+          "confidence": 0.45,
+          "status": "open"
+        },
+        {
+          "id": "h3",
+          "label": "Laser output power aging or degradation reducing peak emitted intensity",
+          "node_ref": "part.laser_module",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "h4",
+          "label": "Detector responsivity drift (dark current rise, gain loss) reducing SNR",
+          "node_ref": "part.detector",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "h5",
+          "label": "TEC module under-performing, elevating detector or laser junction temperature and degrading efficiency",
+          "node_ref": "part.tec",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": -1.5,
+          "confidence": 0.182,
+          "status": "ruled_out"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.laser_power_check.1",
+          "summary": "Laser output power 48.0 mW vs baseline 47.9 mW (+0.1%); diode temperature 25.1 \u00b0C against a 26.0 \u00b0C setpoint ceiling. Both metrics fully nominal; no sustained power loss detected.",
+          "source": "laser_power_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "h3",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "h5",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "h1",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "h2",
+          "polarity": "-",
+          "weight": 0.2
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "h1",
+          "label": "Window contamination / fouling attenuating outgoing or return signal",
+          "node_ref": "part.window",
+          "log_odds": -0.2,
+          "confidence": 0.45,
+          "status": "open"
+        },
+        {
+          "id": "h2",
+          "label": "Calibration or firmware drift reducing effective sensitivity / range gate",
+          "node_ref": "sub.calibration",
+          "log_odds": -0.2,
+          "confidence": 0.45,
+          "status": "open"
+        },
+        {
+          "id": "h3",
+          "label": "Laser output power aging or degradation reducing peak emitted intensity",
+          "node_ref": "part.laser_module",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "h4",
+          "label": "Detector responsivity drift (dark current rise, gain loss) reducing SNR",
+          "node_ref": "part.detector",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "h5",
+          "label": "TEC module under-performing, elevating detector or laser junction temperature and degrading efficiency",
+          "node_ref": "part.tec",
+          "log_odds": -2.8,
+          "confidence": 0.057,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": -1.5,
+          "confidence": 0.182,
+          "status": "ruled_out"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.laser_power_check.1",
+          "summary": "Laser output power 48.0 mW vs baseline 47.9 mW (+0.1%); diode temperature 25.1 \u00b0C against a 26.0 \u00b0C setpoint ceiling. Both metrics fully nominal; no sustained power loss detected.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.detector_health_check.1",
+          "summary": "Detector health check fully nominal: dark-count rise \u22480% (\u22120.003, indistinguishable from zero), detector temperature rise \u22480 \u00b0C (\u22120.007 \u00b0C), bias drift absent, and temperature channel confirmed live (detector_temp_live=true). No detector degradation or bias signature of any kind detected.",
+          "source": "detector_health_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "h3",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "h5",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "h1",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "h2",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.detector_health_check.1",
+          "hypothesis_id": "h4",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.detector_health_check.1",
+          "hypothesis_id": "h5",
+          "polarity": "-",
+          "weight": 0.8
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "h1",
+          "label": "Window contamination / fouling attenuating outgoing or return signal",
+          "node_ref": "part.window",
+          "log_odds": -1.2,
+          "confidence": 0.231,
+          "status": "ruled_out"
+        },
+        {
+          "id": "h2",
+          "label": "Calibration or firmware drift reducing effective sensitivity / range gate",
+          "node_ref": "sub.calibration",
+          "log_odds": 1.8,
+          "confidence": 0.858,
+          "status": "leading"
+        },
+        {
+          "id": "h3",
+          "label": "Laser output power aging or degradation reducing peak emitted intensity",
+          "node_ref": "part.laser_module",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "h4",
+          "label": "Detector responsivity drift (dark current rise, gain loss) reducing SNR",
+          "node_ref": "part.detector",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "h5",
+          "label": "TEC module under-performing, elevating detector or laser junction temperature and degrading efficiency",
+          "node_ref": "part.tec",
+          "log_odds": -2.8,
+          "confidence": 0.057,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": -1.5,
+          "confidence": 0.182,
+          "status": "ruled_out"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.laser_power_check.1",
+          "summary": "Laser output power 48.0 mW vs baseline 47.9 mW (+0.1%); diode temperature 25.1 \u00b0C against a 26.0 \u00b0C setpoint ceiling. Both metrics fully nominal; no sustained power loss detected.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.detector_health_check.1",
+          "summary": "Detector health check fully nominal: dark-count rise \u22480% (\u22120.003, indistinguishable from zero), detector temperature rise \u22480 \u00b0C (\u22120.007 \u00b0C), bias drift absent, and temperature channel confirmed live (detector_temp_live=true). No detector degradation or bias signature of any kind detected.",
+          "source": "detector_health_check"
+        },
+        {
+          "id": "ev.config_diff.1",
+          "summary": "cal_table_version changed from v12 to v13; this is the only configuration change detected. A calibration-table update directly governs range-gate boundaries and sensitivity mapping, and the change falls within the one-week degradation window \u2014 making it a plausible primary cause of the ~8% effective-range reduction without requiring any hardware fault.",
+          "source": "config_diff"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "h3",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "h5",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "h1",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "h2",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.detector_health_check.1",
+          "hypothesis_id": "h4",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.detector_health_check.1",
+          "hypothesis_id": "h5",
+          "polarity": "-",
+          "weight": 0.8
+        },
+        {
+          "evidence_id": "ev.config_diff.1",
+          "hypothesis_id": "h2",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.config_diff.1",
+          "hypothesis_id": "h1",
+          "polarity": "-",
+          "weight": 1.0
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "h1",
+          "label": "Window contamination / fouling attenuating outgoing or return signal",
+          "node_ref": "part.window",
+          "log_odds": -1.2,
+          "confidence": 0.231,
+          "status": "ruled_out"
+        },
+        {
+          "id": "h2",
+          "label": "Calibration or firmware drift reducing effective sensitivity / range gate",
+          "node_ref": "sub.calibration",
+          "log_odds": 3.0,
+          "confidence": 0.953,
+          "status": "leading"
+        },
+        {
+          "id": "h3",
+          "label": "Laser output power aging or degradation reducing peak emitted intensity",
+          "node_ref": "part.laser_module",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "h4",
+          "label": "Detector responsivity drift (dark current rise, gain loss) reducing SNR",
+          "node_ref": "part.detector",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "h5",
+          "label": "TEC module under-performing, elevating detector or laser junction temperature and degrading efficiency",
+          "node_ref": "part.tec",
+          "log_odds": -2.8,
+          "confidence": 0.057,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": -1.5,
+          "confidence": 0.182,
+          "status": "ruled_out"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.laser_power_check.1",
+          "summary": "Laser output power 48.0 mW vs baseline 47.9 mW (+0.1%); diode temperature 25.1 \u00b0C against a 26.0 \u00b0C setpoint ceiling. Both metrics fully nominal; no sustained power loss detected.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.detector_health_check.1",
+          "summary": "Detector health check fully nominal: dark-count rise \u22480% (\u22120.003, indistinguishable from zero), detector temperature rise \u22480 \u00b0C (\u22120.007 \u00b0C), bias drift absent, and temperature channel confirmed live (detector_temp_live=true). No detector degradation or bias signature of any kind detected.",
+          "source": "detector_health_check"
+        },
+        {
+          "id": "ev.config_diff.1",
+          "summary": "cal_table_version changed from v12 to v13; this is the only configuration change detected. A calibration-table update directly governs range-gate boundaries and sensitivity mapping, and the change falls within the one-week degradation window \u2014 making it a plausible primary cause of the ~8% effective-range reduction without requiring any hardware fault.",
+          "source": "config_diff"
+        },
+        {
+          "id": "ev.change_cause_log.cal_update",
+          "summary": "log.cal_update: a recent config change to sub.calibration aligns with the degradation onset \u2192 the change is the cause",
+          "source": "onset_vs_event_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "h3",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "h5",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "h1",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "h2",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.detector_health_check.1",
+          "hypothesis_id": "h4",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.detector_health_check.1",
+          "hypothesis_id": "h5",
+          "polarity": "-",
+          "weight": 0.8
+        },
+        {
+          "evidence_id": "ev.config_diff.1",
+          "hypothesis_id": "h2",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.config_diff.1",
+          "hypothesis_id": "h1",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.change_cause_log.cal_update",
+          "hypothesis_id": "h2",
+          "polarity": "+",
+          "weight": 1.5
+        }
+      ]
+    },
+    {
+      "status": "concluded",
+      "recommended_action": "Roll back cal_table_version from v13 to v12 and verify effective range returns to ~120 m baseline. If confirmed, audit the v13 cal table diff for mis-configured range-gate boundaries or sensitivity-mapping offsets before any re-deployment. Hardware checks (laser, detector, TEC, window) are all nominal and require no further action.",
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "h1",
+          "label": "Window contamination / fouling attenuating outgoing or return signal",
+          "node_ref": "part.window",
+          "log_odds": -1.2,
+          "confidence": 0.231,
+          "status": "ruled_out"
+        },
+        {
+          "id": "h2",
+          "label": "Calibration or firmware drift reducing effective sensitivity / range gate",
+          "node_ref": "sub.calibration",
+          "log_odds": 3.0,
+          "confidence": 0.953,
+          "status": "leading"
+        },
+        {
+          "id": "h3",
+          "label": "Laser output power aging or degradation reducing peak emitted intensity",
+          "node_ref": "part.laser_module",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "h4",
+          "label": "Detector responsivity drift (dark current rise, gain loss) reducing SNR",
+          "node_ref": "part.detector",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "h5",
+          "label": "TEC module under-performing, elevating detector or laser junction temperature and degrading efficiency",
+          "node_ref": "part.tec",
+          "log_odds": -2.8,
+          "confidence": 0.057,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": -1.5,
+          "confidence": 0.182,
+          "status": "ruled_out"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.laser_power_check.1",
+          "summary": "Laser output power 48.0 mW vs baseline 47.9 mW (+0.1%); diode temperature 25.1 \u00b0C against a 26.0 \u00b0C setpoint ceiling. Both metrics fully nominal; no sustained power loss detected.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.detector_health_check.1",
+          "summary": "Detector health check fully nominal: dark-count rise \u22480% (\u22120.003, indistinguishable from zero), detector temperature rise \u22480 \u00b0C (\u22120.007 \u00b0C), bias drift absent, and temperature channel confirmed live (detector_temp_live=true). No detector degradation or bias signature of any kind detected.",
+          "source": "detector_health_check"
+        },
+        {
+          "id": "ev.config_diff.1",
+          "summary": "cal_table_version changed from v12 to v13; this is the only configuration change detected. A calibration-table update directly governs range-gate boundaries and sensitivity mapping, and the change falls within the one-week degradation window \u2014 making it a plausible primary cause of the ~8% effective-range reduction without requiring any hardware fault.",
+          "source": "config_diff"
+        },
+        {
+          "id": "ev.change_cause_log.cal_update",
+          "summary": "log.cal_update: a recent config change to sub.calibration aligns with the degradation onset \u2192 the change is the cause",
+          "source": "onset_vs_event_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "h3",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "h5",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "h1",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.laser_power_check.1",
+          "hypothesis_id": "h2",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.detector_health_check.1",
+          "hypothesis_id": "h4",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.detector_health_check.1",
+          "hypothesis_id": "h5",
+          "polarity": "-",
+          "weight": 0.8
+        },
+        {
+          "evidence_id": "ev.config_diff.1",
+          "hypothesis_id": "h2",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.config_diff.1",
+          "hypothesis_id": "h1",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.change_cause_log.cal_update",
+          "hypothesis_id": "h2",
+          "polarity": "+",
+          "weight": 1.5
+        }
+      ]
+    }
+  ],
+  "trace": [
+    {
+      "action": "seed",
+      "args": {},
+      "rationale": "seed the differential from the symptom",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "h1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "h1": 0.5,
+        "h2": 0.5,
+        "h3": 0.5,
+        "h4": 0.5,
+        "h5": 0.5,
+        "hyp.upstream_power": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "laser_power_check"
+      },
+      "rationale": "No evidence has been collected yet; all hypotheses sit at equal log-odds. Laser output power is the single most branching measurement in the signal chain: (a) if emitted power is at or near baseline, h3 (laser aging) and hyp.upstream_power are strongly disfavoured, collapsing the differential onto h1/h2/h4/h5; (b) if emitted power is depressed by ~15-30% (the range consistent with an 8% range loss under inverse-square / fourth-root scaling), h3 becomes the leading cause and hyp.upstream_power rises in parallel, directing hardware attention to the emitter rather than optics, detector, or calibration. This single measurement therefore raises one cluster of hypotheses while lowering the other \u2014 maximum discrimination with one action. TEC, detector, and window checks remain queued but are only meaningful once we know whether the loss is on the transmit or receive/optics side.",
+      "voi": 0.8,
+      "evidence_id": "ev.laser_power_check.1",
+      "conflicts_added": [],
+      "leader": "h4",
+      "leader_conf": 0.5,
+      "margin": 0.05,
+      "confidences": {
+        "h1": 0.45,
+        "h2": 0.45,
+        "h3": 0.119,
+        "h4": 0.5,
+        "h5": 0.119,
+        "hyp.upstream_power": 0.182
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "detector_health_check"
+      },
+      "rationale": "h4 (detector responsivity drift) currently holds the highest log_odds (0.00) among open hypotheses, yet no detector evidence has been collected. The laser is confirmed nominal (ev.laser_power_check.1), ruling out h3 and supporting that the ~8% range loss originates post-emission. detector_health_check will measure dark current, gain, and SNR margin directly: if any metric is degraded it confirms h4 and largely exonerates h1/h2; if all metrics are nominal it substantially lowers h4, making h1 (window fouling) and h2 (calibration/firmware drift) the co-leaders and directing the next action toward spatial_intensity_check or config_diff respectively. This is the highest-leverage single action because it tests the current front-runner while its negative result would cleanly redirect the differential.",
+      "voi": 0.85,
+      "evidence_id": "ev.detector_health_check.1",
+      "conflicts_added": [],
+      "leader": "h1",
+      "leader_conf": 0.45,
+      "margin": 0.0,
+      "confidences": {
+        "h1": 0.45,
+        "h2": 0.45,
+        "h3": 0.119,
+        "h4": 0.119,
+        "h5": 0.057,
+        "hyp.upstream_power": 0.182
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "config_diff"
+      },
+      "rationale": "Only h1 (window contamination) and h2 (calibration/firmware drift) remain open, both at equal log-odds (-0.20). The laser power (ev.laser_power_check.1) and detector health (ev.detector_health_check.1) are fully nominal, ruling out signal-generation and signal-detection paths. The remaining fork is: (A) the optical path is attenuated externally (h1 \u2014 physical window fouling), or (B) a software/configuration parameter (range-gate threshold, sensitivity coefficient, firmware version) has drifted (h2). config_diff directly probes h2: a detected parameter change aligns with h2 and argues against h1 (no physical cause needed); a clean diff eliminates h2 and makes h1 the remaining candidate to pursue via spatial_intensity_check or physical inspection. No other available check separates these two hypotheses as cleanly in a single step.",
+      "voi": 0.82,
+      "evidence_id": "ev.config_diff.1",
+      "conflicts_added": [],
+      "leader": "h2",
+      "leader_conf": 0.858,
+      "margin": 0.627,
+      "confidences": {
+        "h1": 0.231,
+        "h2": 0.858,
+        "h3": 0.119,
+        "h4": 0.119,
+        "h5": 0.057,
+        "hyp.upstream_power": 0.182
+      }
+    },
+    {
+      "action": "conflict_sweep",
+      "args": {},
+      "rationale": "order onset vs the salient recent event; sanity-check channels",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "h2",
+      "leader_conf": 0.953,
+      "margin": 0.721,
+      "confidences": {
+        "h1": 0.231,
+        "h2": 0.953,
+        "h3": 0.119,
+        "h4": 0.119,
+        "h5": 0.057,
+        "hyp.upstream_power": 0.182
+      }
+    },
+    {
+      "action": "synthesize",
+      "args": {
+        "answer_type": "cause",
+        "root_cause": "sub.calibration"
+      },
+      "rationale": "conclude or abstain from the differential",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "h2",
+      "leader_conf": 0.953,
+      "margin": 0.721,
+      "confidences": {
+        "h1": 0.231,
+        "h2": 0.953,
+        "h3": 0.119,
+        "h4": 0.119,
+        "h5": 0.057,
+        "hyp.upstream_power": 0.182
+      }
+    }
+  ],
+  "case_id": "case4",
+  "title": "Calibration drift",
+  "caption": "post-release config; recent change IS the cause (anti-shortcut balance)",
+  "answer": {
+    "answer_type": "cause",
+    "root_cause": "sub.calibration",
+    "cited_evidence": [
+      "ev.config_diff.1",
+      "ev.change_cause_log.cal_update",
+      "ev.laser_power_check.1",
+      "ev.detector_health_check.1"
+    ],
+    "conflicts": []
+  },
+  "eval_row": {
+    "accuracy": 1.0,
+    "localization": 1.0,
+    "trigger_discrimination": 1.0,
+    "conflict_handling": 1.0,
+    "evidence_f1": 0.0,
+    "tokens": 63228
+  }
+}

@@ -1,0 +1,604 @@
+{
+  "symptom": "Effective maximum range has degraded ~8% over the past week (about 110 m vs a 120 m baseline). Diagnose the root cause.",
+  "trigger": null,
+  "root_cause": "part.detector",
+  "final_status": "concluded",
+  "steps": [
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "H1",
+          "label": "Window contamination / fouling attenuating outgoing beam and return signal",
+          "node_ref": "part.window",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "H2",
+          "label": "Calibration / signal-processing drift skewing range calculation or sensitivity threshold",
+          "node_ref": "sub.calibration",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "H3",
+          "label": "Laser emitter aging reducing peak output power",
+          "node_ref": "part.laser_module",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "H4",
+          "label": "Detector responsivity drift (dark-current rise, gain shift) reducing SNR at long range",
+          "node_ref": "part.detector",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "H5",
+          "label": "TEC / thermal regulation failure elevating laser or detector junction temperature and degrading performance",
+          "node_ref": "part.tec",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        }
+      ],
+      "evidence": [],
+      "links": []
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "H1",
+          "label": "Window contamination / fouling attenuating outgoing beam and return signal",
+          "node_ref": "part.window",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "H2",
+          "label": "Calibration / signal-processing drift skewing range calculation or sensitivity threshold",
+          "node_ref": "sub.calibration",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "H3",
+          "label": "Laser emitter aging reducing peak output power",
+          "node_ref": "part.laser_module",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H4",
+          "label": "Detector responsivity drift (dark-current rise, gain shift) reducing SNR at long range",
+          "node_ref": "part.detector",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "H5",
+          "label": "TEC / thermal regulation failure elevating laser or detector junction temperature and degrading performance",
+          "node_ref": "part.tec",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.laser_power_01",
+          "summary": "Laser emitter output 47.9 mW vs 48.0 mW baseline (\u22120.3%); diode junction temp 25.2 \u00b0C within 26.0 \u00b0C max setpoint; diode_nominal=true, low_power=false, declined=false. No sustained emitter power loss detected.",
+          "source": "laser_power_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.laser_power_01",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_01",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_01",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 2.0
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "H1",
+          "label": "Window contamination / fouling attenuating outgoing beam and return signal",
+          "node_ref": "part.window",
+          "log_odds": -0.5,
+          "confidence": 0.378,
+          "status": "open"
+        },
+        {
+          "id": "H2",
+          "label": "Calibration / signal-processing drift skewing range calculation or sensitivity threshold",
+          "node_ref": "sub.calibration",
+          "log_odds": -1.0,
+          "confidence": 0.269,
+          "status": "open"
+        },
+        {
+          "id": "H3",
+          "label": "Laser emitter aging reducing peak output power",
+          "node_ref": "part.laser_module",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H4",
+          "label": "Detector responsivity drift (dark-current rise, gain shift) reducing SNR at long range",
+          "node_ref": "part.detector",
+          "log_odds": 2.0,
+          "confidence": 0.881,
+          "status": "leading"
+        },
+        {
+          "id": "H5",
+          "label": "TEC / thermal regulation failure elevating laser or detector junction temperature and degrading performance",
+          "node_ref": "part.tec",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.laser_power_01",
+          "summary": "Laser emitter output 47.9 mW vs 48.0 mW baseline (\u22120.3%); diode junction temp 25.2 \u00b0C within 26.0 \u00b0C max setpoint; diode_nominal=true, low_power=false, declined=false. No sustained emitter power loss detected.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.detector_health_01",
+          "summary": "Dark-count rate elevated +56% while detector junction temperature rose only +0.026 \u00b0C (live channel, not stuck); bias_drift=true. The large dark-count rise with a negligible thermal footprint isolates a non-thermal bias/gain drift in the detector as the mechanism elevating the noise floor and degrading SNR at long range. Affirmative = true.",
+          "source": "detector_health_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.laser_power_01",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_01",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_01",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.detector_health_01",
+          "hypothesis_id": "H4",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.detector_health_01",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.detector_health_01",
+          "hypothesis_id": "H2",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.detector_health_01",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 0.5
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "H1",
+          "label": "Window contamination / fouling attenuating outgoing beam and return signal",
+          "node_ref": "part.window",
+          "log_odds": -0.5,
+          "confidence": 0.378,
+          "status": "open"
+        },
+        {
+          "id": "H2",
+          "label": "Calibration / signal-processing drift skewing range calculation or sensitivity threshold",
+          "node_ref": "sub.calibration",
+          "log_odds": -1.0,
+          "confidence": 0.269,
+          "status": "open"
+        },
+        {
+          "id": "H3",
+          "label": "Laser emitter aging reducing peak output power",
+          "node_ref": "part.laser_module",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H4",
+          "label": "Detector responsivity drift (dark-current rise, gain shift) reducing SNR at long range",
+          "node_ref": "part.detector",
+          "log_odds": 2.0,
+          "confidence": 0.881,
+          "status": "leading"
+        },
+        {
+          "id": "H5",
+          "label": "TEC / thermal regulation failure elevating laser or detector junction temperature and degrading performance",
+          "node_ref": "part.tec",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.laser_power_01",
+          "summary": "Laser emitter output 47.9 mW vs 48.0 mW baseline (\u22120.3%); diode junction temp 25.2 \u00b0C within 26.0 \u00b0C max setpoint; diode_nominal=true, low_power=false, declined=false. No sustained emitter power loss detected.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.detector_health_01",
+          "summary": "Dark-count rate elevated +56% while detector junction temperature rose only +0.026 \u00b0C (live channel, not stuck); bias_drift=true. The large dark-count rise with a negligible thermal footprint isolates a non-thermal bias/gain drift in the detector as the mechanism elevating the noise floor and degrading SNR at long range. Affirmative = true.",
+          "source": "detector_health_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.laser_power_01",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_01",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_01",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.detector_health_01",
+          "hypothesis_id": "H4",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.detector_health_01",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.detector_health_01",
+          "hypothesis_id": "H2",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.detector_health_01",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 0.5
+        }
+      ]
+    },
+    {
+      "status": "concluded",
+      "recommended_action": "Trim or recalibrate detector bias voltage to restore nominal dark-count rate: ev.detector_health_01 shows +56% dark-count elevation with only +0.026 \u00b0C junction temperature rise, isolating a non-thermal bias/gain drift as the SNR-degrading mechanism. If bias adjustment cannot return dark-count rate to within \u00b15% of baseline, schedule detector module replacement. Secondarily, perform a physical window inspection and wipe-down to close H1, which remains open with no direct discriminating evidence; this is low-cost and prevents a latent compounding attenuation path. H3/H5/hyp.upstream_power remain ruled out: ev.laser_power_01 confirms emitter output within 0.3% of baseline and junction temperature within setpoint.",
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "H1",
+          "label": "Window contamination / fouling attenuating outgoing beam and return signal",
+          "node_ref": "part.window",
+          "log_odds": -0.5,
+          "confidence": 0.378,
+          "status": "open"
+        },
+        {
+          "id": "H2",
+          "label": "Calibration / signal-processing drift skewing range calculation or sensitivity threshold",
+          "node_ref": "sub.calibration",
+          "log_odds": -1.0,
+          "confidence": 0.269,
+          "status": "open"
+        },
+        {
+          "id": "H3",
+          "label": "Laser emitter aging reducing peak output power",
+          "node_ref": "part.laser_module",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H4",
+          "label": "Detector responsivity drift (dark-current rise, gain shift) reducing SNR at long range",
+          "node_ref": "part.detector",
+          "log_odds": 2.0,
+          "confidence": 0.881,
+          "status": "leading"
+        },
+        {
+          "id": "H5",
+          "label": "TEC / thermal regulation failure elevating laser or detector junction temperature and degrading performance",
+          "node_ref": "part.tec",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.laser_power_01",
+          "summary": "Laser emitter output 47.9 mW vs 48.0 mW baseline (\u22120.3%); diode junction temp 25.2 \u00b0C within 26.0 \u00b0C max setpoint; diode_nominal=true, low_power=false, declined=false. No sustained emitter power loss detected.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.detector_health_01",
+          "summary": "Dark-count rate elevated +56% while detector junction temperature rose only +0.026 \u00b0C (live channel, not stuck); bias_drift=true. The large dark-count rise with a negligible thermal footprint isolates a non-thermal bias/gain drift in the detector as the mechanism elevating the noise floor and degrading SNR at long range. Affirmative = true.",
+          "source": "detector_health_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.laser_power_01",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_01",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_01",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.detector_health_01",
+          "hypothesis_id": "H4",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.detector_health_01",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.detector_health_01",
+          "hypothesis_id": "H2",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.detector_health_01",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 0.5
+        }
+      ]
+    }
+  ],
+  "trace": [
+    {
+      "action": "seed",
+      "args": {},
+      "rationale": "seed the differential from the symptom",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.5,
+        "H2": 0.5,
+        "H3": 0.5,
+        "H4": 0.5,
+        "H5": 0.5,
+        "hyp.upstream_power": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "laser_power_check"
+      },
+      "rationale": "With all six hypotheses at equal prior and zero evidence in hand, the single most discriminating first measurement is emitter output power. A nominal result simultaneously argues AGAINST H3 (laser aging) and AGAINST H5 (TEC-driven junction heating reducing output), collapsing the field to H1/H2/H4/hyp.upstream_power. A degraded result does the opposite \u2014 strongly supporting H3 and flagging H5 as a contributor \u2014 while leaving H1/H2/H4 less likely. No other available check produces this clean a split across this many hypotheses in one step; tec_load_check only addresses H5, detector_health_check only H4, and neither touches laser output.",
+      "voi": 0.8,
+      "evidence_id": "ev.laser_power_01",
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.5,
+        "H2": 0.5,
+        "H3": 0.119,
+        "H4": 0.5,
+        "H5": 0.119,
+        "hyp.upstream_power": 0.119
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "detector_health_check"
+      },
+      "rationale": "ev.laser_power_01 has already eliminated H3 and hyp.upstream_power and strongly argues against H5 (junction temp nominal, emitter output \u22120.3%). The three remaining open hypotheses \u2014 H1 (window fouling), H2 (calibration/processing drift), and H4 (detector responsivity drift) \u2014 are all at equal log_odds=0.00. detector_health_check directly probes the one mechanism (dark-current rise, gain shift) that is wholly distinct from window attenuation and signal-processing error. If dark current and gain are nominal the check argues against H4 and redirects focus to H1/H2; if degraded it sharply raises H4 and argues against H1 and H2 as primary causes. No currently retrieved evidence touches detector parameters, so this is not re-confirming anything already measured.",
+      "voi": 0.82,
+      "evidence_id": "ev.detector_health_01",
+      "conflicts_added": [],
+      "leader": "H4",
+      "leader_conf": 0.881,
+      "margin": 0.503,
+      "confidences": {
+        "H1": 0.378,
+        "H2": 0.269,
+        "H3": 0.119,
+        "H4": 0.881,
+        "H5": 0.047,
+        "hyp.upstream_power": 0.119
+      }
+    },
+    {
+      "action": "conflict_sweep",
+      "args": {},
+      "rationale": "order onset vs the salient recent event; sanity-check channels",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H4",
+      "leader_conf": 0.881,
+      "margin": 0.503,
+      "confidences": {
+        "H1": 0.378,
+        "H2": 0.269,
+        "H3": 0.119,
+        "H4": 0.881,
+        "H5": 0.047,
+        "hyp.upstream_power": 0.119
+      }
+    },
+    {
+      "action": "synthesize",
+      "args": {
+        "answer_type": "cause",
+        "root_cause": "part.detector"
+      },
+      "rationale": "conclude or abstain from the differential",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H4",
+      "leader_conf": 0.881,
+      "margin": 0.503,
+      "confidences": {
+        "H1": 0.378,
+        "H2": 0.269,
+        "H3": 0.119,
+        "H4": 0.881,
+        "H5": 0.047,
+        "hyp.upstream_power": 0.119
+      }
+    }
+  ],
+  "case_id": "case6",
+  "title": "Detector bias (buried)",
+  "caption": "absent-cue; buried evidence reachable via graph traversal + intra-doc",
+  "answer": {
+    "answer_type": "cause",
+    "root_cause": "part.detector",
+    "cited_evidence": [
+      "ev.detector_health_01",
+      "ev.laser_power_01"
+    ],
+    "conflicts": []
+  },
+  "eval_row": {
+    "accuracy": 1.0,
+    "localization": 1.0,
+    "trigger_discrimination": 1.0,
+    "conflict_handling": 1.0,
+    "evidence_f1": 0.33,
+    "tokens": 47348
+  }
+}

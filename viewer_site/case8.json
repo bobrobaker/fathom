@@ -1,0 +1,2273 @@
+{
+  "symptom": "Effective maximum range has degraded ~8% over the past week (about 110 m vs a 120 m baseline). Diagnose the root cause.",
+  "trigger": null,
+  "root_cause": "sub.power",
+  "final_status": "concluded",
+  "steps": [
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "hyp.window_contamination",
+          "label": "Window contamination attenuating TX/RX optical path",
+          "node_ref": "part.window",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "hyp.laser_aging",
+          "label": "Laser emitter output power degraded due to aging or drive-current shift",
+          "node_ref": "part.laser_module",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "hyp.detector_drift",
+          "label": "Receiver/detector sensitivity drift reducing SNR at range",
+          "node_ref": "part.detector",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "hyp.thermal_tec",
+          "label": "TEC module underperforming, elevating detector/laser junction temp and degrading efficiency",
+          "node_ref": "part.tec",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "hyp.calibration_drift",
+          "label": "Signal processing / calibration coefficients drifted, causing systematic range underreporting or sensitivity reduction",
+          "node_ref": "sub.calibration",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        }
+      ],
+      "evidence": [],
+      "links": []
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "hyp.window_contamination",
+          "label": "Window contamination attenuating TX/RX optical path",
+          "node_ref": "part.window",
+          "log_odds": -1.0,
+          "confidence": 0.269,
+          "status": "open"
+        },
+        {
+          "id": "hyp.laser_aging",
+          "label": "Laser emitter output power degraded due to aging or drive-current shift",
+          "node_ref": "part.laser_module",
+          "log_odds": 2.0,
+          "confidence": 0.881,
+          "status": "leading"
+        },
+        {
+          "id": "hyp.detector_drift",
+          "label": "Receiver/detector sensitivity drift reducing SNR at range",
+          "node_ref": "part.detector",
+          "log_odds": -1.0,
+          "confidence": 0.269,
+          "status": "open"
+        },
+        {
+          "id": "hyp.thermal_tec",
+          "label": "TEC module underperforming, elevating detector/laser junction temp and degrading efficiency",
+          "node_ref": "part.tec",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.calibration_drift",
+          "label": "Signal processing / calibration coefficients drifted, causing systematic range underreporting or sensitivity reduction",
+          "node_ref": "sub.calibration",
+          "log_odds": -1.0,
+          "confidence": 0.269,
+          "status": "open"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": 1.0,
+          "confidence": 0.731,
+          "status": "supported"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.laser_power_check_001",
+          "summary": "Laser emitter output 41.8 mW vs 48.0 mW baseline (\u221213.0%) \u2014 a sustained decline exceeding the observed 8% range loss. Diode junction temperature 25.2 \u00b0C is within the 26.0 \u00b0C setpoint, confirming TEC is maintaining thermal control; the power loss is therefore intrinsic to the emitter, not thermally driven.",
+          "source": "laser_power_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 1.0
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "hyp.window_contamination",
+          "label": "Window contamination attenuating TX/RX optical path",
+          "node_ref": "part.window",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "hyp.laser_aging",
+          "label": "Laser emitter output power degraded due to aging or drive-current shift",
+          "node_ref": "part.laser_module",
+          "log_odds": 3.0,
+          "confidence": 0.953,
+          "status": "leading"
+        },
+        {
+          "id": "hyp.detector_drift",
+          "label": "Receiver/detector sensitivity drift reducing SNR at range",
+          "node_ref": "part.detector",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.thermal_tec",
+          "label": "TEC module underperforming, elevating detector/laser junction temp and degrading efficiency",
+          "node_ref": "part.tec",
+          "log_odds": -2.5,
+          "confidence": 0.076,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.calibration_drift",
+          "label": "Signal processing / calibration coefficients drifted, causing systematic range underreporting or sensitivity reduction",
+          "node_ref": "sub.calibration",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": 3.0,
+          "confidence": 0.953,
+          "status": "supported"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.laser_power_check_001",
+          "summary": "Laser emitter output 41.8 mW vs 48.0 mW baseline (\u221213.0%) \u2014 a sustained decline exceeding the observed 8% range loss. Diode junction temperature 25.2 \u00b0C is within the 26.0 \u00b0C setpoint, confirming TEC is maintaining thermal control; the power loss is therefore intrinsic to the emitter, not thermally driven.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.common_mode_check_001",
+          "summary": "Common-mode check confirms 3 channels degraded with an onset spread of only 1.25 days, indicating a single shared upstream failure rather than independent per-channel faults. This eliminates independent multi-channel drift as an explanation and strongly implicates a component that sits upstream of all affected channels (laser drive, optical path, or shared signal processing).",
+          "source": "common_mode_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 0.5
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "hyp.window_contamination",
+          "label": "Window contamination attenuating TX/RX optical path",
+          "node_ref": "part.window",
+          "log_odds": 0.5,
+          "confidence": 0.622,
+          "status": "supported"
+        },
+        {
+          "id": "hyp.laser_aging",
+          "label": "Laser emitter output power degraded due to aging or drive-current shift",
+          "node_ref": "part.laser_module",
+          "log_odds": 3.0,
+          "confidence": 0.953,
+          "status": "leading"
+        },
+        {
+          "id": "hyp.detector_drift",
+          "label": "Receiver/detector sensitivity drift reducing SNR at range",
+          "node_ref": "part.detector",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.thermal_tec",
+          "label": "TEC module underperforming, elevating detector/laser junction temp and degrading efficiency",
+          "node_ref": "part.tec",
+          "log_odds": -2.5,
+          "confidence": 0.076,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.calibration_drift",
+          "label": "Signal processing / calibration coefficients drifted, causing systematic range underreporting or sensitivity reduction",
+          "node_ref": "sub.calibration",
+          "log_odds": -1.5,
+          "confidence": 0.182,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": 2.5,
+          "confidence": 0.924,
+          "status": "supported"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.laser_power_check_001",
+          "summary": "Laser emitter output 41.8 mW vs 48.0 mW baseline (\u221213.0%) \u2014 a sustained decline exceeding the observed 8% range loss. Diode junction temperature 25.2 \u00b0C is within the 26.0 \u00b0C setpoint, confirming TEC is maintaining thermal control; the power loss is therefore intrinsic to the emitter, not thermally driven.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.common_mode_check_001",
+          "summary": "Common-mode check confirms 3 channels degraded with an onset spread of only 1.25 days, indicating a single shared upstream failure rather than independent per-channel faults. This eliminates independent multi-channel drift as an explanation and strongly implicates a component that sits upstream of all affected channels (laser drive, optical path, or shared signal processing).",
+          "source": "common_mode_check"
+        },
+        {
+          "id": "ev.onset_event_check_001",
+          "summary": "onset_vs_event_check returned no logged reboot or timed configuration-change event (log.reboot absent). No discrete system event exists that could align with the degradation onset, eliminating event-triggered calibration coefficient shifts or post-reboot mis-initialisation as a cause. The absence is consistent with gradual, non-event-driven mechanisms such as progressive emitter aging or slow optical-path contamination.",
+          "source": "onset_vs_event_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "+",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 0.5
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": "Recommended-but-untried: swap the laser module to cleanly isolate laser aging from a thermal cause before ordering parts. High value of information.",
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "hyp.window_contamination",
+          "label": "Window contamination attenuating TX/RX optical path",
+          "node_ref": "part.window",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "hyp.laser_aging",
+          "label": "Laser emitter output power degraded due to aging or drive-current shift",
+          "node_ref": "part.laser_module",
+          "log_odds": 3.0,
+          "confidence": 0.953,
+          "status": "leading"
+        },
+        {
+          "id": "hyp.detector_drift",
+          "label": "Receiver/detector sensitivity drift reducing SNR at range",
+          "node_ref": "part.detector",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.thermal_tec",
+          "label": "TEC module underperforming, elevating detector/laser junction temp and degrading efficiency",
+          "node_ref": "part.tec",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.calibration_drift",
+          "label": "Signal processing / calibration coefficients drifted, causing systematic range underreporting or sensitivity reduction",
+          "node_ref": "sub.calibration",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": 2.0,
+          "confidence": 0.881,
+          "status": "supported"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.laser_power_check_001",
+          "summary": "Laser emitter output 41.8 mW vs 48.0 mW baseline (\u221213.0%) \u2014 a sustained decline exceeding the observed 8% range loss. Diode junction temperature 25.2 \u00b0C is within the 26.0 \u00b0C setpoint, confirming TEC is maintaining thermal control; the power loss is therefore intrinsic to the emitter, not thermally driven.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.common_mode_check_001",
+          "summary": "Common-mode check confirms 3 channels degraded with an onset spread of only 1.25 days, indicating a single shared upstream failure rather than independent per-channel faults. This eliminates independent multi-channel drift as an explanation and strongly implicates a component that sits upstream of all affected channels (laser drive, optical path, or shared signal processing).",
+          "source": "common_mode_check"
+        },
+        {
+          "id": "ev.onset_event_check_001",
+          "summary": "onset_vs_event_check returned no logged reboot or timed configuration-change event (log.reboot absent). No discrete system event exists that could align with the degradation onset, eliminating event-triggered calibration coefficient shifts or post-reboot mis-initialisation as a cause. The absence is consistent with gradual, non-event-driven mechanisms such as progressive emitter aging or slow optical-path contamination.",
+          "source": "onset_vs_event_check"
+        },
+        {
+          "id": "ev.swap_rec_001",
+          "summary": "Swap test of the laser emitter module recommended but not yet executed. The recommendation identifies the laser emitter module as the single most discriminating component to isolate next, framing the test as separating intrinsic emitter aging from any residual thermal cause (the latter already largely ruled out by ev.laser_power_check_001). No empirical outcome exists yet; evidential weight is modest and prospective. Critically, the recommendation prioritises the emitter module over optical-path inspection (window cleaning) and over upstream drive-circuit investigation, implicitly deprioritising both hyp.window_contamination and hyp.upstream_power as primary root causes at this stage.",
+          "source": "recommend_swap_test"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "+",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 0.5
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": "Recommended-but-untried: swap the laser module to cleanly isolate laser aging from a thermal cause before ordering parts. High value of information.",
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "hyp.window_contamination",
+          "label": "Window contamination attenuating TX/RX optical path",
+          "node_ref": "part.window",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "hyp.laser_aging",
+          "label": "Laser emitter output power degraded due to aging or drive-current shift",
+          "node_ref": "part.laser_module",
+          "log_odds": 3.0,
+          "confidence": 0.953,
+          "status": "leading"
+        },
+        {
+          "id": "hyp.detector_drift",
+          "label": "Receiver/detector sensitivity drift reducing SNR at range",
+          "node_ref": "part.detector",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.thermal_tec",
+          "label": "TEC module underperforming, elevating detector/laser junction temp and degrading efficiency",
+          "node_ref": "part.tec",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.calibration_drift",
+          "label": "Signal processing / calibration coefficients drifted, causing systematic range underreporting or sensitivity reduction",
+          "node_ref": "sub.calibration",
+          "log_odds": -1.0,
+          "confidence": 0.269,
+          "status": "open"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": 3.0,
+          "confidence": 0.953,
+          "status": "supported"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.laser_power_check_001",
+          "summary": "Laser emitter output 41.8 mW vs 48.0 mW baseline (\u221213.0%) \u2014 a sustained decline exceeding the observed 8% range loss. Diode junction temperature 25.2 \u00b0C is within the 26.0 \u00b0C setpoint, confirming TEC is maintaining thermal control; the power loss is therefore intrinsic to the emitter, not thermally driven.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.common_mode_check_001",
+          "summary": "Common-mode check confirms 3 channels degraded with an onset spread of only 1.25 days, indicating a single shared upstream failure rather than independent per-channel faults. This eliminates independent multi-channel drift as an explanation and strongly implicates a component that sits upstream of all affected channels (laser drive, optical path, or shared signal processing).",
+          "source": "common_mode_check"
+        },
+        {
+          "id": "ev.onset_event_check_001",
+          "summary": "onset_vs_event_check returned no logged reboot or timed configuration-change event (log.reboot absent). No discrete system event exists that could align with the degradation onset, eliminating event-triggered calibration coefficient shifts or post-reboot mis-initialisation as a cause. The absence is consistent with gradual, non-event-driven mechanisms such as progressive emitter aging or slow optical-path contamination.",
+          "source": "onset_vs_event_check"
+        },
+        {
+          "id": "ev.swap_rec_001",
+          "summary": "Swap test of the laser emitter module recommended but not yet executed. The recommendation identifies the laser emitter module as the single most discriminating component to isolate next, framing the test as separating intrinsic emitter aging from any residual thermal cause (the latter already largely ruled out by ev.laser_power_check_001). No empirical outcome exists yet; evidential weight is modest and prospective. Critically, the recommendation prioritises the emitter module over optical-path inspection (window cleaning) and over upstream drive-circuit investigation, implicitly deprioritising both hyp.window_contamination and hyp.upstream_power as primary root causes at this stage.",
+          "source": "recommend_swap_test"
+        },
+        {
+          "id": "ev.config_diff_001",
+          "summary": "config_diff shows scan_params changed from 'raster_default' to 'high_power_v2'. No timestamp accompanies this record, so onset alignment with the ~1-week degradation cannot be confirmed; without that confirmation the change must be treated as coincident rather than causal. The shift to a 'high_power_v2' scan profile implies an upstream alteration to scanner or laser-drive operating parameters, consistent with a shared upstream configuration cause affecting all channels simultaneously. The finding conflicts with ev.onset_event_check_001, which asserted no configuration-change event existed in the event log; the discrepancy indicates this mutation occurred outside the formal event-logging system. The existence of an alternative upstream configuration explanation marginally undercuts hyp.laser_aging as a purely intrinsic mechanism for the observed power deficit.",
+          "source": "config_diff"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "+",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.config_diff_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.config_diff_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.config_diff_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "-",
+          "weight": 1.0
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": "Recommended-but-untried: swap the laser module to cleanly isolate laser aging from a thermal cause before ordering parts. High value of information.",
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "hyp.window_contamination",
+          "label": "Window contamination attenuating TX/RX optical path",
+          "node_ref": "part.window",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "hyp.laser_aging",
+          "label": "Laser emitter output power degraded due to aging or drive-current shift",
+          "node_ref": "part.laser_module",
+          "log_odds": 3.0,
+          "confidence": 0.953,
+          "status": "leading"
+        },
+        {
+          "id": "hyp.detector_drift",
+          "label": "Receiver/detector sensitivity drift reducing SNR at range",
+          "node_ref": "part.detector",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.thermal_tec",
+          "label": "TEC module underperforming, elevating detector/laser junction temp and degrading efficiency",
+          "node_ref": "part.tec",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.calibration_drift",
+          "label": "Signal processing / calibration coefficients drifted, causing systematic range underreporting or sensitivity reduction",
+          "node_ref": "sub.calibration",
+          "log_odds": -1.0,
+          "confidence": 0.269,
+          "status": "open"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": 3.0,
+          "confidence": 0.953,
+          "status": "supported"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.laser_power_check_001",
+          "summary": "Laser emitter output 41.8 mW vs 48.0 mW baseline (\u221213.0%) \u2014 a sustained decline exceeding the observed 8% range loss. Diode junction temperature 25.2 \u00b0C is within the 26.0 \u00b0C setpoint, confirming TEC is maintaining thermal control; the power loss is therefore intrinsic to the emitter, not thermally driven.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.common_mode_check_001",
+          "summary": "Common-mode check confirms 3 channels degraded with an onset spread of only 1.25 days, indicating a single shared upstream failure rather than independent per-channel faults. This eliminates independent multi-channel drift as an explanation and strongly implicates a component that sits upstream of all affected channels (laser drive, optical path, or shared signal processing).",
+          "source": "common_mode_check"
+        },
+        {
+          "id": "ev.onset_event_check_001",
+          "summary": "onset_vs_event_check returned no logged reboot or timed configuration-change event (log.reboot absent). No discrete system event exists that could align with the degradation onset, eliminating event-triggered calibration coefficient shifts or post-reboot mis-initialisation as a cause. The absence is consistent with gradual, non-event-driven mechanisms such as progressive emitter aging or slow optical-path contamination.",
+          "source": "onset_vs_event_check"
+        },
+        {
+          "id": "ev.swap_rec_001",
+          "summary": "Swap test of the laser emitter module recommended but not yet executed. The recommendation identifies the laser emitter module as the single most discriminating component to isolate next, framing the test as separating intrinsic emitter aging from any residual thermal cause (the latter already largely ruled out by ev.laser_power_check_001). No empirical outcome exists yet; evidential weight is modest and prospective. Critically, the recommendation prioritises the emitter module over optical-path inspection (window cleaning) and over upstream drive-circuit investigation, implicitly deprioritising both hyp.window_contamination and hyp.upstream_power as primary root causes at this stage.",
+          "source": "recommend_swap_test"
+        },
+        {
+          "id": "ev.config_diff_001",
+          "summary": "config_diff shows scan_params changed from 'raster_default' to 'high_power_v2'. No timestamp accompanies this record, so onset alignment with the ~1-week degradation cannot be confirmed; without that confirmation the change must be treated as coincident rather than causal. The shift to a 'high_power_v2' scan profile implies an upstream alteration to scanner or laser-drive operating parameters, consistent with a shared upstream configuration cause affecting all channels simultaneously. The finding conflicts with ev.onset_event_check_001, which asserted no configuration-change event existed in the event log; the discrepancy indicates this mutation occurred outside the formal event-logging system. The existence of an alternative upstream configuration explanation marginally undercuts hyp.laser_aging as a purely intrinsic mechanism for the observed power deficit.",
+          "source": "config_diff"
+        },
+        {
+          "id": "ev.tec_load_check_001",
+          "summary": "TEC current is 1.98 A \u2014 79% of the 2.5 A limit \u2014 and is not at limit. Diode junction temperature is 25.21 \u00b0C against a 26.0 \u00b0C setpoint maximum; losing_setpoint is false. The TEC is operating comfortably within capacity and maintaining full thermal control. This independently corroborates ev.laser_power_check_001's finding that the laser power deficit is not thermally driven, and eliminates TEC underperformance as a contributing mechanism to the observed range degradation.",
+          "source": "tec_load_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "+",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.config_diff_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.config_diff_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.config_diff_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.tec_load_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.tec_load_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 1.0
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": "Recommended-but-untried: swap the laser module to cleanly isolate laser aging from a thermal cause before ordering parts. High value of information.",
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "hyp.window_contamination",
+          "label": "Window contamination attenuating TX/RX optical path",
+          "node_ref": "part.window",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "hyp.laser_aging",
+          "label": "Laser emitter output power degraded due to aging or drive-current shift",
+          "node_ref": "part.laser_module",
+          "log_odds": 3.0,
+          "confidence": 0.953,
+          "status": "leading"
+        },
+        {
+          "id": "hyp.detector_drift",
+          "label": "Receiver/detector sensitivity drift reducing SNR at range",
+          "node_ref": "part.detector",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.thermal_tec",
+          "label": "TEC module underperforming, elevating detector/laser junction temp and degrading efficiency",
+          "node_ref": "part.tec",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.calibration_drift",
+          "label": "Signal processing / calibration coefficients drifted, causing systematic range underreporting or sensitivity reduction",
+          "node_ref": "sub.calibration",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": 3.0,
+          "confidence": 0.953,
+          "status": "supported"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.laser_power_check_001",
+          "summary": "Laser emitter output 41.8 mW vs 48.0 mW baseline (\u221213.0%) \u2014 a sustained decline exceeding the observed 8% range loss. Diode junction temperature 25.2 \u00b0C is within the 26.0 \u00b0C setpoint, confirming TEC is maintaining thermal control; the power loss is therefore intrinsic to the emitter, not thermally driven.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.common_mode_check_001",
+          "summary": "Common-mode check confirms 3 channels degraded with an onset spread of only 1.25 days, indicating a single shared upstream failure rather than independent per-channel faults. This eliminates independent multi-channel drift as an explanation and strongly implicates a component that sits upstream of all affected channels (laser drive, optical path, or shared signal processing).",
+          "source": "common_mode_check"
+        },
+        {
+          "id": "ev.onset_event_check_001",
+          "summary": "onset_vs_event_check returned no logged reboot or timed configuration-change event (log.reboot absent). No discrete system event exists that could align with the degradation onset, eliminating event-triggered calibration coefficient shifts or post-reboot mis-initialisation as a cause. The absence is consistent with gradual, non-event-driven mechanisms such as progressive emitter aging or slow optical-path contamination.",
+          "source": "onset_vs_event_check"
+        },
+        {
+          "id": "ev.swap_rec_001",
+          "summary": "Swap test of the laser emitter module recommended but not yet executed. The recommendation identifies the laser emitter module as the single most discriminating component to isolate next, framing the test as separating intrinsic emitter aging from any residual thermal cause (the latter already largely ruled out by ev.laser_power_check_001). No empirical outcome exists yet; evidential weight is modest and prospective. Critically, the recommendation prioritises the emitter module over optical-path inspection (window cleaning) and over upstream drive-circuit investigation, implicitly deprioritising both hyp.window_contamination and hyp.upstream_power as primary root causes at this stage.",
+          "source": "recommend_swap_test"
+        },
+        {
+          "id": "ev.config_diff_001",
+          "summary": "config_diff shows scan_params changed from 'raster_default' to 'high_power_v2'. No timestamp accompanies this record, so onset alignment with the ~1-week degradation cannot be confirmed; without that confirmation the change must be treated as coincident rather than causal. The shift to a 'high_power_v2' scan profile implies an upstream alteration to scanner or laser-drive operating parameters, consistent with a shared upstream configuration cause affecting all channels simultaneously. The finding conflicts with ev.onset_event_check_001, which asserted no configuration-change event existed in the event log; the discrepancy indicates this mutation occurred outside the formal event-logging system. The existence of an alternative upstream configuration explanation marginally undercuts hyp.laser_aging as a purely intrinsic mechanism for the observed power deficit.",
+          "source": "config_diff"
+        },
+        {
+          "id": "ev.tec_load_check_001",
+          "summary": "TEC current is 1.98 A \u2014 79% of the 2.5 A limit \u2014 and is not at limit. Diode junction temperature is 25.21 \u00b0C against a 26.0 \u00b0C setpoint maximum; losing_setpoint is false. The TEC is operating comfortably within capacity and maintaining full thermal control. This independently corroborates ev.laser_power_check_001's finding that the laser power deficit is not thermally driven, and eliminates TEC underperformance as a contributing mechanism to the observed range degradation.",
+          "source": "tec_load_check"
+        },
+        {
+          "id": "ev.traverse_config_001",
+          "summary": "Traversal of config record 'scan_params:high_power_v2' requesting fields [timestamp_applied, drive_current_setpoint_mA, param_delta_vs_raster_default, applied_by] returned a key error ('node_id'). No data was retrieved. Consequently: (1) the timestamp of the high_power_v2 profile application remains unknown, so onset alignment with the ~1-week degradation still cannot be confirmed or denied; (2) whether this profile altered laser drive-current setpoints \u2014 which could explain the 13% power deficit extrinsically \u2014 cannot be established from this path. The config change evidenced in ev.config_diff_001 is real but its detailed record is not traversable as a structured node, deepening the discrepancy with ev.onset_event_check_001. The failure to retrieve drive-current delta leaves hyp.upstream_power mechanistically unsubstantiated and marginally favours hyp.laser_aging as the primary remaining explanation.",
+          "source": "traverse:config_record:scan_params:high_power_v2"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "+",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.config_diff_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.config_diff_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.config_diff_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.tec_load_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.tec_load_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.traverse_config_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.traverse_config_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.traverse_config_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.traverse_config_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "-",
+          "weight": 0.0
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": "Recommended-but-untried: swap the laser module to cleanly isolate laser aging from a thermal cause before ordering parts. High value of information.",
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "hyp.window_contamination",
+          "label": "Window contamination attenuating TX/RX optical path",
+          "node_ref": "part.window",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "hyp.laser_aging",
+          "label": "Laser emitter output power degraded due to aging or drive-current shift",
+          "node_ref": "part.laser_module",
+          "log_odds": -2.5,
+          "confidence": 0.076,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.detector_drift",
+          "label": "Receiver/detector sensitivity drift reducing SNR at range",
+          "node_ref": "part.detector",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.thermal_tec",
+          "label": "TEC module underperforming, elevating detector/laser junction temp and degrading efficiency",
+          "node_ref": "part.tec",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.calibration_drift",
+          "label": "Signal processing / calibration coefficients drifted, causing systematic range underreporting or sensitivity reduction",
+          "node_ref": "sub.calibration",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": 3.0,
+          "confidence": 0.953,
+          "status": "leading"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.laser_power_check_001",
+          "summary": "Laser emitter output 41.8 mW vs 48.0 mW baseline (\u221213.0%) \u2014 a sustained decline exceeding the observed 8% range loss. Diode junction temperature 25.2 \u00b0C is within the 26.0 \u00b0C setpoint, confirming TEC is maintaining thermal control; the power loss is therefore intrinsic to the emitter, not thermally driven.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.common_mode_check_001",
+          "summary": "Common-mode check confirms 3 channels degraded with an onset spread of only 1.25 days, indicating a single shared upstream failure rather than independent per-channel faults. This eliminates independent multi-channel drift as an explanation and strongly implicates a component that sits upstream of all affected channels (laser drive, optical path, or shared signal processing).",
+          "source": "common_mode_check"
+        },
+        {
+          "id": "ev.onset_event_check_001",
+          "summary": "onset_vs_event_check returned no logged reboot or timed configuration-change event (log.reboot absent). No discrete system event exists that could align with the degradation onset, eliminating event-triggered calibration coefficient shifts or post-reboot mis-initialisation as a cause. The absence is consistent with gradual, non-event-driven mechanisms such as progressive emitter aging or slow optical-path contamination.",
+          "source": "onset_vs_event_check"
+        },
+        {
+          "id": "ev.swap_rec_001",
+          "summary": "Swap test of the laser emitter module recommended but not yet executed. The recommendation identifies the laser emitter module as the single most discriminating component to isolate next, framing the test as separating intrinsic emitter aging from any residual thermal cause (the latter already largely ruled out by ev.laser_power_check_001). No empirical outcome exists yet; evidential weight is modest and prospective. Critically, the recommendation prioritises the emitter module over optical-path inspection (window cleaning) and over upstream drive-circuit investigation, implicitly deprioritising both hyp.window_contamination and hyp.upstream_power as primary root causes at this stage.",
+          "source": "recommend_swap_test"
+        },
+        {
+          "id": "ev.config_diff_001",
+          "summary": "config_diff shows scan_params changed from 'raster_default' to 'high_power_v2'. No timestamp accompanies this record, so onset alignment with the ~1-week degradation cannot be confirmed; without that confirmation the change must be treated as coincident rather than causal. The shift to a 'high_power_v2' scan profile implies an upstream alteration to scanner or laser-drive operating parameters, consistent with a shared upstream configuration cause affecting all channels simultaneously. The finding conflicts with ev.onset_event_check_001, which asserted no configuration-change event existed in the event log; the discrepancy indicates this mutation occurred outside the formal event-logging system. The existence of an alternative upstream configuration explanation marginally undercuts hyp.laser_aging as a purely intrinsic mechanism for the observed power deficit.",
+          "source": "config_diff"
+        },
+        {
+          "id": "ev.tec_load_check_001",
+          "summary": "TEC current is 1.98 A \u2014 79% of the 2.5 A limit \u2014 and is not at limit. Diode junction temperature is 25.21 \u00b0C against a 26.0 \u00b0C setpoint maximum; losing_setpoint is false. The TEC is operating comfortably within capacity and maintaining full thermal control. This independently corroborates ev.laser_power_check_001's finding that the laser power deficit is not thermally driven, and eliminates TEC underperformance as a contributing mechanism to the observed range degradation.",
+          "source": "tec_load_check"
+        },
+        {
+          "id": "ev.traverse_config_001",
+          "summary": "Traversal of config record 'scan_params:high_power_v2' requesting fields [timestamp_applied, drive_current_setpoint_mA, param_delta_vs_raster_default, applied_by] returned a key error ('node_id'). No data was retrieved. Consequently: (1) the timestamp of the high_power_v2 profile application remains unknown, so onset alignment with the ~1-week degradation still cannot be confirmed or denied; (2) whether this profile altered laser drive-current setpoints \u2014 which could explain the 13% power deficit extrinsically \u2014 cannot be established from this path. The config change evidenced in ev.config_diff_001 is real but its detailed record is not traversable as a structured node, deepening the discrepancy with ev.onset_event_check_001. The failure to retrieve drive-current delta leaves hyp.upstream_power mechanistically unsubstantiated and marginally favours hyp.laser_aging as the primary remaining explanation.",
+          "source": "traverse:config_record:scan_params:high_power_v2"
+        },
+        {
+          "id": "ev.change_cause_log.power_mode",
+          "summary": "log.power_mode: a recent config change to sub.power aligns with the degradation onset \u2192 the change is the cause",
+          "source": "onset_vs_event_check"
+        },
+        {
+          "id": "ev.common_mode",
+          "summary": "3 degraded channel(s), onset spread 1.25d \u2192 common-mode (one upstream cause, not independent faults)",
+          "source": "common_mode_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "+",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.config_diff_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.config_diff_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.config_diff_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.tec_load_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.tec_load_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.traverse_config_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.traverse_config_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.traverse_config_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "-",
+          "weight": 0.0
+        },
+        {
+          "evidence_id": "ev.change_cause_log.power_mode",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.common_mode",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.common_mode",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.common_mode",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.common_mode",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 1.5
+        }
+      ]
+    },
+    {
+      "status": "concluded",
+      "recommended_action": "Access the high_power_v2 config record via an alternative path (e.g., flat config dump or direct filesystem read, not the failed structured-node traversal) to retrieve drive_current_setpoint_mA and diff it against raster_default. ev.laser_power_check_001 shows a 13% emitter power deficit that is not thermally driven (ev.tec_load_check_001 confirms TEC healthy); the most parsimonious extrinsic explanation is a reduced drive-current setpoint introduced by the unlogged sub.power / scan_params change to high_power_v2 (ev.change_cause_log.power_mode, ev.config_diff_001). If the drive-current setpoint is confirmed lower, revert scan_params to raster_default and verify range recovery to the 120 m baseline. If drive-current is unchanged in the config, escalate to physical emitter inspection; only then does intrinsic laser aging become the primary candidate.",
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "hyp.window_contamination",
+          "label": "Window contamination attenuating TX/RX optical path",
+          "node_ref": "part.window",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "hyp.laser_aging",
+          "label": "Laser emitter output power degraded due to aging or drive-current shift",
+          "node_ref": "part.laser_module",
+          "log_odds": -2.5,
+          "confidence": 0.076,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.detector_drift",
+          "label": "Receiver/detector sensitivity drift reducing SNR at range",
+          "node_ref": "part.detector",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.thermal_tec",
+          "label": "TEC module underperforming, elevating detector/laser junction temp and degrading efficiency",
+          "node_ref": "part.tec",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.calibration_drift",
+          "label": "Signal processing / calibration coefficients drifted, causing systematic range underreporting or sensitivity reduction",
+          "node_ref": "sub.calibration",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": 3.0,
+          "confidence": 0.953,
+          "status": "leading"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.laser_power_check_001",
+          "summary": "Laser emitter output 41.8 mW vs 48.0 mW baseline (\u221213.0%) \u2014 a sustained decline exceeding the observed 8% range loss. Diode junction temperature 25.2 \u00b0C is within the 26.0 \u00b0C setpoint, confirming TEC is maintaining thermal control; the power loss is therefore intrinsic to the emitter, not thermally driven.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.common_mode_check_001",
+          "summary": "Common-mode check confirms 3 channels degraded with an onset spread of only 1.25 days, indicating a single shared upstream failure rather than independent per-channel faults. This eliminates independent multi-channel drift as an explanation and strongly implicates a component that sits upstream of all affected channels (laser drive, optical path, or shared signal processing).",
+          "source": "common_mode_check"
+        },
+        {
+          "id": "ev.onset_event_check_001",
+          "summary": "onset_vs_event_check returned no logged reboot or timed configuration-change event (log.reboot absent). No discrete system event exists that could align with the degradation onset, eliminating event-triggered calibration coefficient shifts or post-reboot mis-initialisation as a cause. The absence is consistent with gradual, non-event-driven mechanisms such as progressive emitter aging or slow optical-path contamination.",
+          "source": "onset_vs_event_check"
+        },
+        {
+          "id": "ev.swap_rec_001",
+          "summary": "Swap test of the laser emitter module recommended but not yet executed. The recommendation identifies the laser emitter module as the single most discriminating component to isolate next, framing the test as separating intrinsic emitter aging from any residual thermal cause (the latter already largely ruled out by ev.laser_power_check_001). No empirical outcome exists yet; evidential weight is modest and prospective. Critically, the recommendation prioritises the emitter module over optical-path inspection (window cleaning) and over upstream drive-circuit investigation, implicitly deprioritising both hyp.window_contamination and hyp.upstream_power as primary root causes at this stage.",
+          "source": "recommend_swap_test"
+        },
+        {
+          "id": "ev.config_diff_001",
+          "summary": "config_diff shows scan_params changed from 'raster_default' to 'high_power_v2'. No timestamp accompanies this record, so onset alignment with the ~1-week degradation cannot be confirmed; without that confirmation the change must be treated as coincident rather than causal. The shift to a 'high_power_v2' scan profile implies an upstream alteration to scanner or laser-drive operating parameters, consistent with a shared upstream configuration cause affecting all channels simultaneously. The finding conflicts with ev.onset_event_check_001, which asserted no configuration-change event existed in the event log; the discrepancy indicates this mutation occurred outside the formal event-logging system. The existence of an alternative upstream configuration explanation marginally undercuts hyp.laser_aging as a purely intrinsic mechanism for the observed power deficit.",
+          "source": "config_diff"
+        },
+        {
+          "id": "ev.tec_load_check_001",
+          "summary": "TEC current is 1.98 A \u2014 79% of the 2.5 A limit \u2014 and is not at limit. Diode junction temperature is 25.21 \u00b0C against a 26.0 \u00b0C setpoint maximum; losing_setpoint is false. The TEC is operating comfortably within capacity and maintaining full thermal control. This independently corroborates ev.laser_power_check_001's finding that the laser power deficit is not thermally driven, and eliminates TEC underperformance as a contributing mechanism to the observed range degradation.",
+          "source": "tec_load_check"
+        },
+        {
+          "id": "ev.traverse_config_001",
+          "summary": "Traversal of config record 'scan_params:high_power_v2' requesting fields [timestamp_applied, drive_current_setpoint_mA, param_delta_vs_raster_default, applied_by] returned a key error ('node_id'). No data was retrieved. Consequently: (1) the timestamp of the high_power_v2 profile application remains unknown, so onset alignment with the ~1-week degradation still cannot be confirmed or denied; (2) whether this profile altered laser drive-current setpoints \u2014 which could explain the 13% power deficit extrinsically \u2014 cannot be established from this path. The config change evidenced in ev.config_diff_001 is real but its detailed record is not traversable as a structured node, deepening the discrepancy with ev.onset_event_check_001. The failure to retrieve drive-current delta leaves hyp.upstream_power mechanistically unsubstantiated and marginally favours hyp.laser_aging as the primary remaining explanation.",
+          "source": "traverse:config_record:scan_params:high_power_v2"
+        },
+        {
+          "id": "ev.change_cause_log.power_mode",
+          "summary": "log.power_mode: a recent config change to sub.power aligns with the degradation onset \u2192 the change is the cause",
+          "source": "onset_vs_event_check"
+        },
+        {
+          "id": "ev.common_mode",
+          "summary": "3 degraded channel(s), onset spread 1.25d \u2192 common-mode (one upstream cause, not independent faults)",
+          "source": "common_mode_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "+",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.onset_event_check_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.swap_rec_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.config_diff_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.config_diff_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "+",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.config_diff_001",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.tec_load_check_001",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.tec_load_check_001",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.traverse_config_001",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.traverse_config_001",
+          "hypothesis_id": "hyp.calibration_drift",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.traverse_config_001",
+          "hypothesis_id": "hyp.window_contamination",
+          "polarity": "-",
+          "weight": 0.0
+        },
+        {
+          "evidence_id": "ev.change_cause_log.power_mode",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.common_mode",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "+",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.common_mode",
+          "hypothesis_id": "hyp.laser_aging",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.common_mode",
+          "hypothesis_id": "hyp.detector_drift",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.common_mode",
+          "hypothesis_id": "hyp.thermal_tec",
+          "polarity": "-",
+          "weight": 1.5
+        }
+      ]
+    }
+  ],
+  "trace": [
+    {
+      "action": "seed",
+      "args": {},
+      "rationale": "seed the differential from the symptom",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "hyp.window_contamination",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "hyp.window_contamination": 0.5,
+        "hyp.laser_aging": 0.5,
+        "hyp.detector_drift": 0.5,
+        "hyp.thermal_tec": 0.5,
+        "hyp.calibration_drift": 0.5,
+        "hyp.upstream_power": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "laser_power_check"
+      },
+      "rationale": "With all six hypotheses at equal prior and no evidence collected, the single most discriminating measurement is transmitted optical power at the emitter. An 8% range loss is physically consistent with a TX-power drop (range \u221d P^0.5 in SNR-limited systems, so ~8% range reduction \u2248 ~15% power drop). Result interpretation: (A) Power is nominal \u2192 strongly argues AGAINST hyp.laser_aging and hyp.upstream_power, and partially against hyp.thermal_tec; redirects suspicion to RX path (hyp.detector_drift), optical path (hyp.window_contamination), or processing (hyp.calibration_drift). (B) Power is reduced \u2192 strongly supports hyp.laser_aging and/or hyp.upstream_power, and raises hyp.thermal_tec as a contributing cause (elevated junction temp reduces wall-plug efficiency). This single check cleanly splits the six hypotheses into two camps \u2014 TX-side vs. RX/calibration-side \u2014 giving the maximum evidence gain per action at this stage.",
+      "voi": 0.82,
+      "evidence_id": "ev.laser_power_check_001",
+      "conflicts_added": [],
+      "leader": "hyp.laser_aging",
+      "leader_conf": 0.881,
+      "margin": 0.15,
+      "confidences": {
+        "hyp.window_contamination": 0.269,
+        "hyp.laser_aging": 0.881,
+        "hyp.detector_drift": 0.269,
+        "hyp.thermal_tec": 0.119,
+        "hyp.calibration_drift": 0.269,
+        "hyp.upstream_power": 0.731
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "common_mode_check"
+      },
+      "rationale": "ev.laser_power_check_001 confirms laser output is \u221213% but cannot distinguish whether that loss is intrinsic to the emitter diode (hyp.laser_aging) or is a consequence of a shifted drive current / upstream power rail (hyp.upstream_power). A common_mode_check tests correlation across all channels sharing the same supply and driver bus: if the output drop is isolated to this single emitter while peer emitters remain nominal, it argues strongly FOR hyp.laser_aging and AGAINST hyp.upstream_power; if peer emitters or downstream subsystems on the same rail show a proportional decline, the shared upstream cause is implicated and hyp.upstream_power rises while hyp.laser_aging falls. This is the only available action that can move these two leading hypotheses in opposite directions from a single result. hyp.thermal_tec is already ruled out by ev.laser_power_check_001; hyp.detector_drift and hyp.calibration_drift remain secondary \u2014 the 13% TX loss already accounts for the observed 8% range degradation, so discriminating the TX-side root cause is the highest-value step before revisiting RX-side hypotheses.",
+      "voi": 0.88,
+      "evidence_id": "ev.common_mode_check_001",
+      "conflicts_added": [],
+      "leader": "hyp.laser_aging",
+      "leader_conf": 0.953,
+      "margin": 0.0,
+      "confidences": {
+        "hyp.window_contamination": 0.5,
+        "hyp.laser_aging": 0.953,
+        "hyp.detector_drift": 0.047,
+        "hyp.thermal_tec": 0.076,
+        "hyp.calibration_drift": 0.5,
+        "hyp.upstream_power": 0.953
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "onset_vs_event_check"
+      },
+      "rationale": "Both hyp.laser_aging and hyp.upstream_power are co-leading at log_odds=3.00 and must be separated. ev.common_mode_check_001 revealed a tight 1.25-day co-onset across 3 channels. True laser aging (hyp.laser_aging) is a slow, continuous, per-emitter process \u2014 it does not produce a near-simultaneous step degradation across multiple channels within 1.25 days. A shared upstream discrete event (drive-current config push, firmware flash, power-supply swap) does. onset_vs_event_check will determine whether any logged event (reboot, config change, firmware update, hardware swap) temporally aligns with the degradation onset. A confirmed alignment strongly raises hyp.upstream_power and hyp.calibration_drift while materially lowering hyp.laser_aging; no alignment reverses those odds and forces an intrinsic emitter explanation for the rapid multi-channel co-onset \u2014 an unusual profile for natural aging that would itself need accounting for. hyp.window_contamination is also implicitly tested: contamination would be gradual and optically uniform, inconsistent with a sharp event-aligned onset.",
+      "voi": 0.88,
+      "evidence_id": "ev.onset_event_check_001",
+      "conflicts_added": [],
+      "leader": "hyp.laser_aging",
+      "leader_conf": 0.953,
+      "margin": 0.028,
+      "confidences": {
+        "hyp.window_contamination": 0.622,
+        "hyp.laser_aging": 0.953,
+        "hyp.detector_drift": 0.047,
+        "hyp.thermal_tec": 0.076,
+        "hyp.calibration_drift": 0.182,
+        "hyp.upstream_power": 0.924
+      }
+    },
+    {
+      "action": "recommend_swap_test",
+      "args": {
+        "component": "laser_emitter_module"
+      },
+      "rationale": "ev.laser_power_check_001 confirms \u221213% optical output with junction temperature at 25.2 \u00b0C (within the 26 \u00b0C TEC setpoint), ruling out a thermally driven cause and isolating the loss to either intrinsic emitter degradation (hyp.laser_aging) or a reduced upstream drive current feeding the emitter (hyp.upstream_power). ev.common_mode_check_001 shows 3 channels co-degrading within a 1.25-day window, consistent with a shared upstream component \u2014 which could be the laser assembly itself or its drive/power supply. These two hypotheses currently sit only 0.5 log-odds apart and no available telemetry check measures drive current directly to separate them. Substituting a known-good laser emitter module is the single most discriminating action available: (a) if optical output and effective range recover to baseline with the replacement emitter, the fault is intrinsic to the diode \u2014 hyp.laser_aging confirmed, hyp.upstream_power substantially lowered; (b) if degradation persists with a fresh emitter under the same drive circuitry, the upstream drive or power rail is the root cause \u2014 hyp.upstream_power confirmed, hyp.laser_aging substantially lowered. Either outcome cleanly separates the two leading hypotheses in a single intervention.",
+      "voi": 0.3,
+      "evidence_id": "ev.swap_rec_001",
+      "conflicts_added": [],
+      "leader": "hyp.laser_aging",
+      "leader_conf": 0.953,
+      "margin": 0.072,
+      "confidences": {
+        "hyp.window_contamination": 0.5,
+        "hyp.laser_aging": 0.953,
+        "hyp.detector_drift": 0.047,
+        "hyp.thermal_tec": 0.047,
+        "hyp.calibration_drift": 0.119,
+        "hyp.upstream_power": 0.881
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "config_diff"
+      },
+      "rationale": "ev.laser_power_check_001 confirms emitter output is \u221213% below baseline and thermal causes are ruled out (TEC nominal). The remaining fork is whether the drive circuit/upstream supply has reduced delivered current to the laser (hyp.upstream_power, log_odds=2.00) or whether the emitter itself has intrinsically degraded at unchanged drive current (hyp.laser_aging, log_odds=3.00). config_diff directly exposes any drift or change in laser drive-current setpoints, bias registers, or supply-voltage parameters. Result is strongly bifurcating: (a) if drive-current or supply parameters have shifted from baseline, this raises upstream_power and materially lowers laser_aging as the sole explanation; (b) if configuration is fully nominal and unchanged, this eliminates the upstream-drive path and consolidates the evidence for intrinsic laser aging, justifying the pending emitter swap. No prior check has yet interrogated drive-current configuration, so this is non-redundant with existing evidence. hyp.window_contamination (log_odds=0.00) is not yet ruled out but is lower priority than resolving the gap between the two leading hypotheses; its spatial signature can be tested by spatial_intensity_check in a subsequent step.",
+      "voi": 0.82,
+      "evidence_id": "ev.config_diff_001",
+      "conflicts_added": [],
+      "leader": "hyp.laser_aging",
+      "leader_conf": 0.953,
+      "margin": 0.0,
+      "confidences": {
+        "hyp.window_contamination": 0.5,
+        "hyp.laser_aging": 0.953,
+        "hyp.detector_drift": 0.047,
+        "hyp.thermal_tec": 0.047,
+        "hyp.calibration_drift": 0.269,
+        "hyp.upstream_power": 0.953
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "tec_load_check"
+      },
+      "rationale": "The two co-leading hypotheses \u2014 hyp.laser_aging (log_odds=3.00) and hyp.upstream_power (log_odds=3.00) \u2014 are not yet discriminated from each other. ev.config_diff_001 revealed a scan_params change to 'high_power_v2' with no timestamp, which could mean the laser driver is supplying a different (potentially higher) drive current \u2014 an upstream mechanism. ev.laser_power_check_001 confirmed the TEC is successfully holding junction temperature at 25.2 \u00b0C against the 26 \u00b0C setpoint, but did NOT measure TEC duty cycle or thermal load. If tec_load_check returns an elevated TEC load, it implies the laser is generating more waste heat than at baseline, consistent with a higher drive-current set by 'high_power_v2' depressing wall-plug efficiency \u2014 this would raise hyp.upstream_power and weaken the purely-intrinsic-aging reading of hyp.laser_aging. If TEC load is nominal (no increase in heat to reject), the drive conditions are effectively unchanged and the \u221213% optical power deficit (ev.laser_power_check_001) is intrinsic to the emitter, raising hyp.laser_aging and weakening hyp.upstream_power. This check has not been run; ev.laser_power_check_001 and ev.common_mode_check_001 are already in evidence and do not answer this question. The action raises one leading hypothesis while lowering the other depending on outcome, satisfying the discrimination criterion.",
+      "voi": 0.72,
+      "evidence_id": "ev.tec_load_check_001",
+      "conflicts_added": [],
+      "leader": "hyp.laser_aging",
+      "leader_conf": 0.953,
+      "margin": 0.0,
+      "confidences": {
+        "hyp.window_contamination": 0.5,
+        "hyp.laser_aging": 0.953,
+        "hyp.detector_drift": 0.047,
+        "hyp.thermal_tec": 0.047,
+        "hyp.calibration_drift": 0.269,
+        "hyp.upstream_power": 0.953
+      }
+    },
+    {
+      "action": "traverse",
+      "args": {
+        "target": "config_record",
+        "ref": "scan_params:high_power_v2",
+        "fields": [
+          "timestamp_applied",
+          "drive_current_setpoint_mA",
+          "param_delta_vs_raster_default",
+          "applied_by"
+        ]
+      },
+      "rationale": "The two co-leading hypotheses \u2014 hyp.laser_aging (log_odds=3.00) and hyp.upstream_power (log_odds=3.00) \u2014 both fit ev.laser_power_check_001's \u221213% output deficit but predict different mechanisms. hyp.laser_aging requires that laser drive current is at its nominal setpoint yet emitter output has intrinsically declined; hyp.upstream_power requires that the 'high_power_v2' config change (ev.config_diff_001) altered drive-current or scan-drive parameters, making the output drop an externally imposed reduction rather than emitter degradation. ev.config_diff_001 is the critical fork: it found a scan_params mutation outside the formal event log with NO timestamp, so onset alignment is unconfirmed and causal attribution is suspended. Traversing the config record directly resolves both discriminating sub-questions: (1) the timestamp determines whether the change aligns with the ~1-week onset \u2014 if aligned, hyp.upstream_power rises and hyp.laser_aging falls as the primary intrinsic mechanism; if misaligned, the reverse; (2) the param delta reveals whether drive-current setpoint changed \u2014 a reduced setpoint fully explains the deficit without invoking aging, while an unchanged setpoint leaves intrinsic emitter degradation as the only remaining explanation. No currently retrieved evidence (ev.laser_power_check_001, ev.tec_load_check_001, ev.common_mode_check_001) directly measures drive-current setpoint or dates the config change, so this action opens new evidential territory rather than re-confirming already-supported findings.",
+      "voi": 0.88,
+      "evidence_id": "ev.traverse_config_001",
+      "conflicts_added": [],
+      "leader": "hyp.laser_aging",
+      "leader_conf": 0.953,
+      "margin": 0.0,
+      "confidences": {
+        "hyp.window_contamination": 0.5,
+        "hyp.laser_aging": 0.953,
+        "hyp.detector_drift": 0.047,
+        "hyp.thermal_tec": 0.047,
+        "hyp.calibration_drift": 0.119,
+        "hyp.upstream_power": 0.953
+      }
+    },
+    {
+      "action": "conflict_sweep",
+      "args": {},
+      "rationale": "order onset vs the salient recent event; sanity-check channels",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "hyp.upstream_power",
+      "leader_conf": 0.953,
+      "margin": 0.453,
+      "confidences": {
+        "hyp.window_contamination": 0.5,
+        "hyp.laser_aging": 0.076,
+        "hyp.detector_drift": 0.047,
+        "hyp.thermal_tec": 0.047,
+        "hyp.calibration_drift": 0.119,
+        "hyp.upstream_power": 0.953
+      }
+    },
+    {
+      "action": "synthesize",
+      "args": {
+        "answer_type": "cause",
+        "root_cause": "sub.power"
+      },
+      "rationale": "conclude or abstain from the differential",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "hyp.upstream_power",
+      "leader_conf": 0.953,
+      "margin": 0.453,
+      "confidences": {
+        "hyp.window_contamination": 0.5,
+        "hyp.laser_aging": 0.076,
+        "hyp.detector_drift": 0.047,
+        "hyp.thermal_tec": 0.047,
+        "hyp.calibration_drift": 0.119,
+        "hyp.upstream_power": 0.953
+      }
+    }
+  ],
+  "case_id": "case8",
+  "title": "Common-mode power",
+  "caption": "one cause looks like two faults; redundant channels agree but are wrong",
+  "answer": {
+    "answer_type": "cause",
+    "root_cause": "sub.power",
+    "cited_evidence": [
+      "ev.change_cause_log.power_mode",
+      "ev.common_mode",
+      "ev.common_mode_check_001",
+      "ev.config_diff_001",
+      "ev.laser_power_check_001",
+      "ev.tec_load_check_001",
+      "ev.traverse_config_001"
+    ],
+    "conflicts": []
+  },
+  "eval_row": {
+    "accuracy": 1.0,
+    "localization": 1.0,
+    "trigger_discrimination": 1.0,
+    "conflict_handling": 1.0,
+    "evidence_f1": 0.22,
+    "tokens": 295256
+  }
+}

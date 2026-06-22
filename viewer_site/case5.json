@@ -1,0 +1,1830 @@
+{
+  "symptom": "An intermittent range fluctuation was reported around the last maintenance. Determine the root cause, or whether there is a single clean cause at all.",
+  "trigger": "log.reboot",
+  "root_cause": null,
+  "final_status": "abstained",
+  "steps": [
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [],
+      "hypotheses": [
+        {
+          "id": "H1",
+          "label": "Window contamination attenuating return signal",
+          "node_ref": "part.window",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "H2",
+          "label": "Calibration / firmware drift shifting range computation",
+          "node_ref": "sub.calibration",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "H3",
+          "label": "Laser aging causing intermittent output-power drop",
+          "node_ref": "part.laser_module",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "H4",
+          "label": "TEC / thermal instability modulating laser or detector operating point",
+          "node_ref": "part.tec",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "H5",
+          "label": "Detector responsivity drift producing range-measurement error",
+          "node_ref": "part.detector",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        }
+      ],
+      "evidence": [],
+      "links": []
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [
+        "log.reboot"
+      ],
+      "hypotheses": [
+        {
+          "id": "H1",
+          "label": "Window contamination attenuating return signal",
+          "node_ref": "part.window",
+          "log_odds": -1.5,
+          "confidence": 0.182,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H2",
+          "label": "Calibration / firmware drift shifting range computation",
+          "node_ref": "sub.calibration",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H3",
+          "label": "Laser aging causing intermittent output-power drop",
+          "node_ref": "part.laser_module",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "H4",
+          "label": "TEC / thermal instability modulating laser or detector operating point",
+          "node_ref": "part.tec",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "H5",
+          "label": "Detector responsivity drift producing range-measurement error",
+          "node_ref": "part.detector",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.onset_vs_reboot",
+          "summary": "Effective-max-range degradation onset at t\u22487.5 precedes log.reboot (maintenance) at t=8.0. The reboot is coincident, not causal. This demotes any hypothesis whose mechanism would have been initiated by the maintenance event and is consistent with pre-existing, gradual degradation.",
+          "source": "onset_vs_event_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.onset_vs_reboot",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.onset_vs_reboot",
+          "hypothesis_id": "H2",
+          "polarity": "-",
+          "weight": 2.0
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [
+        "log.reboot"
+      ],
+      "hypotheses": [
+        {
+          "id": "H1",
+          "label": "Window contamination attenuating return signal",
+          "node_ref": "part.window",
+          "log_odds": -1.5,
+          "confidence": 0.182,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H2",
+          "label": "Calibration / firmware drift shifting range computation",
+          "node_ref": "sub.calibration",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H3",
+          "label": "Laser aging causing intermittent output-power drop",
+          "node_ref": "part.laser_module",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H4",
+          "label": "TEC / thermal instability modulating laser or detector operating point",
+          "node_ref": "part.tec",
+          "log_odds": -1.0,
+          "confidence": 0.269,
+          "status": "open"
+        },
+        {
+          "id": "H5",
+          "label": "Detector responsivity drift producing range-measurement error",
+          "node_ref": "part.detector",
+          "log_odds": 0.0,
+          "confidence": 0.5,
+          "status": "open"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": -1.5,
+          "confidence": 0.182,
+          "status": "ruled_out"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.onset_vs_reboot",
+          "summary": "Effective-max-range degradation onset at t\u22487.5 precedes log.reboot (maintenance) at t=8.0. The reboot is coincident, not causal. This demotes any hypothesis whose mechanism would have been initiated by the maintenance event and is consistent with pre-existing, gradual degradation.",
+          "source": "onset_vs_event_check"
+        },
+        {
+          "id": "ev.laser_power_check",
+          "summary": "Laser output 48.15 mW vs baseline 48.07 mW (+0.2%), ratio 1.0017 \u2014 no sustained decline. Diode temperature 25.28 \u00b0C nominal vs setpoint_max 26.0 \u00b0C, diode_nominal=true, low_power=false. A point-in-time snapshot; cannot exclude brief intermittent drops, but the trend shows no degradation from baseline.",
+          "source": "laser_power_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.onset_vs_reboot",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.onset_vs_reboot",
+          "hypothesis_id": "H2",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 1.5
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [
+        "log.reboot"
+      ],
+      "hypotheses": [
+        {
+          "id": "H1",
+          "label": "Window contamination attenuating return signal",
+          "node_ref": "part.window",
+          "log_odds": -1.5,
+          "confidence": 0.182,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H2",
+          "label": "Calibration / firmware drift shifting range computation",
+          "node_ref": "sub.calibration",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H3",
+          "label": "Laser aging causing intermittent output-power drop",
+          "node_ref": "part.laser_module",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H4",
+          "label": "TEC / thermal instability modulating laser or detector operating point",
+          "node_ref": "part.tec",
+          "log_odds": -2.5,
+          "confidence": 0.076,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H5",
+          "label": "Detector responsivity drift producing range-measurement error",
+          "node_ref": "part.detector",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": -1.5,
+          "confidence": 0.182,
+          "status": "ruled_out"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.onset_vs_reboot",
+          "summary": "Effective-max-range degradation onset at t\u22487.5 precedes log.reboot (maintenance) at t=8.0. The reboot is coincident, not causal. This demotes any hypothesis whose mechanism would have been initiated by the maintenance event and is consistent with pre-existing, gradual degradation.",
+          "source": "onset_vs_event_check"
+        },
+        {
+          "id": "ev.laser_power_check",
+          "summary": "Laser output 48.15 mW vs baseline 48.07 mW (+0.2%), ratio 1.0017 \u2014 no sustained decline. Diode temperature 25.28 \u00b0C nominal vs setpoint_max 26.0 \u00b0C, diode_nominal=true, low_power=false. A point-in-time snapshot; cannot exclude brief intermittent drops, but the trend shows no degradation from baseline.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.detector_health_check",
+          "summary": "Dark-count rise \u22480.003 (effectively 0%), detector temp rise \u22480.008 \u00b0C, bias_drift=false, detector_temp_live=true. No detector bias, responsivity, or thermal signature detected. Detector operating point is electrically and thermally stable at time of check; channel confirmed live (not stuck).",
+          "source": "detector_health_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.onset_vs_reboot",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.onset_vs_reboot",
+          "hypothesis_id": "H2",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.detector_health_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.detector_health_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 1.5
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [
+        "log.reboot"
+      ],
+      "hypotheses": [
+        {
+          "id": "H1",
+          "label": "Window contamination attenuating return signal",
+          "node_ref": "part.window",
+          "log_odds": -1.5,
+          "confidence": 0.182,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H2",
+          "label": "Calibration / firmware drift shifting range computation",
+          "node_ref": "sub.calibration",
+          "log_odds": -2.0,
+          "confidence": 0.119,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H3",
+          "label": "Laser aging causing intermittent output-power drop",
+          "node_ref": "part.laser_module",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H4",
+          "label": "TEC / thermal instability modulating laser or detector operating point",
+          "node_ref": "part.tec",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H5",
+          "label": "Detector responsivity drift producing range-measurement error",
+          "node_ref": "part.detector",
+          "log_odds": -2.5,
+          "confidence": 0.076,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": -1.5,
+          "confidence": 0.182,
+          "status": "ruled_out"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.onset_vs_reboot",
+          "summary": "Effective-max-range degradation onset at t\u22487.5 precedes log.reboot (maintenance) at t=8.0. The reboot is coincident, not causal. This demotes any hypothesis whose mechanism would have been initiated by the maintenance event and is consistent with pre-existing, gradual degradation.",
+          "source": "onset_vs_event_check"
+        },
+        {
+          "id": "ev.laser_power_check",
+          "summary": "Laser output 48.15 mW vs baseline 48.07 mW (+0.2%), ratio 1.0017 \u2014 no sustained decline. Diode temperature 25.28 \u00b0C nominal vs setpoint_max 26.0 \u00b0C, diode_nominal=true, low_power=false. A point-in-time snapshot; cannot exclude brief intermittent drops, but the trend shows no degradation from baseline.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.detector_health_check",
+          "summary": "Dark-count rise \u22480.003 (effectively 0%), detector temp rise \u22480.008 \u00b0C, bias_drift=false, detector_temp_live=true. No detector bias, responsivity, or thermal signature detected. Detector operating point is electrically and thermally stable at time of check; channel confirmed live (not stuck).",
+          "source": "detector_health_check"
+        },
+        {
+          "id": "ev.tec_load_check",
+          "summary": "TEC current 1.19 A is 47% of the 2.5 A limit; diode temp 25.28 \u00b0C is well below setpoint_max 26.0 \u00b0C; losing_setpoint=false. The TEC has substantial headroom, is tracking its setpoint without strain, and shows no sign of thermal saturation, instability, or runaway. The laser diode thermal operating point is actively and stably controlled at time of check.",
+          "source": "tec_load_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.onset_vs_reboot",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.onset_vs_reboot",
+          "hypothesis_id": "H2",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.detector_health_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.detector_health_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.tec_load_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.tec_load_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.tec_load_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 0.5
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [
+        "log.reboot"
+      ],
+      "hypotheses": [
+        {
+          "id": "H1",
+          "label": "Window contamination attenuating return signal",
+          "node_ref": "part.window",
+          "log_odds": -1.7,
+          "confidence": 0.154,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H2",
+          "label": "Calibration / firmware drift shifting range computation",
+          "node_ref": "sub.calibration",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H3",
+          "label": "Laser aging causing intermittent output-power drop",
+          "node_ref": "part.laser_module",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H4",
+          "label": "TEC / thermal instability modulating laser or detector operating point",
+          "node_ref": "part.tec",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H5",
+          "label": "Detector responsivity drift producing range-measurement error",
+          "node_ref": "part.detector",
+          "log_odds": -2.7,
+          "confidence": 0.063,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.onset_vs_reboot",
+          "summary": "Effective-max-range degradation onset at t\u22487.5 precedes log.reboot (maintenance) at t=8.0. The reboot is coincident, not causal. This demotes any hypothesis whose mechanism would have been initiated by the maintenance event and is consistent with pre-existing, gradual degradation.",
+          "source": "onset_vs_event_check"
+        },
+        {
+          "id": "ev.laser_power_check",
+          "summary": "Laser output 48.15 mW vs baseline 48.07 mW (+0.2%), ratio 1.0017 \u2014 no sustained decline. Diode temperature 25.28 \u00b0C nominal vs setpoint_max 26.0 \u00b0C, diode_nominal=true, low_power=false. A point-in-time snapshot; cannot exclude brief intermittent drops, but the trend shows no degradation from baseline.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.detector_health_check",
+          "summary": "Dark-count rise \u22480.003 (effectively 0%), detector temp rise \u22480.008 \u00b0C, bias_drift=false, detector_temp_live=true. No detector bias, responsivity, or thermal signature detected. Detector operating point is electrically and thermally stable at time of check; channel confirmed live (not stuck).",
+          "source": "detector_health_check"
+        },
+        {
+          "id": "ev.tec_load_check",
+          "summary": "TEC current 1.19 A is 47% of the 2.5 A limit; diode temp 25.28 \u00b0C is well below setpoint_max 26.0 \u00b0C; losing_setpoint=false. The TEC has substantial headroom, is tracking its setpoint without strain, and shows no sign of thermal saturation, instability, or runaway. The laser diode thermal operating point is actively and stably controlled at time of check.",
+          "source": "tec_load_check"
+        },
+        {
+          "id": "ev.common_mode_check",
+          "summary": "Common-mode check found 0 degraded channels with onset spread 0.00 d \u2014 no shared degradation signature across channels. A shared upstream cause (power rail, firmware push, shared thermal infrastructure) would be expected to produce concurrent multi-channel onset; the complete absence of any such pattern argues strongly against hyp.upstream_power. It also mildly argues against H2 (firmware/calibration drift, which typically propagates system-wide) and H4 (a shared-path thermal instability scenario). Single-unit per-channel hypotheses (H1, H3, H5) are not meaningfully constrained by this result.",
+          "source": "common_mode_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.onset_vs_reboot",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.onset_vs_reboot",
+          "hypothesis_id": "H2",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.detector_health_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.detector_health_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.tec_load_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.tec_load_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.tec_load_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H2",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 0.2
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [
+        "log.reboot"
+      ],
+      "hypotheses": [
+        {
+          "id": "H1",
+          "label": "Window contamination attenuating return signal",
+          "node_ref": "part.window",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H2",
+          "label": "Calibration / firmware drift shifting range computation",
+          "node_ref": "sub.calibration",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H3",
+          "label": "Laser aging causing intermittent output-power drop",
+          "node_ref": "part.laser_module",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H4",
+          "label": "TEC / thermal instability modulating laser or detector operating point",
+          "node_ref": "part.tec",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H5",
+          "label": "Detector responsivity drift producing range-measurement error",
+          "node_ref": "part.detector",
+          "log_odds": -2.7,
+          "confidence": 0.063,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.onset_vs_reboot",
+          "summary": "Effective-max-range degradation onset at t\u22487.5 precedes log.reboot (maintenance) at t=8.0. The reboot is coincident, not causal. This demotes any hypothesis whose mechanism would have been initiated by the maintenance event and is consistent with pre-existing, gradual degradation.",
+          "source": "onset_vs_event_check"
+        },
+        {
+          "id": "ev.laser_power_check",
+          "summary": "Laser output 48.15 mW vs baseline 48.07 mW (+0.2%), ratio 1.0017 \u2014 no sustained decline. Diode temperature 25.28 \u00b0C nominal vs setpoint_max 26.0 \u00b0C, diode_nominal=true, low_power=false. A point-in-time snapshot; cannot exclude brief intermittent drops, but the trend shows no degradation from baseline.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.detector_health_check",
+          "summary": "Dark-count rise \u22480.003 (effectively 0%), detector temp rise \u22480.008 \u00b0C, bias_drift=false, detector_temp_live=true. No detector bias, responsivity, or thermal signature detected. Detector operating point is electrically and thermally stable at time of check; channel confirmed live (not stuck).",
+          "source": "detector_health_check"
+        },
+        {
+          "id": "ev.tec_load_check",
+          "summary": "TEC current 1.19 A is 47% of the 2.5 A limit; diode temp 25.28 \u00b0C is well below setpoint_max 26.0 \u00b0C; losing_setpoint=false. The TEC has substantial headroom, is tracking its setpoint without strain, and shows no sign of thermal saturation, instability, or runaway. The laser diode thermal operating point is actively and stably controlled at time of check.",
+          "source": "tec_load_check"
+        },
+        {
+          "id": "ev.common_mode_check",
+          "summary": "Common-mode check found 0 degraded channels with onset spread 0.00 d \u2014 no shared degradation signature across channels. A shared upstream cause (power rail, firmware push, shared thermal infrastructure) would be expected to produce concurrent multi-channel onset; the complete absence of any such pattern argues strongly against hyp.upstream_power. It also mildly argues against H2 (firmware/calibration drift, which typically propagates system-wide) and H4 (a shared-path thermal instability scenario). Single-unit per-channel hypotheses (H1, H3, H5) are not meaningfully constrained by this result.",
+          "source": "common_mode_check"
+        },
+        {
+          "id": "ev.spatial_intensity_check",
+          "summary": "Intensity drop is spatially uniform across all 4 sampled regions (spread=0.072, localized=false, affirmative=false). A contaminated window would produce a spatially non-uniform, regionally concentrated attenuation signature; the near-zero spread directly rules that out. Uniformity is instead consistent with any global beam-path or power mechanism \u2014 laser aging, thermal modulation, detector responsivity drift, or upstream power \u2014 all of which would affect all scan regions indiscriminately.",
+          "source": "spatial_intensity_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.onset_vs_reboot",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.onset_vs_reboot",
+          "hypothesis_id": "H2",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.detector_health_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.detector_health_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.tec_load_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.tec_load_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.tec_load_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H2",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.spatial_intensity_check",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 2.0
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [
+        "log.reboot"
+      ],
+      "hypotheses": [
+        {
+          "id": "H1",
+          "label": "Window contamination attenuating return signal",
+          "node_ref": "part.window",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H2",
+          "label": "Calibration / firmware drift shifting range computation",
+          "node_ref": "sub.calibration",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H3",
+          "label": "Laser aging causing intermittent output-power drop",
+          "node_ref": "part.laser_module",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H4",
+          "label": "TEC / thermal instability modulating laser or detector operating point",
+          "node_ref": "part.tec",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H5",
+          "label": "Detector responsivity drift producing range-measurement error",
+          "node_ref": "part.detector",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.onset_vs_reboot",
+          "summary": "Effective-max-range degradation onset at t\u22487.5 precedes log.reboot (maintenance) at t=8.0. The reboot is coincident, not causal. This demotes any hypothesis whose mechanism would have been initiated by the maintenance event and is consistent with pre-existing, gradual degradation.",
+          "source": "onset_vs_event_check"
+        },
+        {
+          "id": "ev.laser_power_check",
+          "summary": "Laser output 48.15 mW vs baseline 48.07 mW (+0.2%), ratio 1.0017 \u2014 no sustained decline. Diode temperature 25.28 \u00b0C nominal vs setpoint_max 26.0 \u00b0C, diode_nominal=true, low_power=false. A point-in-time snapshot; cannot exclude brief intermittent drops, but the trend shows no degradation from baseline.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.detector_health_check",
+          "summary": "Dark-count rise \u22480.003 (effectively 0%), detector temp rise \u22480.008 \u00b0C, bias_drift=false, detector_temp_live=true. No detector bias, responsivity, or thermal signature detected. Detector operating point is electrically and thermally stable at time of check; channel confirmed live (not stuck).",
+          "source": "detector_health_check"
+        },
+        {
+          "id": "ev.tec_load_check",
+          "summary": "TEC current 1.19 A is 47% of the 2.5 A limit; diode temp 25.28 \u00b0C is well below setpoint_max 26.0 \u00b0C; losing_setpoint=false. The TEC has substantial headroom, is tracking its setpoint without strain, and shows no sign of thermal saturation, instability, or runaway. The laser diode thermal operating point is actively and stably controlled at time of check.",
+          "source": "tec_load_check"
+        },
+        {
+          "id": "ev.common_mode_check",
+          "summary": "Common-mode check found 0 degraded channels with onset spread 0.00 d \u2014 no shared degradation signature across channels. A shared upstream cause (power rail, firmware push, shared thermal infrastructure) would be expected to produce concurrent multi-channel onset; the complete absence of any such pattern argues strongly against hyp.upstream_power. It also mildly argues against H2 (firmware/calibration drift, which typically propagates system-wide) and H4 (a shared-path thermal instability scenario). Single-unit per-channel hypotheses (H1, H3, H5) are not meaningfully constrained by this result.",
+          "source": "common_mode_check"
+        },
+        {
+          "id": "ev.spatial_intensity_check",
+          "summary": "Intensity drop is spatially uniform across all 4 sampled regions (spread=0.072, localized=false, affirmative=false). A contaminated window would produce a spatially non-uniform, regionally concentrated attenuation signature; the near-zero spread directly rules that out. Uniformity is instead consistent with any global beam-path or power mechanism \u2014 laser aging, thermal modulation, detector responsivity drift, or upstream power \u2014 all of which would affect all scan regions indiscriminately.",
+          "source": "spatial_intensity_check"
+        },
+        {
+          "id": "ev.temp_correlation_check",
+          "summary": "mean_return_intensity vs laser_diode_temp_C yields r=-0.24 (correlated=false, affirmative=false). The correlation is below significance and the direction is weakly negative. If TEC/thermal instability were modulating the laser or detector operating point (H4), a materially stronger intensity-temperature relationship would be expected; the near-zero correlation directly undercuts that mechanism. It also mildly argues against any thermally-driven pathway in H3 (laser aging manifesting via thermal runaway) and H5 (detector responsivity drifting with diode temperature). H1, H2, and hyp.upstream_power are not substantially constrained by a thermal correlation test, but the absence of any thermal footprint provides marginal additional argument against each.",
+          "source": "temp_correlation_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.onset_vs_reboot",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.onset_vs_reboot",
+          "hypothesis_id": "H2",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.detector_health_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.detector_health_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.tec_load_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.tec_load_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.tec_load_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H2",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.spatial_intensity_check",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.temp_correlation_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.temp_correlation_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.temp_correlation_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.temp_correlation_check",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.temp_correlation_check",
+          "hypothesis_id": "H2",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.temp_correlation_check",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 0.2
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "recommended_action": null,
+      "conflicts": [
+        "log.reboot"
+      ],
+      "hypotheses": [
+        {
+          "id": "H1",
+          "label": "Window contamination attenuating return signal",
+          "node_ref": "part.window",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H2",
+          "label": "Calibration / firmware drift shifting range computation",
+          "node_ref": "sub.calibration",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H3",
+          "label": "Laser aging causing intermittent output-power drop",
+          "node_ref": "part.laser_module",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H4",
+          "label": "TEC / thermal instability modulating laser or detector operating point",
+          "node_ref": "part.tec",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H5",
+          "label": "Detector responsivity drift producing range-measurement error",
+          "node_ref": "part.detector",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.onset_vs_reboot",
+          "summary": "Effective-max-range degradation onset at t\u22487.5 precedes log.reboot (maintenance) at t=8.0. The reboot is coincident, not causal. This demotes any hypothesis whose mechanism would have been initiated by the maintenance event and is consistent with pre-existing, gradual degradation.",
+          "source": "onset_vs_event_check"
+        },
+        {
+          "id": "ev.laser_power_check",
+          "summary": "Laser output 48.15 mW vs baseline 48.07 mW (+0.2%), ratio 1.0017 \u2014 no sustained decline. Diode temperature 25.28 \u00b0C nominal vs setpoint_max 26.0 \u00b0C, diode_nominal=true, low_power=false. A point-in-time snapshot; cannot exclude brief intermittent drops, but the trend shows no degradation from baseline.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.detector_health_check",
+          "summary": "Dark-count rise \u22480.003 (effectively 0%), detector temp rise \u22480.008 \u00b0C, bias_drift=false, detector_temp_live=true. No detector bias, responsivity, or thermal signature detected. Detector operating point is electrically and thermally stable at time of check; channel confirmed live (not stuck).",
+          "source": "detector_health_check"
+        },
+        {
+          "id": "ev.tec_load_check",
+          "summary": "TEC current 1.19 A is 47% of the 2.5 A limit; diode temp 25.28 \u00b0C is well below setpoint_max 26.0 \u00b0C; losing_setpoint=false. The TEC has substantial headroom, is tracking its setpoint without strain, and shows no sign of thermal saturation, instability, or runaway. The laser diode thermal operating point is actively and stably controlled at time of check.",
+          "source": "tec_load_check"
+        },
+        {
+          "id": "ev.common_mode_check",
+          "summary": "Common-mode check found 0 degraded channels with onset spread 0.00 d \u2014 no shared degradation signature across channels. A shared upstream cause (power rail, firmware push, shared thermal infrastructure) would be expected to produce concurrent multi-channel onset; the complete absence of any such pattern argues strongly against hyp.upstream_power. It also mildly argues against H2 (firmware/calibration drift, which typically propagates system-wide) and H4 (a shared-path thermal instability scenario). Single-unit per-channel hypotheses (H1, H3, H5) are not meaningfully constrained by this result.",
+          "source": "common_mode_check"
+        },
+        {
+          "id": "ev.spatial_intensity_check",
+          "summary": "Intensity drop is spatially uniform across all 4 sampled regions (spread=0.072, localized=false, affirmative=false). A contaminated window would produce a spatially non-uniform, regionally concentrated attenuation signature; the near-zero spread directly rules that out. Uniformity is instead consistent with any global beam-path or power mechanism \u2014 laser aging, thermal modulation, detector responsivity drift, or upstream power \u2014 all of which would affect all scan regions indiscriminately.",
+          "source": "spatial_intensity_check"
+        },
+        {
+          "id": "ev.temp_correlation_check",
+          "summary": "mean_return_intensity vs laser_diode_temp_C yields r=-0.24 (correlated=false, affirmative=false). The correlation is below significance and the direction is weakly negative. If TEC/thermal instability were modulating the laser or detector operating point (H4), a materially stronger intensity-temperature relationship would be expected; the near-zero correlation directly undercuts that mechanism. It also mildly argues against any thermally-driven pathway in H3 (laser aging manifesting via thermal runaway) and H5 (detector responsivity drifting with diode temperature). H1, H2, and hyp.upstream_power are not substantially constrained by a thermal correlation test, but the absence of any thermal footprint provides marginal additional argument against each.",
+          "source": "temp_correlation_check"
+        },
+        {
+          "id": "ev.trigger_demoted",
+          "summary": "log.reboot: degradation onset predates it \u2192 coincident, not causal",
+          "source": "onset_vs_event_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.onset_vs_reboot",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.onset_vs_reboot",
+          "hypothesis_id": "H2",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.detector_health_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.detector_health_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.tec_load_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.tec_load_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.tec_load_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H2",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.spatial_intensity_check",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.temp_correlation_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.temp_correlation_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.temp_correlation_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.temp_correlation_check",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.temp_correlation_check",
+          "hypothesis_id": "H2",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.temp_correlation_check",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 0.2
+        }
+      ]
+    },
+    {
+      "status": "abstained",
+      "recommended_action": "H3 (laser aging / intermittent output-power drop) is the sole surviving candidate: H1 is excluded by spatially uniform attenuation (ev.spatial_intensity_check); H4 is excluded by near-zero temp correlation and TEC headroom (ev.temp_correlation_check, ev.tec_load_check); H5 is excluded by stable detector operating point (ev.detector_health_check); hyp.upstream_power and H2 are excluded by zero co-degraded channels (ev.common_mode_check); the maintenance reboot is demoted as non-causal (ev.onset_vs_reboot). However, the laser power check (ev.laser_power_check) is a point-in-time snapshot confirming no sustained decline \u2014 it cannot exclude brief transient drops. To confirm or exclude H3, deploy synchronized high-frequency laser output power logging (\u22651 kHz) time-locked to range-measurement records and capture data across multiple fluctuation events; a confirmed transient power excursion co-incident with range drop would confirm H3 and warrant laser diode I-V characterization and aging assessment.",
+      "conflicts": [
+        "log.reboot"
+      ],
+      "hypotheses": [
+        {
+          "id": "H1",
+          "label": "Window contamination attenuating return signal",
+          "node_ref": "part.window",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H2",
+          "label": "Calibration / firmware drift shifting range computation",
+          "node_ref": "sub.calibration",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H3",
+          "label": "Laser aging causing intermittent output-power drop",
+          "node_ref": "part.laser_module",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H4",
+          "label": "TEC / thermal instability modulating laser or detector operating point",
+          "node_ref": "part.tec",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "H5",
+          "label": "Detector responsivity drift producing range-measurement error",
+          "node_ref": "part.detector",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        },
+        {
+          "id": "hyp.upstream_power",
+          "label": "Scanner / power (shared upstream cause)",
+          "node_ref": "sub.power",
+          "log_odds": -3.0,
+          "confidence": 0.047,
+          "status": "ruled_out"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev.onset_vs_reboot",
+          "summary": "Effective-max-range degradation onset at t\u22487.5 precedes log.reboot (maintenance) at t=8.0. The reboot is coincident, not causal. This demotes any hypothesis whose mechanism would have been initiated by the maintenance event and is consistent with pre-existing, gradual degradation.",
+          "source": "onset_vs_event_check"
+        },
+        {
+          "id": "ev.laser_power_check",
+          "summary": "Laser output 48.15 mW vs baseline 48.07 mW (+0.2%), ratio 1.0017 \u2014 no sustained decline. Diode temperature 25.28 \u00b0C nominal vs setpoint_max 26.0 \u00b0C, diode_nominal=true, low_power=false. A point-in-time snapshot; cannot exclude brief intermittent drops, but the trend shows no degradation from baseline.",
+          "source": "laser_power_check"
+        },
+        {
+          "id": "ev.detector_health_check",
+          "summary": "Dark-count rise \u22480.003 (effectively 0%), detector temp rise \u22480.008 \u00b0C, bias_drift=false, detector_temp_live=true. No detector bias, responsivity, or thermal signature detected. Detector operating point is electrically and thermally stable at time of check; channel confirmed live (not stuck).",
+          "source": "detector_health_check"
+        },
+        {
+          "id": "ev.tec_load_check",
+          "summary": "TEC current 1.19 A is 47% of the 2.5 A limit; diode temp 25.28 \u00b0C is well below setpoint_max 26.0 \u00b0C; losing_setpoint=false. The TEC has substantial headroom, is tracking its setpoint without strain, and shows no sign of thermal saturation, instability, or runaway. The laser diode thermal operating point is actively and stably controlled at time of check.",
+          "source": "tec_load_check"
+        },
+        {
+          "id": "ev.common_mode_check",
+          "summary": "Common-mode check found 0 degraded channels with onset spread 0.00 d \u2014 no shared degradation signature across channels. A shared upstream cause (power rail, firmware push, shared thermal infrastructure) would be expected to produce concurrent multi-channel onset; the complete absence of any such pattern argues strongly against hyp.upstream_power. It also mildly argues against H2 (firmware/calibration drift, which typically propagates system-wide) and H4 (a shared-path thermal instability scenario). Single-unit per-channel hypotheses (H1, H3, H5) are not meaningfully constrained by this result.",
+          "source": "common_mode_check"
+        },
+        {
+          "id": "ev.spatial_intensity_check",
+          "summary": "Intensity drop is spatially uniform across all 4 sampled regions (spread=0.072, localized=false, affirmative=false). A contaminated window would produce a spatially non-uniform, regionally concentrated attenuation signature; the near-zero spread directly rules that out. Uniformity is instead consistent with any global beam-path or power mechanism \u2014 laser aging, thermal modulation, detector responsivity drift, or upstream power \u2014 all of which would affect all scan regions indiscriminately.",
+          "source": "spatial_intensity_check"
+        },
+        {
+          "id": "ev.temp_correlation_check",
+          "summary": "mean_return_intensity vs laser_diode_temp_C yields r=-0.24 (correlated=false, affirmative=false). The correlation is below significance and the direction is weakly negative. If TEC/thermal instability were modulating the laser or detector operating point (H4), a materially stronger intensity-temperature relationship would be expected; the near-zero correlation directly undercuts that mechanism. It also mildly argues against any thermally-driven pathway in H3 (laser aging manifesting via thermal runaway) and H5 (detector responsivity drifting with diode temperature). H1, H2, and hyp.upstream_power are not substantially constrained by a thermal correlation test, but the absence of any thermal footprint provides marginal additional argument against each.",
+          "source": "temp_correlation_check"
+        },
+        {
+          "id": "ev.trigger_demoted",
+          "summary": "log.reboot: degradation onset predates it \u2192 coincident, not causal",
+          "source": "onset_vs_event_check"
+        }
+      ],
+      "links": [
+        {
+          "evidence_id": "ev.onset_vs_reboot",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.onset_vs_reboot",
+          "hypothesis_id": "H2",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.laser_power_check",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.detector_health_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.detector_health_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 1.5
+        },
+        {
+          "evidence_id": "ev.tec_load_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.tec_load_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.tec_load_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H2",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 1.0
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.common_mode_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.spatial_intensity_check",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.temp_correlation_check",
+          "hypothesis_id": "H4",
+          "polarity": "-",
+          "weight": 2.0
+        },
+        {
+          "evidence_id": "ev.temp_correlation_check",
+          "hypothesis_id": "H3",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.temp_correlation_check",
+          "hypothesis_id": "H5",
+          "polarity": "-",
+          "weight": 0.5
+        },
+        {
+          "evidence_id": "ev.temp_correlation_check",
+          "hypothesis_id": "H1",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.temp_correlation_check",
+          "hypothesis_id": "H2",
+          "polarity": "-",
+          "weight": 0.2
+        },
+        {
+          "evidence_id": "ev.temp_correlation_check",
+          "hypothesis_id": "hyp.upstream_power",
+          "polarity": "-",
+          "weight": 0.2
+        }
+      ]
+    }
+  ],
+  "trace": [
+    {
+      "action": "seed",
+      "args": {},
+      "rationale": "seed the differential from the symptom",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.5,
+        "H2": 0.5,
+        "H3": 0.5,
+        "H4": 0.5,
+        "H5": 0.5,
+        "hyp.upstream_power": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "onset_vs_event_check",
+        "event": "last_maintenance",
+        "symptom": "intermittent_range_fluctuation"
+      },
+      "rationale": "The symptom was reported 'around the last maintenance', making maintenance the salient candidate event. Before drilling into any component hypothesis, we must establish whether the fluctuation onset predates, coincides with, or postdates the maintenance window. If onset predates maintenance, H1 (window contamination introduced by maintenance) and H2 (calibration/firmware change at maintenance) are substantially weakened as root causes \u2014 maintenance becomes a non-causal coincidence \u2014 and weight shifts toward chronic degradation hypotheses H3 (laser aging), H4 (TEC instability), H5 (detector drift). If onset aligns tightly with or follows maintenance, H1 and H2 rise sharply and H3/H5 (slow-drift processes) are relatively less likely. This single temporal ordering check is maximally discriminating at the current stage because it partitions the hypothesis space along the maintenance-causal vs. pre-existing-degradation axis before any component-level telemetry is pulled.",
+      "voi": 0.88,
+      "evidence_id": "ev.onset_vs_reboot",
+      "conflicts_added": [
+        "log.reboot"
+      ],
+      "leader": "H3",
+      "leader_conf": 0.5,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.182,
+        "H2": 0.119,
+        "H3": 0.5,
+        "H4": 0.5,
+        "H5": 0.5,
+        "hyp.upstream_power": 0.5
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "laser_power_check"
+      },
+      "rationale": "All four remaining hypotheses (H3, H4, H5, hyp.upstream_power) sit at equal log_odds=0.00. The laser_power_check is the highest-leverage split: a nominal, stable laser-output trace argues AGAINST H3 (laser aging) and hyp.upstream_power simultaneously, concentrating posterior weight on H4/H5; an intermittent or trending power drop argues FOR H3 and hyp.upstream_power and against H4/H5. This is a 2-vs-2 partition \u2014 the maximum information gain available in one step. ev.onset_vs_reboot already tells us the degradation is gradual and pre-existing, which is consistent with laser aging or upstream supply drift, making this check the natural next discriminator. TEC and detector checks are better deferred until the transmit-side is cleared or implicated.",
+      "voi": 0.85,
+      "evidence_id": "ev.laser_power_check",
+      "conflicts_added": [],
+      "leader": "H5",
+      "leader_conf": 0.5,
+      "margin": 0.231,
+      "confidences": {
+        "H1": 0.182,
+        "H2": 0.119,
+        "H3": 0.119,
+        "H4": 0.269,
+        "H5": 0.5,
+        "hyp.upstream_power": 0.182
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "detector_health_check"
+      },
+      "rationale": "H5 (detector responsivity drift, log_odds=0.00) is the current leader and remains directly untested. ev.laser_power_check already showed laser output and diode temperature nominal, which partially demotes H4 on its laser side \u2014 but H4 could still manifest as TEC-driven instability at the detector operating point. A detector_health_check now directly probes the detector channel: if responsivity drift or a declining signal channel is found, H5 is confirmed as the primary mechanism and H4 is demoted to a secondary/contributing role at most; if the detector is healthy with normal variance under load, H5 is strongly demoted and H4 (thermal modulation of the detector operating point, not yet checked on the detector side) rises to become the dominant remaining explanation. The result is expected to move H4 and H5 in strictly opposite directions, maximising discrimination between the only two open hypotheses.",
+      "voi": 0.87,
+      "evidence_id": "ev.detector_health_check",
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.182,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.182,
+        "H2": 0.119,
+        "H3": 0.119,
+        "H4": 0.076,
+        "H5": 0.119,
+        "hyp.upstream_power": 0.182
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "tec_load_check"
+      },
+      "rationale": "All collected evidence (ev.laser_power_check, ev.detector_health_check) are nominal point-in-time snapshots; neither captures intermittent behaviour. ev.onset_vs_reboot confirms the degradation predates maintenance, ruling out any maintenance-triggered cause and indicating slow, pre-existing deterioration. H4 was tentatively ruled out on the basis that the detector temperature appears stable, but the detector health check only observed the equilibrium temperature \u2014 it did not assess TEC drive current or duty-cycle variance. A TEC that is working progressively harder to maintain setpoint (rising thermal resistance in the mount or cooler degradation) remains fully invisible to a static temperature reading yet would produce periodic brief thermal excursions on the laser or detector operating point that manifest as intermittent range fluctuations. Running tec_load_check will either (a) reveal elevated or variable TEC load, which reopens H4 and H3 as thermally coupled degradation modes and narrows the fault locus to the thermal subsystem, or (b) confirm TEC load is flat and nominal, more definitively closing the thermal family and redirecting effort toward undiscovered causes outside the current hypothesis set. No prior evidence addresses this dimension, so expected information gain is high.",
+      "voi": 0.74,
+      "evidence_id": "ev.tec_load_check",
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.182,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.182,
+        "H2": 0.119,
+        "H3": 0.047,
+        "H4": 0.047,
+        "H5": 0.076,
+        "hyp.upstream_power": 0.182
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "common_mode_check"
+      },
+      "rationale": "Every hypothesis has been ruled out via point-in-time snapshot checks, yet the symptom\u2014intermittent range fluctuation with onset predating the maintenance reboot\u2014remains unexplained. The single most discriminating open question is whether the fluctuation is correlated across multiple channels simultaneously (shared/upstream infrastructure: power-supply ripple, clock jitter, chassis vibration, or environmental interference) or strictly isolated to one channel (intermittent local failure not captured in snapshots). A positive common-mode result would directly challenge the ruling-out of hyp.upstream_power and redirect investigation toward shared infrastructure. A negative result would confirm channel isolation and force re-examination of whether any local component (laser, detector, or optical path) produces an intermittent signature invisible to snapshot checks. No prior evidence (ev.laser_power_check, ev.detector_health_check, ev.tec_load_check) addresses cross-channel correlation; this action fills that gap cleanly.",
+      "voi": 0.82,
+      "evidence_id": "ev.common_mode_check",
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.154,
+      "margin": 0.091,
+      "confidences": {
+        "H1": 0.154,
+        "H2": 0.047,
+        "H3": 0.047,
+        "H4": 0.047,
+        "H5": 0.063,
+        "hyp.upstream_power": 0.047
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "spatial_intensity_check"
+      },
+      "rationale": "All established hypotheses are currently marked ruled_out, yet the symptom (intermittent range fluctuation with onset at t\u22487.5, pre-maintenance) persists unexplained. H1 (window contamination, log_odds=-1.70) is the least-negative surviving candidate, and its ruling-out was not directly supported by any spatial measurement in the evidence record \u2014 only by the absence of a common-mode pattern, which does not constrain a single-unit, spatially localised attenuation source. Intermittent or non-uniform contamination (e.g., moisture film, migrating particulate) would produce a spatially structured return-signal deficit invisible to the power snapshot (ev.laser_power_check measures emitted power, not received signal distribution) and to the detector point-check (ev.detector_health_check measures bias/dark-count, not spatial uniformity). A spatial_intensity_check directly probes the return-signal intensity map: a localised cold-spot or asymmetric attenuation would resurrect H1 or surface a beam-path anomaly (alignment/divergence drift) not yet hypothesised; a fully uniform nominal map would instead support a 'no single clean cause / multi-factor or transient' conclusion and allow closure. This is the one unrun check that splits these outcomes along an axis not yet sampled.",
+      "voi": 0.75,
+      "evidence_id": "ev.spatial_intensity_check",
+      "conflicts_added": [],
+      "leader": "H5",
+      "leader_conf": 0.063,
+      "margin": 0.016,
+      "confidences": {
+        "H1": 0.047,
+        "H2": 0.047,
+        "H3": 0.047,
+        "H4": 0.047,
+        "H5": 0.063,
+        "hyp.upstream_power": 0.047
+      }
+    },
+    {
+      "action": "run_check",
+      "args": {
+        "name": "temp_correlation_check"
+      },
+      "rationale": "Every static point-in-time check has returned nominal: laser power, detector bias, TEC load, and common-mode are all clear. However, the symptom is explicitly *intermittent*, and ev.laser_power_check (src=laser_power_check) itself notes it 'cannot exclude brief intermittent drops.' The only remaining check not yet executed is temp_correlation_check, which operates over a time-series rather than a snapshot. A time-varying correlation between ambient or diode temperature and range-measurement error would revive H4 (TEC / thermal instability) \u2014 specifically an intermittent regime not captured by a static TEC headroom check \u2014 and could also implicate H3 (laser aging with thermally triggered dropouts). Absence of any correlation would instead argue that all thermal hypotheses are genuinely clear on a time-series basis as well, pushing the conclusion toward either a multi-factor compound cause or no single clean root cause (consistent with the task framing). The onset at t\u22487.5 predates the reboot (ev.onset_vs_reboot, src=onset_vs_event_check), so a slow-build thermal drift mechanism is plausible and pre-dates maintenance. This is the highest-discrimination action available: a positive result lifts H4 (and possibly H3) while a negative result materially collapses the remaining hypothesis space.",
+      "voi": 0.72,
+      "evidence_id": "ev.temp_correlation_check",
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.047,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.047,
+        "H2": 0.047,
+        "H3": 0.047,
+        "H4": 0.047,
+        "H5": 0.047,
+        "hyp.upstream_power": 0.047
+      }
+    },
+    {
+      "action": "conflict_sweep",
+      "args": {},
+      "rationale": "order onset vs the salient recent event; sanity-check channels",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.047,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.047,
+        "H2": 0.047,
+        "H3": 0.047,
+        "H4": 0.047,
+        "H5": 0.047,
+        "hyp.upstream_power": 0.047
+      }
+    },
+    {
+      "action": "synthesize",
+      "args": {
+        "answer_type": "abstain",
+        "root_cause": null
+      },
+      "rationale": "conclude or abstain from the differential",
+      "voi": 0.0,
+      "evidence_id": null,
+      "conflicts_added": [],
+      "leader": "H1",
+      "leader_conf": 0.047,
+      "margin": 0.0,
+      "confidences": {
+        "H1": 0.047,
+        "H2": 0.047,
+        "H3": 0.047,
+        "H4": 0.047,
+        "H5": 0.047,
+        "hyp.upstream_power": 0.047
+      }
+    }
+  ],
+  "case_id": "case5",
+  "title": "No clean cause (abstain)",
+  "caption": "intermittent/coincidence -> correct answer is abstain",
+  "answer": {
+    "answer_type": "abstain",
+    "root_cause": null,
+    "cited_evidence": [
+      "ev.onset_vs_reboot",
+      "ev.laser_power_check",
+      "ev.detector_health_check",
+      "ev.tec_load_check",
+      "ev.common_mode_check",
+      "ev.spatial_intensity_check",
+      "ev.temp_correlation_check"
+    ],
+    "conflicts": [
+      "log.reboot"
+    ]
+  },
+  "eval_row": {
+    "accuracy": 1.0,
+    "localization": 1.0,
+    "trigger_discrimination": 1.0,
+    "conflict_handling": 1.0,
+    "evidence_f1": 0.0,
+    "tokens": 186581
+  }
+}

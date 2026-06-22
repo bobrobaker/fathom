@@ -1,0 +1,50 @@
+[
+  {
+    "case_id": "case1",
+    "title": "TEC degradation",
+    "caption": "worked example: cross-subsystem + decoy + lying channel + demoted trigger",
+    "final_status": "concluded"
+  },
+  {
+    "case_id": "case2",
+    "title": "Laser aging",
+    "caption": "decoy as a true cause (no temp correlation) \u2014 symmetry vs case1",
+    "final_status": "concluded"
+  },
+  {
+    "case_id": "case3",
+    "title": "Window contamination",
+    "caption": "spatial-cluster signature; reasoning from absence",
+    "final_status": "concluded"
+  },
+  {
+    "case_id": "case4",
+    "title": "Calibration drift",
+    "caption": "post-release config; recent change IS the cause (anti-shortcut balance)",
+    "final_status": "concluded"
+  },
+  {
+    "case_id": "case5",
+    "title": "No clean cause (abstain)",
+    "caption": "intermittent/coincidence -> correct answer is abstain",
+    "final_status": "abstained"
+  },
+  {
+    "case_id": "case6",
+    "title": "Detector bias (buried)",
+    "caption": "absent-cue; buried evidence reachable via graph traversal + intra-doc",
+    "final_status": "concluded"
+  },
+  {
+    "case_id": "case7",
+    "title": "TEC tie-breaker",
+    "caption": "near-symmetric to a decoy; needs the expensive discriminating check",
+    "final_status": "concluded"
+  },
+  {
+    "case_id": "case8",
+    "title": "Common-mode power",
+    "caption": "one cause looks like two faults; redundant channels agree but are wrong",
+    "final_status": "concluded"
+  }
+]
