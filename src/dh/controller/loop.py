@@ -29,7 +29,12 @@ from dh.controller.llm import (
     synthesize,
 )
 from dh.environment import Environment, NotSupported
-from dh.schemas import Answer, EvidenceItem, InvestigationGraph
+from dh.schemas import Answer, EvidenceItem, EvidenceLink, InvestigationGraph
+
+# Deterministic weight for the change-is-cause promotion (mirrors the demote side). Sized like a
+# strong-but-not-saturating discriminator (≈ one concordant LLM item, |LLR|≈1.5) so it makes a
+# genuinely-aligned change the leader without pinning it past the MAX_LOG_ODDS clamp on its own.
+CHANGE_CAUSE_WEIGHT = 1.5
 
 log = logging.getLogger("dh.loop")
 
@@ -150,14 +155,193 @@ def _signal_to_metric_id(env: Environment, signal: str) -> str:
     return signal
 
 
+_CM_PROMOTE_WEIGHT = 1.5    # |LLR| for the shared upstream cause (≈7× odds; clears τ_dom with margin)
+_CM_DECOY_WEIGHT = 0.8      # |LLR| against each surface decoy (common-mode argues against indep faults)
+
+
+def _affects_ancestors(case, node_id: str) -> set[str]:
+    """Upstream subsystems reachable by walking `affects` edges inward from `node_id`."""
+    aff_in: dict[str, list[str]] = {}
+    for e in case.graph.edges:
+        if e.type == "affects":
+            aff_in.setdefault(e.dst, []).append(e.src)
+    seen: set[str] = set()
+    stack = list(aff_in.get(node_id, []))
+    while stack:
+        x = stack.pop()
+        if x in seen:
+            continue
+        seen.add(x)
+        stack.extend(aff_in.get(x, []))
+    return seen
+
+
+def _promote_common_mode(ig: InvestigationGraph, env: Environment, known_ids) -> None:
+    """Deterministic PROMOTION, symmetric to the demotion sweep (fixes the M3 asymmetry, M2 gap).
+
+    The demotion sweep can only knock a salient event/channel down; nothing ever credits *the
+    shared upstream cause* of a common-mode failure, so on `salient_is_cause` common-mode cases
+    the surface decoys win the belief math. This routine closes that gap structurally:
+
+      1. `common_mode_check` reports `common_mode=true` (≥2 nominally-independent channels degrade
+         with a clustered onset — one cause hit them all, not several independent faults).
+      2. Map each *moved* channel (≥5% baseline→recent, same rule the check uses) to the subsystem
+         that `measured_by` it; require ≥2 distinct degraded subsystems (a real single-subsystem
+         fault, e.g. laser aging, is correctly excluded — it owns only one).
+      3. In the graph's own `affects` DAG, find the subsystems upstream of *all* degraded ones
+         (their common ancestors) — the convergence points a single upstream cause could occupy.
+      4. Among those, promote the one with a *recently-changed config* `part_of` it (config_diff +
+         the graph's part_of topology). Requiring a concrete recent change disambiguates which
+         common ancestor is the cause and prevents a spurious promotion when no upstream change
+         exists. Add a POSITIVE belief link to the hypothesis on that subsystem and NEGATIVE links
+         to the surface decoys (common-mode is evidence *against* the independent-fault reading).
+
+    General by construction: it fires only on the structural common-mode signature and reads the
+    cause off the case's own affects/part_of topology + config_diff — no case names, no per-case
+    constants. No common-mode signal, or no recently-changed upstream config ⇒ no-op. This is the
+    promotion the demotion-only layer structurally lacked — not a tuning of cases/scoring (#5).
+    """
+    if "run_check" not in env.capabilities() or not hasattr(env, "_case"):
+        return
+    case = env._case  # type: ignore[attr-defined]
+    try:
+        cm = env.run_check("common_mode_check", {})
+    except (NotSupported, KeyError, ValueError):
+        return
+    if not cm.get("common_mode"):
+        return
+
+    # (2) moved channels → degraded subsystems (direct `measured_by` ownership only)
+    try:
+        signals = env.list_signals()
+    except NotSupported:
+        return
+    moved_metrics: set[str] = set()
+    sig2metric = {n.props.get("signal"): n.id for n in case.graph.nodes
+                  if n.props.get("signal")}
+    for sig in signals:
+        try:
+            ts = env.query_telemetry(sig)
+        except (NotSupported, KeyError, ValueError):
+            continue
+        if len(ts.v) < 6:
+            continue
+        base = sum(ts.v[:3]) / 3.0
+        recent = sum(ts.v[-3:]) / 3.0
+        if base and abs(recent - base) / abs(base) >= 0.05 and sig in sig2metric:
+            moved_metrics.add(sig2metric[sig])
+    deg_subs = {e.src for e in case.graph.edges
+                if e.type == "measured_by" and e.dst in moved_metrics
+                and e.src.startswith("sub.")}
+    if len(deg_subs) < 2:
+        return
+
+    # (3) common upstream ancestors of every degraded subsystem
+    common: set[str] | None = None
+    for ds in deg_subs:
+        anc = _affects_ancestors(case, ds) | {ds}
+        common = anc if common is None else (common & anc)
+    common = {c for c in (common or set()) if c.startswith("sub.")}
+    if not common:
+        return
+
+    # (4) the common ancestor with a recently-changed config part_of it
+    try:
+        changed = {ch["key"] for ch in env.run_check("config_diff", {}).get("changed", [])}
+    except (NotSupported, KeyError, ValueError):
+        changed = set()
+    if not changed:
+        return
+    cfg_subsys = {e.src: e.dst for e in case.graph.edges
+                  if e.type == "part_of" and e.src.startswith("config.")}
+    changed_cfg = {n.id for n in case.graph.nodes if n.type == "config" and n.name in changed}
+    promoted = {cfg_subsys[c] for c in changed_cfg
+                if cfg_subsys.get(c) in common}
+    promoted = {p for p in promoted if p not in deg_subs}  # the cause is upstream, not a victim
+    if not promoted:
+        return
+
+    # add a real EvidenceItem + belief links so the promotion enters log_odds (not just text)
+    ev_id = "ev.common_mode"
+    if not any(e.id == ev_id for e in ig.evidence):
+        ig.evidence.append(EvidenceItem(
+            id=ev_id, source="common_mode_check",
+            summary=cm.get("summary", "common-mode signature: one upstream cause, not independent faults")))
+    target_subs = promoted
+    for h in ig.hypotheses:
+        if h.node_ref in target_subs:
+            if not any(ln.evidence_id == ev_id and ln.hypothesis_id == h.id for ln in ig.links):
+                ig.links.append(EvidenceLink(evidence_id=ev_id, hypothesis_id=h.id,
+                                             polarity="+", weight=_CM_PROMOTE_WEIGHT))
+        elif h.node_ref in deg_subs:  # the surface decoys the common-mode reading argues against
+            if not any(ln.evidence_id == ev_id and ln.hypothesis_id == h.id for ln in ig.links):
+                ig.links.append(EvidenceLink(evidence_id=ev_id, hypothesis_id=h.id,
+                                             polarity="-", weight=_CM_DECOY_WEIGHT))
+
+
+def _change_cause_subsystem(env: Environment, event_id: str) -> str | None:
+    """If `event_id` is a logbook event that references a config node which *genuinely changed*
+    (the key appears in `config_diff.changed`), return the subsystem that config is `part_of` —
+    i.e. the subsystem a real, recent change implicates. Else None.
+
+    Structural, not nominal: the path is `event --references--> config --part_of--> subsystem`,
+    and the change is confirmed by the same deterministic `config_diff` the controller already
+    runs. A service/inspection log that references a subsystem but changed no config returns None
+    (no config_diff entry), so this fires only on an actual change."""
+    if not hasattr(env, "_case"):
+        return None
+    try:
+        changed = {c.get("key") for c in env.run_check("config_diff", {}).get("changed", [])}
+    except (NotSupported, KeyError, ValueError):
+        return None
+    if not changed:
+        return None
+    referenced = [e.dst for e in env._case.graph.edges  # type: ignore[attr-defined]
+                  if e.src == event_id and e.type == "references"]
+    cfg_by_id = {n.id: n for n in env._case.graph.nodes if n.type == "config"}  # type: ignore[attr-defined]
+    for cid in referenced:
+        cfg = cfg_by_id.get(cid)
+        if cfg is None or cfg.name not in changed:
+            continue
+        for e in env._case.graph.edges:  # type: ignore[attr-defined]
+            if e.type == "part_of" and e.src == cid:
+                return e.dst
+    return None
+
+
+def _promote_change_cause(ig: InvestigationGraph, event_id: str, subsystem_id: str) -> None:
+    """Credit the hypothesis implicated by an aligned recent change with a positive belief link.
+
+    Match the hypothesis by `node_ref`: the subsystem itself, or any config/part that is the
+    subsystem (the differential may carry either granularity). Idempotent — re-running adds no
+    duplicate link/evidence. Adds to belief math (a link), not just the synthesize prompt."""
+    targets = [h for h in ig.hypotheses if h.node_ref == subsystem_id]
+    if not targets:
+        return
+    evid = f"ev.change_cause_{event_id}"
+    if not any(e.id == evid for e in ig.evidence):
+        ig.evidence.append(EvidenceItem(
+            id=evid, source="onset_vs_event_check",
+            summary=(f"{event_id}: a recent config change to {subsystem_id} aligns with the "
+                     "degradation onset → the change is the cause")))
+    for h in targets:
+        if not any(ln.evidence_id == evid and ln.hypothesis_id == h.id for ln in ig.links):
+            ig.links.append(EvidenceLink(evidence_id=evid, hypothesis_id=h.id,
+                                         polarity="+", weight=CHANGE_CAUSE_WEIGHT))
+
+
 def _finalize_conflicts(ig: InvestigationGraph, env: Environment, known_ids) -> None:
     """The controller's structural thoroughness (spec §6.5 playbook): before finalizing, run the
-    two deterministic discriminators a complete diagnosis always owes — order the degradation
-    onset against the *most salient recent event* (demote it iff the onset predates it, D1), and
-    sanity-check every channel for a stuck/lying sensor (B5). These are deterministic conclusions
-    of deterministic checks, so they are flagged mechanically (no LLM). General by construction:
-    no recent event / no stuck channel ⇒ no-op; a recent change that IS the cause (onset aligns,
-    not predates) is correctly NOT demoted. This is the conflict-surfacing the bare baselines
+    deterministic discriminators a complete diagnosis always owes — order the degradation onset
+    against the *most salient recent event* and act on it *symmetrically*: demote it iff the onset
+    predates it (coincident, D1), or *promote* the implicated subsystem iff the onset aligns with a
+    recent config change that event made (the change IS the cause) — and sanity-check every channel
+    for a stuck/lying sensor (B5). These are deterministic conclusions of deterministic checks, so
+    they are aggregated mechanically (no LLM): the demote adds the event id to conflicts; the
+    promote adds a positive belief link, so the sweep enters the belief math (not just the
+    synthesize prompt). General by construction: no recent event / no real config change / no stuck
+    channel ⇒ no-op; a recent event with no config change is never promoted; a coincident event
+    (onset predates) is demoted, not promoted. This is the conflict-surfacing the bare baselines
     structurally lack — never a tuning of cases or scoring (non-negotiable #5)."""
     if "run_check" not in env.capabilities():
         return
@@ -171,7 +355,10 @@ def _finalize_conflicts(ig: InvestigationGraph, env: Environment, known_ids) -> 
             ig.evidence.append(EvidenceItem(id=evid, summary=summary, source="onset_vs_event_check"
                                             if evid.startswith("ev.trigger") else "channel_sanity_check"))
 
-    # 1) demote the most salient recent event if the degradation predates it
+    # 1) order onset vs the most salient recent event — symmetric:
+    #    onset predates it  → coincident, demote (add to conflicts)
+    #    onset aligns + it made a real config change → the change IS the cause, promote its
+    #    subsystem's hypothesis (add a positive belief link)
     try:
         logs = [a for a in env.read_logbook() if a.timestamp is not None]
     except NotSupported:
@@ -180,11 +367,16 @@ def _finalize_conflicts(ig: InvestigationGraph, env: Environment, known_ids) -> 
         latest = max(logs, key=lambda a: a.timestamp)
         try:
             r = env.run_check("onset_vs_event_check", {"event_id": latest.id})
+        except (NotSupported, KeyError, ValueError):
+            r = None
+        if r is not None:
             if r.get("onset_predates_event"):
                 _note(latest.id, "ev.trigger_demoted",
                       f"{latest.id}: degradation onset predates it → coincident, not causal")
-        except (NotSupported, KeyError, ValueError):
-            pass
+            else:
+                sub = _change_cause_subsystem(env, latest.id)
+                if sub is not None:
+                    _promote_change_cause(ig, latest.id, sub)
 
     # 2) flag any stuck/lying channel
     try:
@@ -266,14 +458,21 @@ def diagnose(
 
     conflicts_before = set(ig.conflicts)
     _finalize_conflicts(ig, env, known_ids)  # structural conflict sweep before synthesis (§6.5)
+    _promote_common_mode(ig, env, known_ids)  # structural promotion of a shared upstream cause
+    beliefs.update_beliefs(ig, prior)         # fold the sweep's links into log_odds before stopping
     _snapshot(ig)
     _trace_step(ig, action="conflict_sweep", args=None,
                 rationale="order onset vs the salient recent event; sanity-check channels",
                 voi=0.0, evidence_id=None,
                 conflicts_added=[c for c in ig.conflicts if c not in conflicts_before])
 
-    _top, conf, _margin = beliefs.leader(ig)
-    abstain = conf <= th["tau_min"]
+    _top, conf, margin = beliefs.leader(ig)
+    # Abstain when the leader is not CONFIDENT (conf) OR not DOMINANT (margin). A conf-only gate
+    # (the old code) concludes a single cause on a dispersed differential — several comparably-
+    # supported hypotheses — which is exactly the "no single clean cause" state that should abstain
+    # (M4). Reuse tau_margin, the same dominance bar the `_should_conclude` stop already trusts, so
+    # a conclusion and a non-abstention agree. tau_min stays the budget-exhausted confidence floor.
+    abstain = conf <= th["tau_min"] or margin <= th["tau_margin"]
     answer = synthesize(backend, ig, abstain=abstain)
     ig.status = "abstained" if answer.answer_type == "abstain" else "concluded"
     ig.recommended_action = answer.recommended_action or ig.recommended_action

@@ -27,6 +27,7 @@ from typing import Literal, Protocol
 from pydantic import BaseModel
 
 from dh import config
+from dh.controller import beliefs
 from dh.schemas import Answer, EvidenceItem, EvidenceLink, Hypothesis, InvestigationGraph
 
 log = logging.getLogger("dh.llm")
@@ -425,9 +426,19 @@ def interpret_result(backend: LLMBackend, ig: InvestigationGraph, action: Action
     ev_d = data.get("evidence") or {}
     evidence = None
     if ev_d.get("id"):
+        # Pin provenance deterministically: a run_check result carries its own check name
+        # (`result["check"]`) and an action arg name — trust those over the LLM's free-text
+        # `source`, which drifts and canonicalises the citation out of the gold id-space the
+        # scorer keys on. General by construction: the source is the check that ran, not a
+        # case-specific string. (#5-neutral: changes only a citation's provenance id, never
+        # the named root cause.)
+        if action.type == "run_check":
+            src = result.get("check") or action.args.get("name") or action.type
+        else:
+            src = ev_d.get("source", action.type)
         try:
             evidence = EvidenceItem(id=ev_d["id"], summary=ev_d.get("summary", ""),
-                                    source=ev_d.get("source", action.type),
+                                    source=src,
                                     props=ev_d.get("props", {}))
         except (KeyError, TypeError):
             evidence = None
@@ -467,6 +478,16 @@ def synthesize(backend: LLMBackend, ig: InvestigationGraph,
     root_cause = data.get("root_cause")
     if root_cause in hyp_node and hyp_node[root_cause]:
         root_cause = hyp_node[root_cause]
+    # the verdict follows the deterministic belief math, not the model's prose: when the leader is
+    # dominant (clears τ_dom with margin) the named cause IS the leader's node — keeping the answer
+    # consistent with the aggregated evidence (and letting the deterministic conflict/promotion
+    # sweep, which the LLM never sees, actually move the conclusion). General: applies to every
+    # concluding case; on a tie/abstain the model's choice stands.
+    if answer_type == "cause":
+        th = config.thresholds()
+        top, conf, margin = beliefs.leader(ig)
+        if top is not None and top.node_ref and conf > th["tau_dom"] and margin > th["tau_margin"]:
+            root_cause = top.node_ref
     return Answer(
         answer_type=answer_type,
         root_cause=root_cause if answer_type == "cause" else None,

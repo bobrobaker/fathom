@@ -232,7 +232,8 @@ class LidarEnvironment(Environment):
     def _run_tec_load_check(self, args: dict) -> dict:
         sig = self._telemetry["tec_current_A"]
         limit = args.get("limit") or (sig.spec or {}).get("max")
-        return checks.tec_load_check(sig, limit)
+        diode = self._telemetry.get("laser_diode_temp_C")  # for the thermal-control discriminator
+        return checks.tec_load_check(sig, limit, diode_temp=diode)
 
     def _run_channel_sanity_check(self, args: dict) -> dict:
         signal = self._metric_signal(args.get("signal", "detector_temp_C"))

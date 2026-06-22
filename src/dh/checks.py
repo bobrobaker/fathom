@@ -79,11 +79,23 @@ def temp_correlation_check(
     }
 
 
-def tec_load_check(tec_current: TimeSeries, limit: float) -> dict:
-    """Current TEC load vs its limit (§3.3 → "92% of limit" for case #1)."""
+def tec_load_check(tec_current: TimeSeries, limit: float,
+                   diode_temp: TimeSeries | None = None) -> dict:
+    """Current TEC load vs its limit, plus the thermal-control discriminator (§3.3).
+
+    Raw load (`frac_of_limit`/`at_limit`) is a graded signal that can sit *just under* a
+    binary threshold on a near-symmetric variant (case #7), so it alone does not separate a
+    failing TEC from an aging laser. The decisive, magnitude-bearing tell is whether the TEC
+    is *losing control of the setpoint*: the TEC's job is to hold the diode at its control
+    setpoint, so a diode held ABOVE setpoint while TEC current is elevated uniquely implicates
+    the TEC — an aging laser does not push the diode past the cooler's setpoint, the cooler
+    simply absorbs it. This `losing_setpoint` flag is a structural property of the thermal
+    loop (true only when the cooler is the bottleneck), not a per-case tuning: it is False on
+    every non-thermal fault (the diode stays at setpoint) and on a common-mode power fault
+    (elevated current but diode in spec), and True only when the TEC itself is the cause."""
     current = tec_current.v[-1]
     frac = current / limit if limit else 0.0
-    return {
+    out = {
         "check": "tec_load_check",
         "current": current,
         "limit": limit,
@@ -91,6 +103,19 @@ def tec_load_check(tec_current: TimeSeries, limit: float) -> dict:
         "at_limit": frac >= 0.85,
         "summary": f"TEC current {current:.2f} A is {frac * 100:.0f}% of the {limit} A limit",
     }
+    if diode_temp is not None:
+        setpoint_max = (diode_temp.spec or {}).get("max")
+        diode_recent = _recent(diode_temp)
+        elevated = frac >= 0.60  # working harder than a healthy idle load
+        losing = bool(setpoint_max is not None and diode_recent > setpoint_max and elevated)
+        out["diode_temp"] = diode_recent
+        out["diode_setpoint_max"] = setpoint_max
+        out["losing_setpoint"] = losing
+        if losing:
+            out["summary"] += (f"; diode held at {diode_recent:.1f} C ABOVE its "
+                               f"{setpoint_max} C setpoint while TEC current is elevated "
+                               "→ TEC is losing thermal control (implicates the TEC, not the laser)")
+    return out
 
 
 def channel_sanity_check(series: TimeSeries, min_var: float = 1e-6) -> dict:
