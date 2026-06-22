@@ -84,8 +84,11 @@ Non-negotiables (`00_README` §"Non-negotiable rules"):
 - [~] M8 — benchmark harness + scoring built; real MuSiQue n=20→n=100 run deferred (A5, time-boxed, not a ship-blocker; same decision as M4.5)
 - [x] M9 — viewer (`ig.json` export + static `index.html`, evidence-colored, step slider)
 
-**Remaining critical path (the cold-start "what next"):** the analytical deliverable is **complete
-at n=1**; only the showpiece viewer remains. Settled steps kept for provenance:
+**Remaining critical path (the cold-start "what next"):** a controller investigation (2026-06-22,
+branch `investigate-controller`, unmerged — see the Note below) **reopened the analytical
+deliverable**: the result is no longer thesis-negative-at-n=1. Remaining: merge the branch, the
+**A3 variance pass (now load-bearing)**, an honest findings rewrite, then the showpiece. Settled
+steps kept for provenance:
 
 1. ~~Live ≥3-run variance eval (A3)~~ — **declined for cost (2026-06-22).** Deliverable is **n=1**,
    single run per case (`reports/bespoke.md`), variance uncharacterized and flagged in
@@ -121,6 +124,22 @@ is the hoped-for result, *not* the ship gate.
 **Note (2026-06-22):** the S1 "≥3 runs, variance reported" sub-criterion was **consciously
 descoped to n=1** (A3 declined for cost); the variance pass is the only S1 gap and is re-runnable
 later. All other S1–S4 criteria are met.
+
+**Note (2026-06-22, controller investigation — branch `investigate-controller`, unmerged):** a
+focused investigation into *why* the controller underperformed lifted it from the thesis-negative
+**4/8 to 8/8 live accuracy** (n=1, budget 8) via general, #5-defensible mechanism fixes — an M1
+affirmative-evidence gate, deterministic change-cause/common-mode promotions wired into the belief
+math, a margin-aware + authoritative abstain gate, a leader-anchored verdict, a diode-aware
+`laser_power_check`, and upstream seeding coverage (suite 189 green). This **supersedes the
+thesis-negative finding above — pending two gates**: (1) **merge** `investigate-controller` to
+master (the fixes and the rewritten findings live on the branch; master still reads
+thesis-negative), and (2) the **A3 ≥3-run variance pass, now load-bearing** — a thesis-*positive*
+headline must be variance-backed (a loss could ship at n=1; an 8/8 win at n=1 cannot, given real
+LLM variance). On merge, `docs/findings.md` §4/§6 must be rewritten negative→positive *honestly*:
+the win is real but n=1, and the M1 fix raised the per-call cost (it explores to budget instead of
+shortcutting to a confident-wrong leader — an accuracy↔cost tradeoff). Pointers:
+`investigation/RESULTS.md` (full audit/fix/spike/fix-audit + the 8/8 table),
+`handoffs/2026-06-22-controller-m1-and-case8-fix.md`, `docs/decisions/2026-06-22-*`.
 
 ---
 
