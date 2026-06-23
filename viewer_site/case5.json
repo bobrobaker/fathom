@@ -1967,8 +1967,11 @@
     ]
   },
   "explainer": {
-    "purpose": "intermittent/coincidence -> correct answer is abstain",
+    "purpose": "No single clean cause exists; the correct answer is to abstain rather than name a culprit.",
     "answer_type": "abstain",
+    "pattern": "Abstain",
+    "detail": "The symptom looks like a fault, but the readings are intermittent and never converge \u2014 no hypothesis clears the confidence bar. When the evidence doesn't single out one cause, the agent says so instead of guessing.",
+    "why": "A confident wrong diagnosis is worse than an honest \u201cno clean cause,\u201d and calibrated abstention is what makes the confident answers trustworthy.",
     "mechanisms": [
       {
         "id": "E1",

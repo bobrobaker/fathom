@@ -1361,12 +1361,15 @@
     ]
   },
   "explainer": {
-    "purpose": "near-symmetric to a decoy; needs the expensive discriminating check",
+    "purpose": "Two near-identical suspects that only an expensive discriminating check can tell apart.",
     "answer_type": "cause",
+    "pattern": "Tie-breaker",
+    "detail": "Cheaper evidence leaves the two suspects balanced, so the agent has to judge whether the costly discriminating check is worth it \u2014 and abstain rather than overspend or guess when it isn't.",
+    "why": "Deciding when one more measurement pays for itself, and when to stop, is the value-of-information call at the heart of the system.",
     "mechanisms": [
       {
         "id": "D6",
-        "desc": "D6"
+        "desc": "Two suspects are nearly symmetric and only one expensive check can break the tie, so the agent must weigh whether that discrimination is worth the cost \u2014 or abstain rather than overspend."
       }
     ],
     "decoys": [

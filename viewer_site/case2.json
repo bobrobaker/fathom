@@ -623,8 +623,11 @@
     ]
   },
   "explainer": {
-    "purpose": "decoy as a true cause (no temp correlation) \u2014 symmetry vs case1",
+    "purpose": "An aging laser is the true cause, even though a tempting decoy part would normally show a temperature correlation and here doesn't.",
     "answer_type": "cause",
+    "pattern": "Decoy fails to correlate",
+    "detail": "A thermal cause would track temperature, so the agent computes the correlation, finds none, and uses that absence to rule the tempting decoy out. The laser itself carries both supporting and contradicting evidence that has to be read as a net, not a tally.",
+    "why": "Treating a missing-but-expected signal as real evidence is exactly the move shallow reasoning skips.",
     "mechanisms": [
       {
         "id": "D5",
@@ -632,7 +635,7 @@
       },
       {
         "id": "A1",
-        "desc": "A1"
+        "desc": "Supporting and contradicting evidence pile up on the same suspect, so its standing is the net of the two \u2014 you can't just tally the readings that point at it."
       }
     ],
     "decoys": [

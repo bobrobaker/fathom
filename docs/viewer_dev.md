@@ -73,6 +73,11 @@ distinction (case1/6 → 1 leader ring; case5 abstain → 0) and zero console er
 - **D3 `.remove()` does NOT cancel in-flight transitions.** A `.on("end", loop)` recursion survives removal
   and leaks forever. Guard animation loops with a generation token (`pulseId`) and cancel queued timeouts
   (`introTimer`) on case/step/mode change.
+- **`pulseId` is bumped on *every* `renderStep`** (via `renderPulse`'s `++pulseId`), so it's a valid guard for
+  the pulse loop guarding *itself* — but NOT for a deferred one-shot that must survive across renders.
+  Guarding the autoplay kickoff with `pulseId` false-trips (the intro's `renderStep(0)` bumps it before the
+  timeout fires, so it never plays). Key such guards on a stable identity (`cur.case_id` + `step`), not the
+  churning token; cancel them via `cancelIntro()` so a case/step change still kills a pending autostart.
 - **Two transitions on the same selection cancel each other** unless *named*. The render uses
   `svg.transition("move")` (positions/opacity) and `svg.transition("color")` (fills/strokes); they must
   stay attribute-disjoint.

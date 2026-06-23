@@ -1074,8 +1074,11 @@ window.FATHOM_BUNDLES = {
       ]
     },
     "explainer": {
-      "purpose": "worked example: cross-subsystem + decoy + lying channel + demoted trigger",
+      "purpose": "A cross-subsystem fault masked by a decoy part, a lying sensor channel, and a coincidental reboot that has to be demoted.",
       "answer_type": "cause",
+      "pattern": "Red-herring demotion",
+      "detail": "The range started slipping before the reboot, so timing alone clears the eye-catching event. One sensor reads plausibly but wrongly and only counts once it's cross-checked, and the remaining suspects look alike until a computed rate separates them.",
+      "why": "Resisting the obvious recent event and the confident-but-wrong channel is what separates evidence-driven diagnosis from pattern-matching on recency.",
       "mechanisms": [
         {
           "id": "D1",
@@ -1725,8 +1728,11 @@ window.FATHOM_BUNDLES = {
       ]
     },
     "explainer": {
-      "purpose": "decoy as a true cause (no temp correlation) \u2014 symmetry vs case1",
+      "purpose": "An aging laser is the true cause, even though a tempting decoy part would normally show a temperature correlation and here doesn't.",
       "answer_type": "cause",
+      "pattern": "Decoy fails to correlate",
+      "detail": "A thermal cause would track temperature, so the agent computes the correlation, finds none, and uses that absence to rule the tempting decoy out. The laser itself carries both supporting and contradicting evidence that has to be read as a net, not a tally.",
+      "why": "Treating a missing-but-expected signal as real evidence is exactly the move shallow reasoning skips.",
       "mechanisms": [
         {
           "id": "D5",
@@ -1734,7 +1740,7 @@ window.FATHOM_BUNDLES = {
         },
         {
           "id": "A1",
-          "desc": "A1"
+          "desc": "Supporting and contradicting evidence pile up on the same suspect, so its standing is the net of the two \u2014 you can't just tally the readings that point at it."
         }
       ],
       "decoys": [
@@ -2827,16 +2833,19 @@ window.FATHOM_BUNDLES = {
       ]
     },
     "explainer": {
-      "purpose": "spatial-cluster signature; reasoning from absence",
+      "purpose": "A spatially-clustered intensity loss, pinned down by where it occurs and by an expected signal that never appears.",
       "answer_type": "cause",
+      "pattern": "Reason from absence",
+      "detail": "Because the intensity loss is concentrated in one region rather than spread evenly, the discriminator is where it occurs, not how much was lost. Causes like aging would have moved other signals; their silence is what rules them out.",
+      "why": "A clean spatial signature plus reasoning from what's absent is far harder than reading a single threshold.",
       "mechanisms": [
         {
           "id": "C-spatial",
-          "desc": "C-spatial"
+          "desc": "The fault has a spatial fingerprint \u2014 the intensity loss is clustered in one region of the field rather than spread evenly \u2014 so it's identified by where the degradation sits, not just how much."
         },
         {
           "id": "A3",
-          "desc": "A3"
+          "desc": "The decisive clue is a signal that should be present but isn't (aging would have driven the laser current up; it didn't) \u2014 so you reason from the absence, not from what's there."
         }
       ],
       "decoys": [
@@ -3808,16 +3817,19 @@ window.FATHOM_BUNDLES = {
       ]
     },
     "explainer": {
-      "purpose": "post-release config; recent change IS the cause (anti-shortcut balance)",
+      "purpose": "Here the recent config change really is the culprit \u2014 the salient event is the cause, not a red herring to rule out.",
       "answer_type": "cause",
+      "pattern": "Salient event is cause",
+      "detail": "A maintenance ticket fingers a config edit, and its weight depends on whether its date falls after a release boundary \u2014 a fact assembled across log \u2192 ticket \u2192 config \u2192 date. Here, unlike the trigger cases, demoting the recent change would be the mistake.",
+      "why": "It proves the agent weighs recent events on the evidence instead of reflexively dismissing them, so a genuine recent cause still gets caught.",
       "mechanisms": [
         {
           "id": "B1",
-          "desc": "B1"
+          "desc": "A maintenance ticket points at a config, but how much it counts depends on context: whether its date falls before or after a major hardware/software release flips it from damning to irrelevant."
         },
         {
           "id": "C3",
-          "desc": "C3"
+          "desc": "No single lookup gets the answer \u2014 the fact has to be chained across several hops (log \u2192 ticket \u2192 config \u2192 date \u2192 release boundary) before it means anything."
         }
       ],
       "decoys": [
@@ -5796,8 +5808,11 @@ window.FATHOM_BUNDLES = {
       ]
     },
     "explainer": {
-      "purpose": "intermittent/coincidence -> correct answer is abstain",
+      "purpose": "No single clean cause exists; the correct answer is to abstain rather than name a culprit.",
       "answer_type": "abstain",
+      "pattern": "Abstain",
+      "detail": "The symptom looks like a fault, but the readings are intermittent and never converge \u2014 no hypothesis clears the confidence bar. When the evidence doesn't single out one cause, the agent says so instead of guessing.",
+      "why": "A confident wrong diagnosis is worse than an honest \u201cno clean cause,\u201d and calibrated abstention is what makes the confident answers trustworthy.",
       "mechanisms": [
         {
           "id": "E1",
@@ -6551,8 +6566,11 @@ window.FATHOM_BUNDLES = {
       ]
     },
     "explainer": {
-      "purpose": "absent-cue; buried evidence reachable via graph traversal + intra-doc",
+      "purpose": "No obvious cue \u2014 the deciding evidence is reached only by traversing the graph to it and digging it out of a document.",
       "answer_type": "cause",
+      "pattern": "Buried evidence",
+      "detail": "Nothing on the surface implicates the detector; the agent follows a relationship link to an artifact that doesn't look relevant, then extracts the deciding fact buried inside its text.",
+      "why": "Much of real diagnosis is retrieval \u2014 the answer exists but has to be navigated to, not recalled from what's already in view.",
       "mechanisms": [
         {
           "id": "C1",
@@ -7934,12 +7952,15 @@ window.FATHOM_BUNDLES = {
       ]
     },
     "explainer": {
-      "purpose": "near-symmetric to a decoy; needs the expensive discriminating check",
+      "purpose": "Two near-identical suspects that only an expensive discriminating check can tell apart.",
       "answer_type": "cause",
+      "pattern": "Tie-breaker",
+      "detail": "Cheaper evidence leaves the two suspects balanced, so the agent has to judge whether the costly discriminating check is worth it \u2014 and abstain rather than overspend or guess when it isn't.",
+      "why": "Deciding when one more measurement pays for itself, and when to stop, is the value-of-information call at the heart of the system.",
       "mechanisms": [
         {
           "id": "D6",
-          "desc": "D6"
+          "desc": "Two suspects are nearly symmetric and only one expensive check can break the tie, so the agent must weigh whether that discrimination is worth the cost \u2014 or abstain rather than overspend."
         }
       ],
       "decoys": [
@@ -10360,16 +10381,19 @@ window.FATHOM_BUNDLES = {
       ]
     },
     "explainer": {
-      "purpose": "one cause looks like two faults; redundant channels agree but are wrong",
+      "purpose": "One upstream power fault that masquerades as two independent faults across redundant channels.",
       "answer_type": "cause",
+      "pattern": "Common-mode",
+      "detail": "Several channels sag together, reading either as multiple independent faults or as reassuring agreement \u2014 but a single shared supply is driving them all. The tell is a common onset across channels, traced upstream instead of debugged one at a time.",
+      "why": "Shared-cause failures defeat redundancy and fool naive monitoring, so finding the one root behind many symptoms is the whole point of structured causal reasoning.",
       "mechanisms": [
         {
           "id": "A4",
-          "desc": "A4"
+          "desc": "One upstream cause shows up as several independent-looking faults at once; the trap is to chase each symptom on its own instead of finding the single shared root behind them."
         },
         {
           "id": "A5",
-          "desc": "A5"
+          "desc": "Several redundant channels all agree, which feels reassuring \u2014 but one shared cause is skewing them together, so their agreement points to a common-mode fault, not to health."
         }
       ],
       "decoys": [

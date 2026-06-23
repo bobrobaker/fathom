@@ -960,16 +960,19 @@
     ]
   },
   "explainer": {
-    "purpose": "post-release config; recent change IS the cause (anti-shortcut balance)",
+    "purpose": "Here the recent config change really is the culprit \u2014 the salient event is the cause, not a red herring to rule out.",
     "answer_type": "cause",
+    "pattern": "Salient event is cause",
+    "detail": "A maintenance ticket fingers a config edit, and its weight depends on whether its date falls after a release boundary \u2014 a fact assembled across log \u2192 ticket \u2192 config \u2192 date. Here, unlike the trigger cases, demoting the recent change would be the mistake.",
+    "why": "It proves the agent weighs recent events on the evidence instead of reflexively dismissing them, so a genuine recent cause still gets caught.",
     "mechanisms": [
       {
         "id": "B1",
-        "desc": "B1"
+        "desc": "A maintenance ticket points at a config, but how much it counts depends on context: whether its date falls before or after a major hardware/software release flips it from damning to irrelevant."
       },
       {
         "id": "C3",
-        "desc": "C3"
+        "desc": "No single lookup gets the answer \u2014 the fact has to be chained across several hops (log \u2192 ticket \u2192 config \u2192 date \u2192 release boundary) before it means anything."
       }
     ],
     "decoys": [

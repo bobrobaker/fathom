@@ -29,7 +29,7 @@
   #controls button:hover{border-color:var(--accent)}
   #slider{flex:1}
   #wrap{display:flex;gap:20px;padding:20px 24px;align-items:flex-start}
-  .leftcol{flex:1;min-width:0;display:flex;flex-direction:column;gap:14px}
+  .leftcol{flex:1;min-width:0;display:flex;flex-direction:column;gap:14px;position:relative}
   svg{background:linear-gradient(180deg,#11151d,#0e1117);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);width:100%;height:560px;min-width:0}
   .col-label{fill:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.12em}
   .nodeLabel{fill:var(--ink);font-size:11px;text-anchor:middle;pointer-events:none}
@@ -59,10 +59,17 @@
   .legend{color:var(--muted);font-size:11.5px;padding:0 24px 22px;max-width:96ch}
   .legend b{color:var(--ink);font-weight:600}
   /* intro blurb */
-  #intro{padding:14px 24px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  #intro{padding:11px 24px;border-bottom:1px solid var(--line);background:var(--panel2)}
   #intro .tag{color:var(--ink);font-size:13.5px;max-width:110ch}
   #intro .tag b{color:var(--accent)}
   #intro details{margin-top:8px}
+  /* folded transferable-shape / "why lidar" bridge — lives inside the expander now */
+  #intro .more-bridge{display:block;margin-bottom:9px;color:#9aa3b6}
+  #intro .more-bridge b{color:#b7c0d4;font-weight:600}
+  #intro .more-bridge i{color:var(--ink);font-style:normal;font-weight:600}
+  /* in-graph symptom caption (moved out of the old bar to save vertical space) */
+  #gsymptom{position:absolute;top:44px;left:16px;max-width:52%;color:#c2ccdb;font-size:12px;line-height:1.4;
+    background:rgba(10,12,17,.62);border:1px solid var(--line);border-radius:8px;padding:7px 10px;pointer-events:none}
   #intro summary{color:var(--accent);cursor:pointer;font-size:12.5px;width:max-content}
   #intro .more{color:var(--muted);font-size:12.5px;max-width:110ch;margin-top:8px;line-height:1.6}
   /* node badge (hypothesis id) */
@@ -82,16 +89,31 @@
   .act .voichip{margin-left:auto;color:var(--muted);font-size:10.5px;border:1px solid var(--line);border-radius:6px;padding:1px 6px}
   .act .why{color:#b7c0d4;font-size:12px;line-height:1.55}
   .act .why b{color:var(--accent);font-family:ui-monospace,Menlo,monospace;font-weight:700}
+  /* literal-rationale sentence bullets — scannable, not a wall */
+  .act .why-list{margin:6px 0 0;padding-left:17px;list-style:disc}
+  .act .why-list li{margin:5px 0;color:#b7c0d4;font-size:12px;line-height:1.5}
+  .act .why-list li::marker{color:var(--accent)}
+  .act .why-list b{color:var(--accent);font-family:ui-monospace,Menlo,monospace;font-weight:700}
   /* explainer table */
-  #explain{padding:0;display:flex;flex-direction:column}
-  #explain h3, #baselines-sec h3{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 10px}
-  #explain .ex-card{flex:1}  /* fill the left column under the graph so it ends near the side panel */
+  /* "what this example shows" — moved above the graph into the slot the result strip vacated */
+  #explain{padding:12px 24px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  #explain .ex-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 9px}
+  #explain .ex-titlewrap{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;min-width:0}
+  #explain h3, #baselines-sec h3{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0}
+  /* domain chip: the lidar fault name (preserved here now that the tab shows the reasoning challenge) */
+  #explain .ex-pattern:not(:empty){display:inline-flex;align-items:baseline;gap:8px;font-size:12px;
+    border:1px solid var(--line);border-radius:999px;padding:2px 11px;background:var(--panel)}
+  #explain .ex-pattern .dlabel{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.07em}
+  #explain .ex-pattern b{color:var(--ink);font-weight:600}
+  #explain .ex-hint{color:var(--muted);font-size:11px;font-style:italic;white-space:nowrap;flex:none}
   #baselines-sec{padding:2px 24px 26px}
   .ex-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;box-shadow:var(--shadow)}
-  .ex-card .lead{color:var(--ink);font-size:13px;margin-bottom:10px}
-  .mech{margin:9px 0;font-size:12.5px;color:#c2ccdb;line-height:1.5}
-  .mech::before{content:"—";color:var(--accent);margin-right:8px}
-  .ex-meta{color:var(--muted);font-size:12px;margin-top:10px}
+  .ex-card .lead{color:var(--ink);font-size:13.5px;font-weight:600;margin-bottom:9px;line-height:1.45}
+  /* authored body: detail elaborates, "why it matters" gives the stakes */
+  .ex-detail{color:#c2ccdb;font-size:12.5px;line-height:1.55}
+  .ex-why{color:var(--muted);font-size:12.5px;line-height:1.55;margin-top:8px}
+  .ex-why b{color:var(--accent);font-weight:600}
+  .ex-meta{color:var(--muted);font-size:11.5px;margin-top:10px;padding-top:9px;border-top:1px solid var(--line)}
   .ex-meta b{color:var(--ink)}
   table.metrics{width:100%;border-collapse:collapse;font-size:12.5px}
   table.metrics th,table.metrics td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
@@ -107,9 +129,13 @@
   .seg-btn:hover{color:var(--ink)}
   .seg-btn.on{background:#1b2436;color:#fff}
   #modebar .mhint{color:var(--muted);font-size:11.5px;max-width:54ch}
+  /* author/provenance seam (one line, survives the artifact traveling) */
+  #seam{padding:14px 24px 22px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+  #seam a{color:var(--accent);text-decoration:none}
+  #seam a:hover{text-decoration:underline}
   /* mobile — moderate degrade: stack graph + side panel, scale the svg, single-column tables */
   @media (max-width:860px){
-    header,#bar,#controls,#intro,#baselines-sec,.legend,#modebar{padding-left:14px;padding-right:14px}
+    header,#bar,#controls,#intro,#explain,#baselines-sec,.legend,#modebar,#seam{padding-left:14px;padding-right:14px}
     #wrap{flex-direction:column;gap:14px;padding:14px}
     .leftcol{gap:14px}
     #side{width:100%}
@@ -119,21 +145,47 @@
     #intro .tag{font-size:12.5px}
     table.metrics th,table.metrics td{padding:5px 6px;font-size:11.5px}
     .hyp .lab{max-width:62vw}
+    /* labels scale down with the viewBox at narrow widths — bump them so they stay legible */
+    .nodeLabel{font-size:14px}
+    .nodeSub{font-size:12px}
+  }
+  /* phone — hook must dominate the first screen: case selector moves below the intro hook (JS),
+     the title row stands alone, and node labels get a further legibility bump. (The transferable-shape
+     bridge is folded into the expander for all widths now, so no phone-specific hide is needed.) */
+  @media (max-width:560px){
+    header{flex-direction:column;align-items:stretch;gap:10px}
+    header h1{font-size:15px}
+    #cases.cases-mobile{margin:0;width:100%;display:flex;flex-wrap:nowrap;overflow-x:auto;gap:7px;
+      padding:8px 14px 9px;border-bottom:1px solid var(--line);background:var(--panel2);
+      -webkit-overflow-scrolling:touch;scrollbar-width:none}
+    #cases.cases-mobile::-webkit-scrollbar{display:none}
+    #cases.cases-mobile .case-btn{flex:0 0 auto}
+    #intro{padding-top:12px;padding-bottom:12px}
+    #explain .ex-hint{display:none}         /* tabs sit directly above on phone — hint would just crowd the box */
+    #gsymptom{max-width:74%;font-size:11.5px}
+    .nodeLabel{font-size:16px}
+    .nodeSub{font-size:13px}
+    svg{height:auto;min-height:300px}
   }
 </style>
 </head>
 <body>
 <header>
-  <h1><b>Fathom</b> — watch the harness diagnose</h1>
+  <h1><b>Fathom</b> — watch it diagnose</h1>
   <div id="cases"></div>
 </header>
 <div id="intro">
-  <div class="tag"><b>Fathom</b> is an abductive diagnostic reasoner: an LLM controller runs a
-    <b>value-of-information–guided hypothesis differential</b> over a typed causal graph to localize a
-    root cause — built as a controlled evaluation that isolates what that structure buys over a bare LLM.</div>
+  <div class="tag"><b>Fathom</b> is a diagnostic agent that finds the root cause of a system failure. Under
+    the hood it runs a <b>value-of-information–guided hypothesis differential</b> over a typed causal
+    graph, built as a controlled evaluation.</div>
   <details>
     <summary>What you're looking at &amp; why it's interesting</summary>
-    <div class="more">From the reported symptom, the controller <b>walks the typed causal graph backward from the
+    <div class="more"><span class="more-bridge">That evaluation isolates what the structure buys over a
+      bare LLM. The transferable shape is <b>structured agentic reasoning + calibrated abstention + a
+      controlled evaluation against real baselines</b>; the lidar domain earns it, being hard enough —
+      decoys, a salient red-herring trigger to demote, an abstain case — to <i>require</i> that structure,
+      where an easy domain would let a bare LLM win and invalidate the result.</span>
+      From the reported symptom, the controller <b>walks the typed causal graph backward from the
       affected KPI</b> — traversing the structure to surface candidate subsystems — and forms competing fault
       hypotheses anchored to those nodes. It then repeatedly picks the single most <b>discriminating</b> next
       action by value-of-information, executes it against a deterministic evidence layer, and folds each result
@@ -144,8 +196,17 @@
       real reasoning substrate, with hypotheses anchored to the graph nodes they implicate.</div>
   </details>
 </div>
+<section id="explain">
+  <div class="ex-head">
+    <div class="ex-titlewrap">
+      <h3>What this example shows</h3>
+      <span class="ex-pattern" id="ex-pattern"></span>
+    </div>
+    <span class="ex-hint" id="ex-hint">↑ tap an example tab to see another case</span>
+  </div>
+  <div class="ex-card" id="ex-what"></div>
+</section>
 <div id="bar">
-  <span class="sym" id="symptom"></span>
   <span class="pill" id="answer"></span>
   <span class="pill" id="evrow"></span>
 </div>
@@ -159,10 +220,7 @@
 <div id="wrap">
   <div class="leftcol">
     <svg id="canvas" viewBox="0 0 900 560" preserveAspectRatio="xMidYMid meet" height="560"></svg>
-    <section id="explain">
-      <h3>What this example shows</h3>
-      <div class="ex-card" id="ex-what"></div>
-    </section>
+    <div id="gsymptom"></div>
   </div>
   <div id="side">
     <h3>This step</h3><div class="card act" id="actcard"></div>
@@ -178,8 +236,8 @@
 <div id="modebar">
   <span class="mlabel">View</span>
   <div class="seg">
-    <button id="mode-narr" class="seg-btn">Narrative reveal</button>
-    <button id="mode-faith" class="seg-btn">Faithful (literal)</button>
+    <button id="mode-narr" class="seg-btn">Discovery order</button>
+    <button id="mode-faith" class="seg-btn">All at once</button>
   </div>
   <span class="mhint" id="mhint"></span>
 </div>
@@ -194,6 +252,7 @@
   <b>pulses up the headline path</b> to the KPI. When evidence supports no single cause the harness
   <b>abstains</b> — shown honestly, no false winner.
 </div>
+<footer id="seam">Built by Bolun · <a href="https://github.com/bobrobaker/fathom" target="_blank" rel="noopener">github</a></footer>
 <script src="d3.v7.min.js"></script>
 <script src="bundles.js"></script>
 <script>
@@ -212,9 +271,9 @@ const W=900, H=560, LM=78, RM=150, TM=64, BM=44, EV_THRESH=0.25;
 const TYPE_R={KPI:17, subsystem:12.5, part_type:11, part_version:11, metric:9, config:9.5};
 const svg=d3.select("#canvas");
 let cur=null, step=0, timer=null, pos={}, headPath=[];
-let introTimer=null, pulseId=0;  // lifecycle handles: cancel a queued intro / supersede an old pulse loop
+let introTimer=null, autoplayTimer=null, pulseId=0;  // lifecycle handles: cancel a queued intro / autostart / supersede an old pulse loop
 let dispId={}, refToDisp={}, hypByRefCur={};  // hypothesis id → "H1".. badge; node_ref → badge; live step's anchors
-let MODE="narrative", revealMap={}, nextUp={}, COLW=120;  // "narrative" (progressive) | "faithful" (literal)
+let MODE="faithful", revealMap={}, nextUp={}, COLW=120;  // "narrative" (progressive) | "faithful" (literal); faithful is the default (populated first frame, matches the plain description)
 
 const tip=document.getElementById("tip");
 function placeTip(e){ const pad=14;
@@ -237,7 +296,8 @@ function showEvTip(e,d){
 }
 function hideTip(){ tip.style.opacity=0; }
 
-function cancelIntro(){ if(introTimer){introTimer.stop(); introTimer=null;} }
+function cancelIntro(){ if(introTimer){introTimer.stop(); introTimer=null;}
+  if(autoplayTimer){autoplayTimer.stop(); autoplayTimer=null;} }  // any case/step change kills a pending autostart
 
 function confColor(c){const r=Math.round(255*(1-Math.max(0,(c-.5)*2)));const g=Math.round(255*Math.min(1,c*2));return `rgb(${Math.min(255,r+30)},${Math.min(255,g)},96)`;}
 function isTrig(id){return cur&&cur.trigger&&id===cur.trigger;}
@@ -309,7 +369,11 @@ function edgePath(a,b){ const mx=(a.x+b.x)/2; return `M${a.x},${a.y}C${mx},${a.y
 
 function buildCaseButtons(){
   const box=document.getElementById("cases");box.innerHTML="";
-  M.forEach(m=>{const b=document.createElement("button");b.className="case-btn";b.textContent=m.title||m.case_id;
+  // tabs are labelled by the reasoning CHALLENGE (so the strip reads as "kinds of hard reasoning"); the
+  // lidar fault name (m.title) is preserved in the "what this example shows" header. title tooltip keeps it.
+  M.forEach(m=>{const b=document.createElement("button");b.className="case-btn";
+    const pat=((B[m.case_id]||{}).explainer||{}).pattern;
+    b.textContent=pat||m.title||m.case_id; b.title=m.title||"";
     b.onclick=()=>selectCase(m.case_id);b.dataset.id=m.case_id;box.appendChild(b);});
 }
 
@@ -317,7 +381,7 @@ function selectCase(id){
   cur=B[id]; step=0; stopPlay(); cancelIntro(); pulseId++;  // kill any pulse loop from the prior case
   document.querySelectorAll(".case-btn").forEach(b=>b.classList.toggle("on",b.dataset.id===id));
   const sl=document.getElementById("slider");sl.max=Math.max(0,cur.steps.length-1);sl.value=0;
-  document.getElementById("symptom").textContent=cur.symptom||"";
+  document.getElementById("gsymptom").textContent=cur.symptom||"";  // symptom rides inside the graph frame
   const ans=document.getElementById("answer"), a=cur.answer||{};
   const abst=cur.final_status==="abstained"||a.answer_type==="abstain";
   ans.className="pill "+(abst?"abst":"win");
@@ -506,15 +570,20 @@ function esc(s){return (s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":
 
 // "What this example shows" panel: the difficulty mechanisms (plain-English, no internal IDs) + what's hard.
 function renderExplainer(){
-  const ex=cur.explainer||{}, a=cur.answer||{};
-  const abst=cur.final_status==="abstained"||a.answer_type==="abstain";
-  const mech=(ex.mechanisms||[]).map(m=>`<div class="mech">${esc(m.desc)}</div>`).join("");
+  const ex=cur.explainer||{};
   const hard=[];
-  if((ex.decoys||[]).length) hard.push(`${ex.decoys.length} decoy hypothes${ex.decoys.length>1?"es":"is"} that mimic the true cause`);
+  if((ex.decoys||[]).length){ const n=ex.decoys.length;
+    hard.push(`${n} decoy hypothes${n>1?"es":"is"} that mimic${n>1?"":"s"} the true cause`); }
   if(ex.trigger) hard.push(`a salient recent event (<b>${esc(ex.trigger)}</b>) that must be demoted, not blamed`);
-  if(abst) hard.push("no single clean cause — the correct answer is to <b>abstain</b>");
+  // (abstain is already the title/body for the abstain case — don't repeat it in the hard-hooks line)
+  // header chip preserves the DOMAIN content (the lidar fault name) now that the tab shows the challenge
+  const dom=document.getElementById("ex-pattern");
+  if(dom) dom.innerHTML = cur.title ? `<span class="dlabel">lidar fault</span><b>${esc(cur.title)}</b>` : "";
+  // title (purpose) STATES it; detail + why ELABORATE without repeating
   document.getElementById("ex-what").innerHTML=
-    `<div class="lead">${esc(ex.purpose||cur.caption||"")}</div>${mech}`
+    `<div class="lead">${esc(ex.purpose||cur.caption||"")}</div>`
+    +(ex.detail?`<div class="ex-detail">${esc(ex.detail)}</div>`:"")
+    +(ex.why?`<div class="ex-why"><b>Why it matters:</b> ${esc(ex.why)}</div>`:"")
     +(hard.length?`<div class="ex-meta">What makes it hard: ${hard.join("; ")}.</div>`:"");
 }
 
@@ -568,7 +637,15 @@ function renderSidePanel(s){
     ac.innerHTML=head+`<div class="why">${line}</div>`
       +(shifts.length?`<div class="why" style="margin-top:6px;color:var(--muted)">Belief: ${shifts.join(" · ")}</div>`:"");
   } else {
-    ac.innerHTML=head+`<div class="why">${resolveHyps(tr.rationale)||"<span style='color:var(--muted)'>—</span>"}</div>`;
+    // the literal rationale is dense multi-sentence prose — split into sentence bullets so it's scannable.
+    // Split only on a period followed by whitespace + an uppercase/"(" start, so decimals (4.96 °C, log_odds=0.00)
+    // and lowercase ids (hyp.upstream_power) don't false-split.
+    const raw=(tr.rationale||"").trim();
+    const sents=raw?raw.split(/\.\s+(?=[A-Z(])/).map(s=>s.replace(/\.\s*$/,"").trim()).filter(Boolean):[];
+    const body = sents.length>1
+      ? `<ul class="why-list">${sents.map(s=>`<li>${resolveHyps(s)}.</li>`).join("")}</ul>`
+      : `<div class="why">${resolveHyps(raw)||"<span style='color:var(--muted)'>—</span>"}</div>`;
+    ac.innerHTML=head+body;
   }
   const hy=document.getElementById("hyps");hy.innerHTML="";
   const hyps=[...s.hypotheses].filter(shown).sort((a,b)=>b.confidence-a.confidence);
@@ -589,12 +666,28 @@ function renderSidePanel(s){
   document.getElementById("rec").textContent=s.recommended_action||"—";
 }
 
+// One-shot autoplay for the hero frame: after the load case's intro choreography settles, drive the
+// existing play() so the first thing a visitor sees is a live, populated, animating graph. Guarded by
+// case id (a case switch changes it), step (manual navigation moves it off 0), and timer (don't double-
+// start) so any user action supersedes the autostart. (Can't key on pulseId — renderPulse bumps it every
+// render.) The d3.timeout is a single shot, not a self-recursing loop, so nothing leaks.
+function autoplayHero(){
+  if(!cur) return;
+  const myCase=cur.case_id;
+  const maxD=d3.max((cur.graph||{nodes:[]}).nodes,n=>n.depth)||0;
+  const introMs = MODE==="narrative" ? 1200 : (220+maxD*260+260);  // mirror introExpand's settle window
+  // ~3s dwell after the graph has settled, so a visitor can read the page before it starts moving.
+  const delay = Math.max(introMs+220, 3000);
+  autoplayTimer=d3.timeout(()=>{ autoplayTimer=null;
+    if(!cur||cur.case_id!==myCase||step!==0||timer) return; play(); }, delay);  // guards: case/step/already-playing
+}
+
 function go(i){if(!cur)return;cancelIntro();renderStep(i,false);}  // user navigation overrides a queued intro
 function play(){stopPlay();document.getElementById("play").textContent="⏸ pause";
   timer=setInterval(()=>{if(step>=cur.steps.length-1){stopPlay();return;}go(step+1);},1500);}
 function stopPlay(){if(timer){clearInterval(timer);timer=null;}document.getElementById("play").textContent="▶ play";}
-const MHINT={narrative:"Progressive: only the KPI shows first; hypotheses appear as the run discovers them (real state, re-timed).",
-  faithful:"Literal: every hypothesis is seeded at triage (step 0), exactly as the controller runs it."};
+const MHINT={narrative:"Both modes replay the same real run. “Discovery order” reveals each hypothesis as the agent surfaced it (real state, re-timed).",
+  faithful:"Both modes replay the same real run. “All at once” seeds every hypothesis at triage (step 0), exactly as the controller runs it."};
 function setMode(m){
   MODE=m; stopPlay();
   document.getElementById("mode-narr").classList.toggle("on",m==="narrative");
@@ -610,10 +703,33 @@ document.getElementById("mode-narr").onclick=()=>setMode("narrative");
 document.getElementById("mode-faith").onclick=()=>setMode("faithful");
 // mobile: a tap shows the tooltip (node/chip click handlers); a tap anywhere else dismisses it
 document.addEventListener("click",e=>{ if(!e.target.closest(".node,.evchips g")) hideTip(); });
+// Phone reflow (same nodes move, so handlers survive; desktop layout the recruiter signed off stays
+// byte-for-byte). Two moves: (a) the 8 cryptic domain pills must not greet a visitor before the hook —
+// drop the case selector just below the intro; (b) the explainer box, which sits up top on desktop,
+// would push the animated graph below the fold on a phone — so on narrow screens it goes back BELOW the
+// graph (preserving the earlier "surface the graph early on mobile" fix).
+const phoneMQ = window.matchMedia("(max-width:560px)");
+function placeCases(){
+  const cases=document.getElementById("cases"), header=document.querySelector("header"),
+        intro=document.getElementById("intro"), explain=document.getElementById("explain"),
+        wrap=document.getElementById("wrap"), bar=document.getElementById("bar");
+  if(phoneMQ.matches){
+    if(cases.previousElementSibling!==intro) intro.after(cases);   // pills below the hook
+    if(explain.previousElementSibling!==wrap) wrap.after(explain); // explainer below the graph
+    cases.classList.add("cases-mobile");
+  }else{
+    if(cases.parentElement!==header) header.appendChild(cases);    // restore desktop top-right cluster
+    if(explain.nextElementSibling!==bar) bar.before(explain);      // explainer back above the bar
+    cases.classList.remove("cases-mobile");
+  }
+}
+phoneMQ.addEventListener("change", placeCases);
+
 buildCaseButtons();
+placeCases();
 renderBaselines();
 setMode(MODE);  // sets the toggle UI + hint
-if(M.length)selectCase(M[0].case_id);
+if(M.length){selectCase(M[0].case_id); autoplayHero();}  // hero frame: load + autoplay the first case
 </script>
 </body>
 </html>

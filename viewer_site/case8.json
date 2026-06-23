@@ -2410,16 +2410,19 @@
     ]
   },
   "explainer": {
-    "purpose": "one cause looks like two faults; redundant channels agree but are wrong",
+    "purpose": "One upstream power fault that masquerades as two independent faults across redundant channels.",
     "answer_type": "cause",
+    "pattern": "Common-mode",
+    "detail": "Several channels sag together, reading either as multiple independent faults or as reassuring agreement \u2014 but a single shared supply is driving them all. The tell is a common onset across channels, traced upstream instead of debugged one at a time.",
+    "why": "Shared-cause failures defeat redundancy and fool naive monitoring, so finding the one root behind many symptoms is the whole point of structured causal reasoning.",
     "mechanisms": [
       {
         "id": "A4",
-        "desc": "A4"
+        "desc": "One upstream cause shows up as several independent-looking faults at once; the trap is to chase each symptom on its own instead of finding the single shared root behind them."
       },
       {
         "id": "A5",
-        "desc": "A5"
+        "desc": "Several redundant channels all agree, which feels reassuring \u2014 but one shared cause is skewing them together, so their agreement points to a common-mode fault, not to health."
       }
     ],
     "decoys": [

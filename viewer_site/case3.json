@@ -1082,16 +1082,19 @@
     ]
   },
   "explainer": {
-    "purpose": "spatial-cluster signature; reasoning from absence",
+    "purpose": "A spatially-clustered intensity loss, pinned down by where it occurs and by an expected signal that never appears.",
     "answer_type": "cause",
+    "pattern": "Reason from absence",
+    "detail": "Because the intensity loss is concentrated in one region rather than spread evenly, the discriminator is where it occurs, not how much was lost. Causes like aging would have moved other signals; their silence is what rules them out.",
+    "why": "A clean spatial signature plus reasoning from what's absent is far harder than reading a single threshold.",
     "mechanisms": [
       {
         "id": "C-spatial",
-        "desc": "C-spatial"
+        "desc": "The fault has a spatial fingerprint \u2014 the intensity loss is clustered in one region of the field rather than spread evenly \u2014 so it's identified by where the degradation sits, not just how much."
       },
       {
         "id": "A3",
-        "desc": "A3"
+        "desc": "The decisive clue is a signal that should be present but isn't (aging would have driven the laser current up; it didn't) \u2014 so you reason from the absence, not from what's there."
       }
     ],
     "decoys": [

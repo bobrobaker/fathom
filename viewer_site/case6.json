@@ -741,8 +741,11 @@
     ]
   },
   "explainer": {
-    "purpose": "absent-cue; buried evidence reachable via graph traversal + intra-doc",
+    "purpose": "No obvious cue \u2014 the deciding evidence is reached only by traversing the graph to it and digging it out of a document.",
     "answer_type": "cause",
+    "pattern": "Buried evidence",
+    "detail": "Nothing on the surface implicates the detector; the agent follows a relationship link to an artifact that doesn't look relevant, then extracts the deciding fact buried inside its text.",
+    "why": "Much of real diagnosis is retrieval \u2014 the answer exists but has to be navigated to, not recalled from what's already in view.",
     "mechanisms": [
       {
         "id": "C1",

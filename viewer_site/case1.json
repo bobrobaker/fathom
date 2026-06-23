@@ -1073,8 +1073,11 @@
     ]
   },
   "explainer": {
-    "purpose": "worked example: cross-subsystem + decoy + lying channel + demoted trigger",
+    "purpose": "A cross-subsystem fault masked by a decoy part, a lying sensor channel, and a coincidental reboot that has to be demoted.",
     "answer_type": "cause",
+    "pattern": "Red-herring demotion",
+    "detail": "The range started slipping before the reboot, so timing alone clears the eye-catching event. One sensor reads plausibly but wrongly and only counts once it's cross-checked, and the remaining suspects look alike until a computed rate separates them.",
+    "why": "Resisting the obvious recent event and the confident-but-wrong channel is what separates evidence-driven diagnosis from pattern-matching on recency.",
     "mechanisms": [
       {
         "id": "D1",
