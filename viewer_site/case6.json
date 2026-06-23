@@ -600,5 +600,164 @@
     "conflict_handling": 1.0,
     "evidence_f1": 0.33,
     "tokens": 47348
+  },
+  "graph": {
+    "root": "kpi.effective_range",
+    "nodes": [
+      {
+        "id": "kpi.effective_range",
+        "type": "KPI",
+        "name": "effective_max_range_m",
+        "depth": 0
+      },
+      {
+        "id": "metric.intensity",
+        "type": "metric",
+        "name": "mean_return_intensity",
+        "depth": 1
+      },
+      {
+        "id": "sub.calibration",
+        "type": "subsystem",
+        "name": "Signal proc / calibration",
+        "depth": 1
+      },
+      {
+        "id": "sub.laser",
+        "type": "subsystem",
+        "name": "Laser emitter",
+        "depth": 2
+      },
+      {
+        "id": "sub.optics",
+        "type": "subsystem",
+        "name": "Optics / window",
+        "depth": 2
+      },
+      {
+        "id": "sub.detector",
+        "type": "subsystem",
+        "name": "Receiver / detector",
+        "depth": 2
+      },
+      {
+        "id": "sub.thermal",
+        "type": "subsystem",
+        "name": "Thermal / TEC",
+        "depth": 3
+      },
+      {
+        "id": "sub.power",
+        "type": "subsystem",
+        "name": "Scanner / power",
+        "depth": 4
+      },
+      {
+        "id": "part.laser_module",
+        "type": "part_type",
+        "name": "Laser module",
+        "depth": 3
+      },
+      {
+        "id": "part.window",
+        "type": "part_type",
+        "name": "Window",
+        "depth": 3
+      },
+      {
+        "id": "part.detector",
+        "type": "part_type",
+        "name": "Detector",
+        "depth": 3
+      },
+      {
+        "id": "part.tec",
+        "type": "part_type",
+        "name": "TEC module",
+        "depth": 4
+      }
+    ],
+    "edges": [
+      {
+        "src": "metric.intensity",
+        "dst": "kpi.effective_range",
+        "type": "affects"
+      },
+      {
+        "src": "sub.calibration",
+        "dst": "kpi.effective_range",
+        "type": "affects"
+      },
+      {
+        "src": "sub.laser",
+        "dst": "metric.intensity",
+        "type": "affects"
+      },
+      {
+        "src": "sub.optics",
+        "dst": "metric.intensity",
+        "type": "affects"
+      },
+      {
+        "src": "sub.detector",
+        "dst": "metric.intensity",
+        "type": "affects"
+      },
+      {
+        "src": "sub.thermal",
+        "dst": "sub.laser",
+        "type": "affects"
+      },
+      {
+        "src": "sub.thermal",
+        "dst": "sub.detector",
+        "type": "affects"
+      },
+      {
+        "src": "sub.power",
+        "dst": "sub.thermal",
+        "type": "affects"
+      },
+      {
+        "src": "part.laser_module",
+        "dst": "sub.laser",
+        "type": "part_of"
+      },
+      {
+        "src": "part.window",
+        "dst": "sub.optics",
+        "type": "part_of"
+      },
+      {
+        "src": "part.detector",
+        "dst": "sub.detector",
+        "type": "part_of"
+      },
+      {
+        "src": "part.tec",
+        "dst": "sub.thermal",
+        "type": "part_of"
+      }
+    ]
+  },
+  "explainer": {
+    "purpose": "absent-cue; buried evidence reachable via graph traversal + intra-doc",
+    "answer_type": "cause",
+    "mechanisms": [
+      {
+        "id": "C1",
+        "desc": "The decisive evidence isn't obviously relevant; you only reach it by following a relationship link through the graph to it."
+      },
+      {
+        "id": "C2",
+        "desc": "The key fact is buried inside a document you've already found, and has to be dug out of its text."
+      }
+    ],
+    "decoys": [
+      "part.tec",
+      "part.laser_module",
+      "part.window"
+    ],
+    "trigger": null
   }
 }

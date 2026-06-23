@@ -933,6 +933,171 @@ window.FATHOM_BUNDLES = {
       "conflict_handling": 1.0,
       "evidence_f1": 0.4,
       "tokens": 83683
+    },
+    "graph": {
+      "root": "kpi.effective_range",
+      "nodes": [
+        {
+          "id": "kpi.effective_range",
+          "type": "KPI",
+          "name": "effective_max_range_m",
+          "depth": 0
+        },
+        {
+          "id": "metric.intensity",
+          "type": "metric",
+          "name": "mean_return_intensity",
+          "depth": 1
+        },
+        {
+          "id": "sub.calibration",
+          "type": "subsystem",
+          "name": "Signal proc / calibration",
+          "depth": 1
+        },
+        {
+          "id": "sub.laser",
+          "type": "subsystem",
+          "name": "Laser emitter",
+          "depth": 2
+        },
+        {
+          "id": "sub.optics",
+          "type": "subsystem",
+          "name": "Optics / window",
+          "depth": 2
+        },
+        {
+          "id": "sub.detector",
+          "type": "subsystem",
+          "name": "Receiver / detector",
+          "depth": 2
+        },
+        {
+          "id": "sub.thermal",
+          "type": "subsystem",
+          "name": "Thermal / TEC",
+          "depth": 3
+        },
+        {
+          "id": "sub.power",
+          "type": "subsystem",
+          "name": "Scanner / power",
+          "depth": 4
+        },
+        {
+          "id": "part.laser_module",
+          "type": "part_type",
+          "name": "Laser module",
+          "depth": 3
+        },
+        {
+          "id": "part.window",
+          "type": "part_type",
+          "name": "Window",
+          "depth": 3
+        },
+        {
+          "id": "part.detector",
+          "type": "part_type",
+          "name": "Detector",
+          "depth": 3
+        },
+        {
+          "id": "part.tec",
+          "type": "part_type",
+          "name": "TEC module",
+          "depth": 4
+        }
+      ],
+      "edges": [
+        {
+          "src": "metric.intensity",
+          "dst": "kpi.effective_range",
+          "type": "affects"
+        },
+        {
+          "src": "sub.calibration",
+          "dst": "kpi.effective_range",
+          "type": "affects"
+        },
+        {
+          "src": "sub.laser",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.optics",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.detector",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.thermal",
+          "dst": "sub.laser",
+          "type": "affects"
+        },
+        {
+          "src": "sub.thermal",
+          "dst": "sub.detector",
+          "type": "affects"
+        },
+        {
+          "src": "sub.power",
+          "dst": "sub.thermal",
+          "type": "affects"
+        },
+        {
+          "src": "part.laser_module",
+          "dst": "sub.laser",
+          "type": "part_of"
+        },
+        {
+          "src": "part.window",
+          "dst": "sub.optics",
+          "type": "part_of"
+        },
+        {
+          "src": "part.detector",
+          "dst": "sub.detector",
+          "type": "part_of"
+        },
+        {
+          "src": "part.tec",
+          "dst": "sub.thermal",
+          "type": "part_of"
+        }
+      ]
+    },
+    "explainer": {
+      "purpose": "worked example: cross-subsystem + decoy + lying channel + demoted trigger",
+      "answer_type": "cause",
+      "mechanisms": [
+        {
+          "id": "D1",
+          "desc": "A recent, attention-grabbing event looks like the cause but isn't \u2014 the fault started before it, so it has to be ruled out by timing."
+        },
+        {
+          "id": "B5",
+          "desc": "A sensor channel reports plausible-but-wrong values, so its readings can't be trusted on their own and must be cross-checked against an independent source."
+        },
+        {
+          "id": "D5",
+          "desc": "You can't tell the suspects apart by eye \u2014 it takes an actual computation (a rate, residual, or threshold) to discriminate them."
+        },
+        {
+          "id": "A2",
+          "desc": "One reading moves two suspects at once \u2014 it raises one hypothesis while lowering another, so a single check has to be read in both directions."
+        }
+      ],
+      "decoys": [
+        "part.laser_module"
+      ],
+      "trigger": "log.reboot"
     }
   },
   "case2": {
@@ -1419,6 +1584,163 @@ window.FATHOM_BUNDLES = {
       "conflict_handling": 1.0,
       "evidence_f1": 0.33,
       "tokens": 36527
+    },
+    "graph": {
+      "root": "kpi.effective_range",
+      "nodes": [
+        {
+          "id": "kpi.effective_range",
+          "type": "KPI",
+          "name": "effective_max_range_m",
+          "depth": 0
+        },
+        {
+          "id": "metric.intensity",
+          "type": "metric",
+          "name": "mean_return_intensity",
+          "depth": 1
+        },
+        {
+          "id": "sub.calibration",
+          "type": "subsystem",
+          "name": "Signal proc / calibration",
+          "depth": 1
+        },
+        {
+          "id": "sub.laser",
+          "type": "subsystem",
+          "name": "Laser emitter",
+          "depth": 2
+        },
+        {
+          "id": "sub.optics",
+          "type": "subsystem",
+          "name": "Optics / window",
+          "depth": 2
+        },
+        {
+          "id": "sub.detector",
+          "type": "subsystem",
+          "name": "Receiver / detector",
+          "depth": 2
+        },
+        {
+          "id": "sub.thermal",
+          "type": "subsystem",
+          "name": "Thermal / TEC",
+          "depth": 3
+        },
+        {
+          "id": "sub.power",
+          "type": "subsystem",
+          "name": "Scanner / power",
+          "depth": 4
+        },
+        {
+          "id": "part.laser_module",
+          "type": "part_type",
+          "name": "Laser module",
+          "depth": 3
+        },
+        {
+          "id": "part.window",
+          "type": "part_type",
+          "name": "Window",
+          "depth": 3
+        },
+        {
+          "id": "part.detector",
+          "type": "part_type",
+          "name": "Detector",
+          "depth": 3
+        },
+        {
+          "id": "part.tec",
+          "type": "part_type",
+          "name": "TEC module",
+          "depth": 4
+        }
+      ],
+      "edges": [
+        {
+          "src": "metric.intensity",
+          "dst": "kpi.effective_range",
+          "type": "affects"
+        },
+        {
+          "src": "sub.calibration",
+          "dst": "kpi.effective_range",
+          "type": "affects"
+        },
+        {
+          "src": "sub.laser",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.optics",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.detector",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.thermal",
+          "dst": "sub.laser",
+          "type": "affects"
+        },
+        {
+          "src": "sub.thermal",
+          "dst": "sub.detector",
+          "type": "affects"
+        },
+        {
+          "src": "sub.power",
+          "dst": "sub.thermal",
+          "type": "affects"
+        },
+        {
+          "src": "part.laser_module",
+          "dst": "sub.laser",
+          "type": "part_of"
+        },
+        {
+          "src": "part.window",
+          "dst": "sub.optics",
+          "type": "part_of"
+        },
+        {
+          "src": "part.detector",
+          "dst": "sub.detector",
+          "type": "part_of"
+        },
+        {
+          "src": "part.tec",
+          "dst": "sub.thermal",
+          "type": "part_of"
+        }
+      ]
+    },
+    "explainer": {
+      "purpose": "decoy as a true cause (no temp correlation) \u2014 symmetry vs case1",
+      "answer_type": "cause",
+      "mechanisms": [
+        {
+          "id": "D5",
+          "desc": "You can't tell the suspects apart by eye \u2014 it takes an actual computation (a rate, residual, or threshold) to discriminate them."
+        },
+        {
+          "id": "A1",
+          "desc": "A1"
+        }
+      ],
+      "decoys": [
+        "part.tec"
+      ],
+      "trigger": "log.reboot"
     }
   },
   "case3": {
@@ -2364,6 +2686,164 @@ window.FATHOM_BUNDLES = {
       "conflict_handling": 1.0,
       "evidence_f1": 0.29,
       "tokens": 69316
+    },
+    "graph": {
+      "root": "kpi.effective_range",
+      "nodes": [
+        {
+          "id": "kpi.effective_range",
+          "type": "KPI",
+          "name": "effective_max_range_m",
+          "depth": 0
+        },
+        {
+          "id": "metric.intensity",
+          "type": "metric",
+          "name": "mean_return_intensity",
+          "depth": 1
+        },
+        {
+          "id": "sub.calibration",
+          "type": "subsystem",
+          "name": "Signal proc / calibration",
+          "depth": 1
+        },
+        {
+          "id": "sub.laser",
+          "type": "subsystem",
+          "name": "Laser emitter",
+          "depth": 2
+        },
+        {
+          "id": "sub.optics",
+          "type": "subsystem",
+          "name": "Optics / window",
+          "depth": 2
+        },
+        {
+          "id": "sub.detector",
+          "type": "subsystem",
+          "name": "Receiver / detector",
+          "depth": 2
+        },
+        {
+          "id": "sub.thermal",
+          "type": "subsystem",
+          "name": "Thermal / TEC",
+          "depth": 3
+        },
+        {
+          "id": "sub.power",
+          "type": "subsystem",
+          "name": "Scanner / power",
+          "depth": 4
+        },
+        {
+          "id": "part.laser_module",
+          "type": "part_type",
+          "name": "Laser module",
+          "depth": 3
+        },
+        {
+          "id": "part.window",
+          "type": "part_type",
+          "name": "Window",
+          "depth": 3
+        },
+        {
+          "id": "part.detector",
+          "type": "part_type",
+          "name": "Detector",
+          "depth": 3
+        },
+        {
+          "id": "part.tec",
+          "type": "part_type",
+          "name": "TEC module",
+          "depth": 4
+        }
+      ],
+      "edges": [
+        {
+          "src": "metric.intensity",
+          "dst": "kpi.effective_range",
+          "type": "affects"
+        },
+        {
+          "src": "sub.calibration",
+          "dst": "kpi.effective_range",
+          "type": "affects"
+        },
+        {
+          "src": "sub.laser",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.optics",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.detector",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.thermal",
+          "dst": "sub.laser",
+          "type": "affects"
+        },
+        {
+          "src": "sub.thermal",
+          "dst": "sub.detector",
+          "type": "affects"
+        },
+        {
+          "src": "sub.power",
+          "dst": "sub.thermal",
+          "type": "affects"
+        },
+        {
+          "src": "part.laser_module",
+          "dst": "sub.laser",
+          "type": "part_of"
+        },
+        {
+          "src": "part.window",
+          "dst": "sub.optics",
+          "type": "part_of"
+        },
+        {
+          "src": "part.detector",
+          "dst": "sub.detector",
+          "type": "part_of"
+        },
+        {
+          "src": "part.tec",
+          "dst": "sub.thermal",
+          "type": "part_of"
+        }
+      ]
+    },
+    "explainer": {
+      "purpose": "spatial-cluster signature; reasoning from absence",
+      "answer_type": "cause",
+      "mechanisms": [
+        {
+          "id": "C-spatial",
+          "desc": "C-spatial"
+        },
+        {
+          "id": "A3",
+          "desc": "A3"
+        }
+      ],
+      "decoys": [
+        "part.tec",
+        "part.laser_module"
+      ],
+      "trigger": "log.reboot"
     }
   },
   "case4": {
@@ -3187,6 +3667,164 @@ window.FATHOM_BUNDLES = {
       "conflict_handling": 1.0,
       "evidence_f1": 0.0,
       "tokens": 63228
+    },
+    "graph": {
+      "root": "kpi.effective_range",
+      "nodes": [
+        {
+          "id": "kpi.effective_range",
+          "type": "KPI",
+          "name": "effective_max_range_m",
+          "depth": 0
+        },
+        {
+          "id": "metric.intensity",
+          "type": "metric",
+          "name": "mean_return_intensity",
+          "depth": 1
+        },
+        {
+          "id": "sub.calibration",
+          "type": "subsystem",
+          "name": "Signal proc / calibration",
+          "depth": 1
+        },
+        {
+          "id": "sub.laser",
+          "type": "subsystem",
+          "name": "Laser emitter",
+          "depth": 2
+        },
+        {
+          "id": "sub.optics",
+          "type": "subsystem",
+          "name": "Optics / window",
+          "depth": 2
+        },
+        {
+          "id": "sub.detector",
+          "type": "subsystem",
+          "name": "Receiver / detector",
+          "depth": 2
+        },
+        {
+          "id": "sub.thermal",
+          "type": "subsystem",
+          "name": "Thermal / TEC",
+          "depth": 3
+        },
+        {
+          "id": "sub.power",
+          "type": "subsystem",
+          "name": "Scanner / power",
+          "depth": 4
+        },
+        {
+          "id": "part.laser_module",
+          "type": "part_type",
+          "name": "Laser module",
+          "depth": 3
+        },
+        {
+          "id": "part.window",
+          "type": "part_type",
+          "name": "Window",
+          "depth": 3
+        },
+        {
+          "id": "part.detector",
+          "type": "part_type",
+          "name": "Detector",
+          "depth": 3
+        },
+        {
+          "id": "part.tec",
+          "type": "part_type",
+          "name": "TEC module",
+          "depth": 4
+        }
+      ],
+      "edges": [
+        {
+          "src": "metric.intensity",
+          "dst": "kpi.effective_range",
+          "type": "affects"
+        },
+        {
+          "src": "sub.calibration",
+          "dst": "kpi.effective_range",
+          "type": "affects"
+        },
+        {
+          "src": "sub.laser",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.optics",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.detector",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.thermal",
+          "dst": "sub.laser",
+          "type": "affects"
+        },
+        {
+          "src": "sub.thermal",
+          "dst": "sub.detector",
+          "type": "affects"
+        },
+        {
+          "src": "sub.power",
+          "dst": "sub.thermal",
+          "type": "affects"
+        },
+        {
+          "src": "part.laser_module",
+          "dst": "sub.laser",
+          "type": "part_of"
+        },
+        {
+          "src": "part.window",
+          "dst": "sub.optics",
+          "type": "part_of"
+        },
+        {
+          "src": "part.detector",
+          "dst": "sub.detector",
+          "type": "part_of"
+        },
+        {
+          "src": "part.tec",
+          "dst": "sub.thermal",
+          "type": "part_of"
+        }
+      ]
+    },
+    "explainer": {
+      "purpose": "post-release config; recent change IS the cause (anti-shortcut balance)",
+      "answer_type": "cause",
+      "mechanisms": [
+        {
+          "id": "B1",
+          "desc": "B1"
+        },
+        {
+          "id": "C3",
+          "desc": "C3"
+        }
+      ],
+      "decoys": [
+        "part.tec",
+        "part.laser_module"
+      ],
+      "trigger": null
     }
   },
   "case5": {
@@ -5017,6 +5655,157 @@ window.FATHOM_BUNDLES = {
       "conflict_handling": 1.0,
       "evidence_f1": 0.0,
       "tokens": 186581
+    },
+    "graph": {
+      "root": "kpi.effective_range",
+      "nodes": [
+        {
+          "id": "kpi.effective_range",
+          "type": "KPI",
+          "name": "effective_max_range_m",
+          "depth": 0
+        },
+        {
+          "id": "metric.intensity",
+          "type": "metric",
+          "name": "mean_return_intensity",
+          "depth": 1
+        },
+        {
+          "id": "sub.calibration",
+          "type": "subsystem",
+          "name": "Signal proc / calibration",
+          "depth": 1
+        },
+        {
+          "id": "sub.laser",
+          "type": "subsystem",
+          "name": "Laser emitter",
+          "depth": 2
+        },
+        {
+          "id": "sub.optics",
+          "type": "subsystem",
+          "name": "Optics / window",
+          "depth": 2
+        },
+        {
+          "id": "sub.detector",
+          "type": "subsystem",
+          "name": "Receiver / detector",
+          "depth": 2
+        },
+        {
+          "id": "sub.thermal",
+          "type": "subsystem",
+          "name": "Thermal / TEC",
+          "depth": 3
+        },
+        {
+          "id": "sub.power",
+          "type": "subsystem",
+          "name": "Scanner / power",
+          "depth": 4
+        },
+        {
+          "id": "part.laser_module",
+          "type": "part_type",
+          "name": "Laser module",
+          "depth": 3
+        },
+        {
+          "id": "part.window",
+          "type": "part_type",
+          "name": "Window",
+          "depth": 3
+        },
+        {
+          "id": "part.detector",
+          "type": "part_type",
+          "name": "Detector",
+          "depth": 3
+        },
+        {
+          "id": "part.tec",
+          "type": "part_type",
+          "name": "TEC module",
+          "depth": 4
+        }
+      ],
+      "edges": [
+        {
+          "src": "metric.intensity",
+          "dst": "kpi.effective_range",
+          "type": "affects"
+        },
+        {
+          "src": "sub.calibration",
+          "dst": "kpi.effective_range",
+          "type": "affects"
+        },
+        {
+          "src": "sub.laser",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.optics",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.detector",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.thermal",
+          "dst": "sub.laser",
+          "type": "affects"
+        },
+        {
+          "src": "sub.thermal",
+          "dst": "sub.detector",
+          "type": "affects"
+        },
+        {
+          "src": "sub.power",
+          "dst": "sub.thermal",
+          "type": "affects"
+        },
+        {
+          "src": "part.laser_module",
+          "dst": "sub.laser",
+          "type": "part_of"
+        },
+        {
+          "src": "part.window",
+          "dst": "sub.optics",
+          "type": "part_of"
+        },
+        {
+          "src": "part.detector",
+          "dst": "sub.detector",
+          "type": "part_of"
+        },
+        {
+          "src": "part.tec",
+          "dst": "sub.thermal",
+          "type": "part_of"
+        }
+      ]
+    },
+    "explainer": {
+      "purpose": "intermittent/coincidence -> correct answer is abstain",
+      "answer_type": "abstain",
+      "mechanisms": [
+        {
+          "id": "E1",
+          "desc": "There is no single clean cause \u2014 the honest answer is that it's intermittent or coincidental, so the system should abstain rather than invent a culprit."
+        }
+      ],
+      "decoys": [],
+      "trigger": "log.reboot"
     }
   },
   "case6": {
@@ -5621,6 +6410,165 @@ window.FATHOM_BUNDLES = {
       "conflict_handling": 1.0,
       "evidence_f1": 0.33,
       "tokens": 47348
+    },
+    "graph": {
+      "root": "kpi.effective_range",
+      "nodes": [
+        {
+          "id": "kpi.effective_range",
+          "type": "KPI",
+          "name": "effective_max_range_m",
+          "depth": 0
+        },
+        {
+          "id": "metric.intensity",
+          "type": "metric",
+          "name": "mean_return_intensity",
+          "depth": 1
+        },
+        {
+          "id": "sub.calibration",
+          "type": "subsystem",
+          "name": "Signal proc / calibration",
+          "depth": 1
+        },
+        {
+          "id": "sub.laser",
+          "type": "subsystem",
+          "name": "Laser emitter",
+          "depth": 2
+        },
+        {
+          "id": "sub.optics",
+          "type": "subsystem",
+          "name": "Optics / window",
+          "depth": 2
+        },
+        {
+          "id": "sub.detector",
+          "type": "subsystem",
+          "name": "Receiver / detector",
+          "depth": 2
+        },
+        {
+          "id": "sub.thermal",
+          "type": "subsystem",
+          "name": "Thermal / TEC",
+          "depth": 3
+        },
+        {
+          "id": "sub.power",
+          "type": "subsystem",
+          "name": "Scanner / power",
+          "depth": 4
+        },
+        {
+          "id": "part.laser_module",
+          "type": "part_type",
+          "name": "Laser module",
+          "depth": 3
+        },
+        {
+          "id": "part.window",
+          "type": "part_type",
+          "name": "Window",
+          "depth": 3
+        },
+        {
+          "id": "part.detector",
+          "type": "part_type",
+          "name": "Detector",
+          "depth": 3
+        },
+        {
+          "id": "part.tec",
+          "type": "part_type",
+          "name": "TEC module",
+          "depth": 4
+        }
+      ],
+      "edges": [
+        {
+          "src": "metric.intensity",
+          "dst": "kpi.effective_range",
+          "type": "affects"
+        },
+        {
+          "src": "sub.calibration",
+          "dst": "kpi.effective_range",
+          "type": "affects"
+        },
+        {
+          "src": "sub.laser",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.optics",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.detector",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.thermal",
+          "dst": "sub.laser",
+          "type": "affects"
+        },
+        {
+          "src": "sub.thermal",
+          "dst": "sub.detector",
+          "type": "affects"
+        },
+        {
+          "src": "sub.power",
+          "dst": "sub.thermal",
+          "type": "affects"
+        },
+        {
+          "src": "part.laser_module",
+          "dst": "sub.laser",
+          "type": "part_of"
+        },
+        {
+          "src": "part.window",
+          "dst": "sub.optics",
+          "type": "part_of"
+        },
+        {
+          "src": "part.detector",
+          "dst": "sub.detector",
+          "type": "part_of"
+        },
+        {
+          "src": "part.tec",
+          "dst": "sub.thermal",
+          "type": "part_of"
+        }
+      ]
+    },
+    "explainer": {
+      "purpose": "absent-cue; buried evidence reachable via graph traversal + intra-doc",
+      "answer_type": "cause",
+      "mechanisms": [
+        {
+          "id": "C1",
+          "desc": "The decisive evidence isn't obviously relevant; you only reach it by following a relationship link through the graph to it."
+        },
+        {
+          "id": "C2",
+          "desc": "The key fact is buried inside a document you've already found, and has to be dug out of its text."
+        }
+      ],
+      "decoys": [
+        "part.tec",
+        "part.laser_module",
+        "part.window"
+      ],
+      "trigger": null
     }
   },
   "case7": {
@@ -6845,6 +7793,159 @@ window.FATHOM_BUNDLES = {
       "conflict_handling": 1.0,
       "evidence_f1": 0.44,
       "tokens": 128121
+    },
+    "graph": {
+      "root": "kpi.effective_range",
+      "nodes": [
+        {
+          "id": "kpi.effective_range",
+          "type": "KPI",
+          "name": "effective_max_range_m",
+          "depth": 0
+        },
+        {
+          "id": "metric.intensity",
+          "type": "metric",
+          "name": "mean_return_intensity",
+          "depth": 1
+        },
+        {
+          "id": "sub.calibration",
+          "type": "subsystem",
+          "name": "Signal proc / calibration",
+          "depth": 1
+        },
+        {
+          "id": "sub.laser",
+          "type": "subsystem",
+          "name": "Laser emitter",
+          "depth": 2
+        },
+        {
+          "id": "sub.optics",
+          "type": "subsystem",
+          "name": "Optics / window",
+          "depth": 2
+        },
+        {
+          "id": "sub.detector",
+          "type": "subsystem",
+          "name": "Receiver / detector",
+          "depth": 2
+        },
+        {
+          "id": "sub.thermal",
+          "type": "subsystem",
+          "name": "Thermal / TEC",
+          "depth": 3
+        },
+        {
+          "id": "sub.power",
+          "type": "subsystem",
+          "name": "Scanner / power",
+          "depth": 4
+        },
+        {
+          "id": "part.laser_module",
+          "type": "part_type",
+          "name": "Laser module",
+          "depth": 3
+        },
+        {
+          "id": "part.window",
+          "type": "part_type",
+          "name": "Window",
+          "depth": 3
+        },
+        {
+          "id": "part.detector",
+          "type": "part_type",
+          "name": "Detector",
+          "depth": 3
+        },
+        {
+          "id": "part.tec",
+          "type": "part_type",
+          "name": "TEC module",
+          "depth": 4
+        }
+      ],
+      "edges": [
+        {
+          "src": "metric.intensity",
+          "dst": "kpi.effective_range",
+          "type": "affects"
+        },
+        {
+          "src": "sub.calibration",
+          "dst": "kpi.effective_range",
+          "type": "affects"
+        },
+        {
+          "src": "sub.laser",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.optics",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.detector",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.thermal",
+          "dst": "sub.laser",
+          "type": "affects"
+        },
+        {
+          "src": "sub.thermal",
+          "dst": "sub.detector",
+          "type": "affects"
+        },
+        {
+          "src": "sub.power",
+          "dst": "sub.thermal",
+          "type": "affects"
+        },
+        {
+          "src": "part.laser_module",
+          "dst": "sub.laser",
+          "type": "part_of"
+        },
+        {
+          "src": "part.window",
+          "dst": "sub.optics",
+          "type": "part_of"
+        },
+        {
+          "src": "part.detector",
+          "dst": "sub.detector",
+          "type": "part_of"
+        },
+        {
+          "src": "part.tec",
+          "dst": "sub.thermal",
+          "type": "part_of"
+        }
+      ]
+    },
+    "explainer": {
+      "purpose": "near-symmetric to a decoy; needs the expensive discriminating check",
+      "answer_type": "cause",
+      "mechanisms": [
+        {
+          "id": "D6",
+          "desc": "D6"
+        }
+      ],
+      "decoys": [
+        "part.laser_module"
+      ],
+      "trigger": "log.reboot"
     }
   },
   "case8": {
@@ -9118,6 +10219,164 @@ window.FATHOM_BUNDLES = {
       "conflict_handling": 1.0,
       "evidence_f1": 0.22,
       "tokens": 295256
+    },
+    "graph": {
+      "root": "kpi.effective_range",
+      "nodes": [
+        {
+          "id": "kpi.effective_range",
+          "type": "KPI",
+          "name": "effective_max_range_m",
+          "depth": 0
+        },
+        {
+          "id": "metric.intensity",
+          "type": "metric",
+          "name": "mean_return_intensity",
+          "depth": 1
+        },
+        {
+          "id": "sub.calibration",
+          "type": "subsystem",
+          "name": "Signal proc / calibration",
+          "depth": 1
+        },
+        {
+          "id": "sub.laser",
+          "type": "subsystem",
+          "name": "Laser emitter",
+          "depth": 2
+        },
+        {
+          "id": "sub.optics",
+          "type": "subsystem",
+          "name": "Optics / window",
+          "depth": 2
+        },
+        {
+          "id": "sub.detector",
+          "type": "subsystem",
+          "name": "Receiver / detector",
+          "depth": 2
+        },
+        {
+          "id": "sub.thermal",
+          "type": "subsystem",
+          "name": "Thermal / TEC",
+          "depth": 3
+        },
+        {
+          "id": "sub.power",
+          "type": "subsystem",
+          "name": "Scanner / power",
+          "depth": 4
+        },
+        {
+          "id": "part.laser_module",
+          "type": "part_type",
+          "name": "Laser module",
+          "depth": 3
+        },
+        {
+          "id": "part.window",
+          "type": "part_type",
+          "name": "Window",
+          "depth": 3
+        },
+        {
+          "id": "part.detector",
+          "type": "part_type",
+          "name": "Detector",
+          "depth": 3
+        },
+        {
+          "id": "part.tec",
+          "type": "part_type",
+          "name": "TEC module",
+          "depth": 4
+        }
+      ],
+      "edges": [
+        {
+          "src": "metric.intensity",
+          "dst": "kpi.effective_range",
+          "type": "affects"
+        },
+        {
+          "src": "sub.calibration",
+          "dst": "kpi.effective_range",
+          "type": "affects"
+        },
+        {
+          "src": "sub.laser",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.optics",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.detector",
+          "dst": "metric.intensity",
+          "type": "affects"
+        },
+        {
+          "src": "sub.thermal",
+          "dst": "sub.laser",
+          "type": "affects"
+        },
+        {
+          "src": "sub.thermal",
+          "dst": "sub.detector",
+          "type": "affects"
+        },
+        {
+          "src": "sub.power",
+          "dst": "sub.thermal",
+          "type": "affects"
+        },
+        {
+          "src": "part.laser_module",
+          "dst": "sub.laser",
+          "type": "part_of"
+        },
+        {
+          "src": "part.window",
+          "dst": "sub.optics",
+          "type": "part_of"
+        },
+        {
+          "src": "part.detector",
+          "dst": "sub.detector",
+          "type": "part_of"
+        },
+        {
+          "src": "part.tec",
+          "dst": "sub.thermal",
+          "type": "part_of"
+        }
+      ]
+    },
+    "explainer": {
+      "purpose": "one cause looks like two faults; redundant channels agree but are wrong",
+      "answer_type": "cause",
+      "mechanisms": [
+        {
+          "id": "A4",
+          "desc": "A4"
+        },
+        {
+          "id": "A5",
+          "desc": "A5"
+        }
+      ],
+      "decoys": [
+        "part.laser_module",
+        "part.detector"
+      ],
+      "trigger": null
     }
   }
 };
