@@ -7,8 +7,10 @@ static bundle; steps grow and recolor; the demoted trigger is annotated distinct
 import json
 
 from dh.controller.beliefs import sigmoid
+from dh.generator import generate
+from dh.generator.cases import CASES_BY_ID
 from dh.schemas import EvidenceItem, EvidenceLink, Hypothesis, InvestigationGraph
-from dh.viewer.export import build_site, case_bundle, export_viewer, ig_to_dict
+from dh.viewer.export import bfs_subgraph, build_site, case_bundle, export_viewer, ig_to_dict
 
 
 def _ig_with_snapshots() -> InvestigationGraph:
@@ -85,3 +87,32 @@ def test_build_site_writes_manifest_and_bundles(tmp_path):
     html = (tmp_path / "index.html").read_text()
     assert "FATHOM_BUNDLES" in html and "<svg" in html
     assert "http://" not in html.replace('"http://www.w3.org/2000/svg"', "")  # no external deps
+
+
+def test_bfs_subgraph_is_kpi_rooted_causal_tree():
+    """The exported subgraph is the backward-affects BFS from the KPI, depth-layered, with the
+    part_of drill — and every recorded hypothesis anchor resolves to a node (enabling change)."""
+    spec = CASES_BY_ID["case1"]
+    case = generate(spec.fault, list(spec.mechanisms), seed=spec.seed)
+    refs = ("part.tec", "sub.calibration", "part.detector")
+    g = bfs_subgraph(case, node_refs=refs)
+
+    assert g["root"] == "kpi.effective_range"
+    by_id = {n["id"]: n for n in g["nodes"]}
+    assert by_id[g["root"]]["depth"] == 0
+    # the TEC causal chain is present and strictly deepens away from the KPI
+    assert by_id["part.tec"]["depth"] > by_id["sub.thermal"]["depth"] > by_id["metric.intensity"]["depth"]
+    # only affects/part_of edges, all between included nodes
+    assert {e["type"] for e in g["edges"]} <= {"affects", "part_of"}
+    assert all(e["src"] in by_id and e["dst"] in by_id for e in g["edges"])
+    # every requested hypothesis anchor resolves
+    assert set(refs) <= set(by_id)
+
+
+def test_bfs_subgraph_pulls_in_off_bfs_node_ref():
+    """A hypothesis anchored at a config node (off the subsystem/part BFS) is still surfaced."""
+    spec = CASES_BY_ID["case1"]
+    case = generate(spec.fault, list(spec.mechanisms), seed=spec.seed)
+    cfg = next(n.id for n in case.graph.nodes if n.type == "config")
+    g = bfs_subgraph(case, node_refs=(cfg,))
+    assert cfg in {n["id"] for n in g["nodes"]}

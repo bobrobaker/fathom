@@ -18,6 +18,8 @@ first, then the full MVP, spike-conditioned.
   first** (read-order + non-negotiables); `spike_spec.md` wins on any conflict;
   `spike_build_plan.md` sets milestone order (M0→M9).
 - `docs/decisions/` — design calls + why. `docs/debt.md` — deferred-work shelf.
+- **Web viewer / front-end work → read `docs/viewer_dev.md` first** (architecture, bundle data
+  contract, dev loop, D3/animation gotchas). The showpiece is `src/dh/viewer/site.html`.
 - `src/dh/` — controller (loop/voi/beliefs/llm), generator, environment, baselines, eval,
   viewer. `tests/`, `fixtures/tec_case.json` (golden), `config.yaml` (model, thresholds, seeds).
 - Governed product surfaces (lesson-routing menu, each with admission rules):

@@ -8,7 +8,7 @@
   :root{
     --bg:#0c0e13; --panel:#141821; --panel2:#10131a; --ink:#e8ebf2; --muted:#8a93a6;
     --line:#252b38; --accent:#6ea8ff; --good:#43c08a; --bad:#e5604f; --open:#7b8499;
-    --trig:#f2b45a; --shadow:0 1px 0 rgba(255,255,255,.03), 0 8px 24px rgba(0,0,0,.35);
+    --trig:#f2b45a; --dim:#2a3346; --shadow:0 1px 0 rgba(255,255,255,.03), 0 8px 24px rgba(0,0,0,.35);
   }
   *{box-sizing:border-box}
   body{margin:0;font:14px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
@@ -19,8 +19,8 @@
   .case-btn{padding:5px 11px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--muted);cursor:pointer;font-size:13px;transition:.15s}
   .case-btn:hover{color:var(--ink)}
   .case-btn.on{color:#fff;border-color:var(--accent);background:#1b2436}
-  #bar{display:flex;gap:18px;align-items:center;padding:10px 24px;border-bottom:1px solid var(--line);background:var(--panel2)}
-  #bar .sym{color:var(--muted);max-width:70ch;flex:1;min-width:280px}
+  #bar{display:flex;gap:14px 22px;align-items:center;flex-wrap:wrap;padding:10px 24px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  #bar .sym{color:var(--muted);max-width:70ch;flex:1 1 380px;min-width:280px;padding-right:8px}
   .pill{padding:3px 9px;border-radius:8px;background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:12px;white-space:nowrap}
   .pill.win{color:var(--good);border-color:#1f4536}
   .pill.abst{color:var(--trig);border-color:#4a3a1c}
@@ -29,12 +29,16 @@
   #controls button:hover{border-color:var(--accent)}
   #slider{flex:1}
   #wrap{display:flex;gap:20px;padding:20px 24px;align-items:flex-start}
-  svg{background:linear-gradient(180deg,#11151d,#0e1117);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);flex:1;min-width:0}
+  .leftcol{flex:1;min-width:0;display:flex;flex-direction:column;gap:14px;position:relative}
+  svg{background:linear-gradient(180deg,#11151d,#0e1117);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);width:100%;height:560px;min-width:0}
   .col-label{fill:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.12em}
-  .node text{fill:var(--ink);font-size:12px}
-  .node .sub{fill:var(--muted);font-size:10.5px}
-  circle,rect,line{transition:all .45s cubic-bezier(.4,0,.2,1)}
-  #side{width:360px;flex:none}
+  .nodeLabel{fill:var(--ink);font-size:11px;text-anchor:middle;pointer-events:none}
+  .nodeSub{fill:var(--muted);font-size:9.5px;text-anchor:middle;pointer-events:none}
+  .edge{fill:none;stroke:#33405a;stroke-width:1.4}
+  .edge.head{stroke:var(--accent);stroke-width:2.6;stroke-opacity:.9}
+  .evlink{stroke-linecap:round}
+  .pulse{fill:var(--accent)}
+  #side{width:340px;flex:none}
   #side h3{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 8px}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:14px;box-shadow:var(--shadow)}
   .act{font-size:13px}
@@ -43,7 +47,7 @@
   .act .why{color:var(--muted);margin-top:4px}
   .hyp{margin:7px 0}
   .hyp .row{display:flex;justify-content:space-between;font-size:12.5px}
-  .hyp .lab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:230px}
+  .hyp .lab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:215px}
   .hyp .st{color:var(--muted);font-size:11px}
   .conf-bar{height:6px;border-radius:3px;background:#222733;margin-top:3px;overflow:hidden}
   .conf-bar>i{display:block;height:100%;transition:width .45s ease}
@@ -52,17 +56,157 @@
   .conflict{color:var(--trig);font-size:12.5px;margin:4px 0}
   .trigger{color:var(--bad);font-weight:600}
   .rec{color:var(--good);font-size:12.5px}
-  .legend{color:var(--muted);font-size:11.5px;padding:0 24px 22px;max-width:90ch}
+  .legend{color:var(--muted);font-size:11.5px;padding:0 24px 22px;max-width:96ch}
   .legend b{color:var(--ink);font-weight:600}
+  /* intro blurb */
+  #intro{padding:11px 24px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  #intro .tag{color:var(--ink);font-size:13.5px;max-width:110ch}
+  #intro .tag b{color:var(--accent)}
+  #intro details{margin-top:8px}
+  /* folded transferable-shape / "why lidar" bridge — lives inside the expander now */
+  #intro .more-bridge{display:block;margin-bottom:9px;color:#9aa3b6}
+  #intro .more-bridge b{color:#b7c0d4;font-weight:600}
+  #intro .more-bridge i{color:var(--ink);font-style:normal;font-weight:600}
+  /* in-graph symptom caption (moved out of the old bar to save vertical space) */
+  #gsymptom{position:absolute;top:44px;left:16px;max-width:52%;color:#c2ccdb;font-size:12px;line-height:1.4;
+    background:rgba(10,12,17,.62);border:1px solid var(--line);border-radius:8px;padding:7px 10px;pointer-events:none}
+  #intro summary{color:var(--accent);cursor:pointer;font-size:12.5px;width:max-content}
+  #intro .more{color:var(--muted);font-size:12.5px;max-width:110ch;margin-top:8px;line-height:1.6}
+  /* node badge (hypothesis id) */
+  .badge{fill:#0c0e13;stroke-width:0;font-size:10px;font-weight:700;font-family:ui-monospace,Menlo,monospace}
+  .badgeBg{stroke:none}
+  /* hover tooltip */
+  #tip{position:fixed;pointer-events:none;z-index:50;max-width:320px;background:#0b0e14;border:1px solid var(--accent);
+    border-radius:9px;padding:9px 11px;font-size:12px;color:var(--ink);box-shadow:var(--shadow);opacity:0;transition:opacity .12s}
+  #tip .t-id{color:var(--muted);font-size:10.5px;font-family:ui-monospace,Menlo,monospace}
+  #tip .t-name{font-weight:600;margin:2px 0}
+  #tip .t-hyp{color:var(--accent);margin-top:5px}
+  #tip .t-meta{color:var(--muted);font-size:11px;margin-top:3px}
+  /* this-step formatting */
+  .act .head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .act .verb{color:var(--accent);font-weight:700;font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
+  .act .arg{color:var(--ink);font-size:12px}
+  .act .voichip{margin-left:auto;color:var(--muted);font-size:10.5px;border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+  .act .why{color:#b7c0d4;font-size:12px;line-height:1.55}
+  .act .why b{color:var(--accent);font-family:ui-monospace,Menlo,monospace;font-weight:700}
+  /* literal-rationale sentence bullets — scannable, not a wall */
+  .act .why-list{margin:6px 0 0;padding-left:17px;list-style:disc}
+  .act .why-list li{margin:5px 0;color:#b7c0d4;font-size:12px;line-height:1.5}
+  .act .why-list li::marker{color:var(--accent)}
+  .act .why-list b{color:var(--accent);font-family:ui-monospace,Menlo,monospace;font-weight:700}
+  /* explainer table */
+  /* "what this example shows" — moved above the graph into the slot the result strip vacated */
+  #explain{padding:12px 24px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  #explain .ex-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 9px}
+  #explain .ex-titlewrap{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;min-width:0}
+  #explain h3, #baselines-sec h3{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0}
+  /* domain chip: the lidar fault name (preserved here now that the tab shows the reasoning challenge) */
+  #explain .ex-pattern:not(:empty){display:inline-flex;align-items:baseline;gap:8px;font-size:12px;
+    border:1px solid var(--line);border-radius:999px;padding:2px 11px;background:var(--panel)}
+  #explain .ex-pattern .dlabel{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.07em}
+  #explain .ex-pattern b{color:var(--ink);font-weight:600}
+  #explain .ex-hint{color:var(--muted);font-size:11px;font-style:italic;white-space:nowrap;flex:none}
+  #baselines-sec{padding:2px 24px 26px}
+  .ex-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;box-shadow:var(--shadow)}
+  .ex-card .lead{color:var(--ink);font-size:13.5px;font-weight:600;margin-bottom:9px;line-height:1.45}
+  /* authored body: detail elaborates, "why it matters" gives the stakes */
+  .ex-detail{color:#c2ccdb;font-size:12.5px;line-height:1.55}
+  .ex-why{color:var(--muted);font-size:12.5px;line-height:1.55;margin-top:8px}
+  .ex-why b{color:var(--accent);font-weight:600}
+  .ex-meta{color:var(--muted);font-size:11.5px;margin-top:10px;padding-top:9px;border-top:1px solid var(--line)}
+  .ex-meta b{color:var(--ink)}
+  table.metrics{width:100%;border-collapse:collapse;font-size:12.5px}
+  table.metrics th,table.metrics td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+  table.metrics th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+  table.metrics td.num{font-family:ui-monospace,Menlo,monospace;color:var(--ink);text-align:right}
+  .note{color:var(--muted);font-size:11px;margin-top:10px;line-height:1.5}
+  .note b{color:var(--trig)}
+  /* mode toggle (near the bottom) */
+  #modebar{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:6px 24px 14px}
+  #modebar .mlabel{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.1em}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--panel)}
+  .seg-btn{background:transparent;border:0;color:var(--muted);padding:6px 16px;cursor:pointer;font-size:13px;transition:.15s}
+  .seg-btn:hover{color:var(--ink)}
+  .seg-btn.on{background:#1b2436;color:#fff}
+  #modebar .mhint{color:var(--muted);font-size:11.5px;max-width:54ch}
+  /* author/provenance seam (one line, survives the artifact traveling) */
+  #seam{padding:14px 24px 22px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+  #seam a{color:var(--accent);text-decoration:none}
+  #seam a:hover{text-decoration:underline}
+  /* mobile — moderate degrade: stack graph + side panel, scale the svg, single-column tables */
+  @media (max-width:860px){
+    header,#bar,#controls,#intro,#explain,#baselines-sec,.legend,#modebar,#seam{padding-left:14px;padding-right:14px}
+    #wrap{flex-direction:column;gap:14px;padding:14px}
+    .leftcol{gap:14px}
+    #side{width:100%}
+    svg{width:100%;height:auto}
+    #bar{gap:10px}
+    #bar .sym{min-width:0;font-size:12px}
+    #intro .tag{font-size:12.5px}
+    table.metrics th,table.metrics td{padding:5px 6px;font-size:11.5px}
+    .hyp .lab{max-width:62vw}
+    /* labels scale down with the viewBox at narrow widths — bump them so they stay legible */
+    .nodeLabel{font-size:14px}
+    .nodeSub{font-size:12px}
+  }
+  /* phone — hook must dominate the first screen: case selector moves below the intro hook (JS),
+     the title row stands alone, and node labels get a further legibility bump. (The transferable-shape
+     bridge is folded into the expander for all widths now, so no phone-specific hide is needed.) */
+  @media (max-width:560px){
+    header{flex-direction:column;align-items:stretch;gap:10px}
+    header h1{font-size:15px}
+    #cases.cases-mobile{margin:0;width:100%;display:flex;flex-wrap:nowrap;overflow-x:auto;gap:7px;
+      padding:8px 14px 9px;border-bottom:1px solid var(--line);background:var(--panel2);
+      -webkit-overflow-scrolling:touch;scrollbar-width:none}
+    #cases.cases-mobile::-webkit-scrollbar{display:none}
+    #cases.cases-mobile .case-btn{flex:0 0 auto}
+    #intro{padding-top:12px;padding-bottom:12px}
+    #explain .ex-hint{display:none}         /* tabs sit directly above on phone — hint would just crowd the box */
+    #gsymptom{max-width:74%;font-size:11.5px}
+    .nodeLabel{font-size:16px}
+    .nodeSub{font-size:13px}
+    svg{height:auto;min-height:300px}
+  }
 </style>
 </head>
 <body>
 <header>
-  <h1><b>Fathom</b> — watch the harness diagnose</h1>
+  <h1><b>Fathom</b> — watch it diagnose</h1>
   <div id="cases"></div>
 </header>
+<div id="intro">
+  <div class="tag"><b>Fathom</b> is a diagnostic agent that finds the root cause of a system failure. Under
+    the hood it runs a <b>value-of-information–guided hypothesis differential</b> over a typed causal
+    graph, built as a controlled evaluation.</div>
+  <details>
+    <summary>What you're looking at &amp; why it's interesting</summary>
+    <div class="more"><span class="more-bridge">That evaluation isolates what the structure buys over a
+      bare LLM. The transferable shape is <b>structured agentic reasoning + calibrated abstention + a
+      controlled evaluation against real baselines</b>; the lidar domain earns it, being hard enough —
+      decoys, a salient red-herring trigger to demote, an abstain case — to <i>require</i> that structure,
+      where an easy domain would let a bare LLM win and invalidate the result.</span>
+      From the reported symptom, the controller <b>walks the typed causal graph backward from the
+      affected KPI</b> — traversing the structure to surface candidate subsystems — and forms competing fault
+      hypotheses anchored to those nodes. It then repeatedly picks the single most <b>discriminating</b> next
+      action by value-of-information, executes it against a deterministic evidence layer, and folds each result
+      into a live Investigation Graph — updating belief in <b>log-odds</b> (evidence weighted by approximate
+      log-likelihood ratios, aggregated to a sigmoid confidence) until one explanation dominates or it
+      <b>abstains</b> rather than guess. The model supplies judgment while the tool layer supplies measurement,
+      so a hypothesis can never rest on a reading the controller didn't actually retrieve. The map below is that
+      real reasoning substrate, with hypotheses anchored to the graph nodes they implicate.</div>
+  </details>
+</div>
+<section id="explain">
+  <div class="ex-head">
+    <div class="ex-titlewrap">
+      <h3>What this example shows</h3>
+      <span class="ex-pattern" id="ex-pattern"></span>
+    </div>
+    <span class="ex-hint" id="ex-hint">↑ tap an example tab to see another case</span>
+  </div>
+  <div class="ex-card" id="ex-what"></div>
+</section>
 <div id="bar">
-  <span class="sym" id="symptom"></span>
   <span class="pill" id="answer"></span>
   <span class="pill" id="evrow"></span>
 </div>
@@ -74,7 +218,10 @@
   <span class="pill" id="stepnum"></span>
 </div>
 <div id="wrap">
-  <svg id="canvas" viewBox="0 0 780 540" preserveAspectRatio="xMidYMid meet" height="540"></svg>
+  <div class="leftcol">
+    <svg id="canvas" viewBox="0 0 900 560" preserveAspectRatio="xMidYMid meet" height="560"></svg>
+    <div id="gsymptom"></div>
+  </div>
   <div id="side">
     <h3>This step</h3><div class="card act" id="actcard"></div>
     <h3>Differential</h3><div class="card" id="hyps"></div>
@@ -82,37 +229,159 @@
     <h3>Recommended next action</h3><div class="card rec" id="rec"></div>
   </div>
 </div>
-<div class="legend">
-  <b>How to read it.</b> Each step is one diagnostic action. Hypotheses (left) fill red→green by
-  <b>confidence</b>; a bright ring marks the <b>leader</b>. Evidence (right) links back with
-  <span style="color:var(--good)">green = supporting</span> /
-  <span style="color:var(--bad)">red = contradicting</span> edges, thickness ∝ weight. A
-  <span class="trigger">⚠ demoted trigger</span> (a salient recent event the onset check rules out)
-  and <span style="color:var(--trig)">⚑ flagged channels</span> render apart from the differential.
-  When the evidence supports no single cause, the harness <b>abstains</b> — shown honestly, no false winner.
+<div id="tip"></div>
+<section id="baselines-sec">
+  <div class="ex-card" id="ex-baselines"></div>
+</section>
+<div id="modebar">
+  <span class="mlabel">View</span>
+  <div class="seg">
+    <button id="mode-narr" class="seg-btn">Discovery order</button>
+    <button id="mode-faith" class="seg-btn">All at once</button>
+  </div>
+  <span class="mhint" id="mhint"></span>
 </div>
+<div class="legend">
+  <b>How to read it.</b> The map is the controller's real reasoning substrate — the causal subgraph
+  it walked <b>backward from the KPI</b> (far left) through subsystems to candidate parts (right).
+  <b>Lit nodes</b> are live fault hypotheses, filled red→green by <b>belief</b>; <b>dim nodes</b> are
+  other candidates it kept in view. Evidence attaches to the node it bears on
+  (<span style="color:var(--good)">green = supports</span> /
+  <span style="color:var(--bad)">red = refutes</span>, thickness ∝ weight; pruned to the dominant
+  association + relevant opposing side). A bright ring marks the <b>leader</b>; belief
+  <b>pulses up the headline path</b> to the KPI. When evidence supports no single cause the harness
+  <b>abstains</b> — shown honestly, no false winner.
+</div>
+<footer id="seam">Built by Bolun · <a href="https://github.com/bobrobaker/fathom" target="_blank" rel="noopener">github</a></footer>
+<script src="d3.v7.min.js"></script>
 <script src="bundles.js"></script>
 <script>
-const SVG="http://www.w3.org/2000/svg";
 const B = window.FATHOM_BUNDLES||{}, M = window.FATHOM_MANIFEST||[];
-let cur=null, step=0, timer=null;
+// Suite-level baseline comparison — sourced from investigation/RESULTS.md (Rows 5-7 + closeout).
+// INDICATIVE ONLY: n=1, and the accuracy row mixes the post-fix controller (8/8) against spike-era
+// baselines (bare_llm 6/8, react 5/8). An n=3 variance pass is owed before any of this is a headline.
+const BASELINES=[
+  {label:"accuracy (8 cases)", controller:"8/8", bare_llm:"6/8", react:"5/8", win:true},
+  {label:"evidence-F1", controller:"0.26", bare_llm:"—", react:"0.44", win:false,
+    caveat:"partly a citation-keying asymmetry; real coverage ceiling ≈0.69"},
+  {label:"abstention-calibration", controller:"0.75", bare_llm:"0.88", react:"—", win:false},
+  {label:"cost (tokens / run)", controller:"~5.6× bare_llm · ~1.5× react", bare_llm:"1×", react:"~3.7×", win:false},
+];
+const W=900, H=560, LM=78, RM=150, TM=64, BM=44, EV_THRESH=0.25;
+const TYPE_R={KPI:17, subsystem:12.5, part_type:11, part_version:11, metric:9, config:9.5};
+const svg=d3.select("#canvas");
+let cur=null, step=0, timer=null, pos={}, headPath=[];
+let introTimer=null, autoplayTimer=null, pulseId=0;  // lifecycle handles: cancel a queued intro / autostart / supersede an old pulse loop
+let dispId={}, refToDisp={}, hypByRefCur={};  // hypothesis id → "H1".. badge; node_ref → badge; live step's anchors
+let MODE="faithful", revealMap={}, nextUp={}, COLW=120;  // "narrative" (progressive) | "faithful" (literal); faithful is the default (populated first frame, matches the plain description)
 
-function el(t,a){const e=document.createElementNS(SVG,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+const tip=document.getElementById("tip");
+function placeTip(e){ const pad=14;
+  tip.style.left=Math.min(e.clientX+pad, innerWidth-tip.offsetWidth-pad)+"px";
+  tip.style.top=Math.min(e.clientY+pad, innerHeight-tip.offsetHeight-pad)+"px"; }
+function showTip(e,d){
+  const h=hypByRefCur[d.id], rows=[`<div class="t-id">${esc(d.id)} · ${esc(d.type)}</div>`,
+    `<div class="t-name">${esc(d.name)}</div>`];
+  if(h) rows.push(`<div class="t-hyp"><b>${dispId[h.id]||""}</b> · ${esc(h.label)}</div>`,
+    `<div class="t-meta">belief ${(h.confidence).toFixed(2)} · ${esc(h.status)}</div>`);
+  else rows.push(`<div class="t-meta">candidate node (no live hypothesis here) · depth ${d.depth}</div>`);
+  tip.innerHTML=rows.join(""); tip.style.opacity=1; placeTip(e);
+}
+function showEvTip(e,d){
+  const pol=d.l.polarity==="+"?"supports":"refutes", col=d.l.polarity==="+"?"var(--good)":"var(--bad)";
+  tip.innerHTML=`<div class="t-id">evidence · ${esc(d.ev.source||d.l.evidence_id)}</div>`
+    +`<div class="t-name">${esc(d.ev.summary||"(evidence)")}</div>`
+    +`<div class="t-meta" style="color:${col}">${pol} <b>${esc(refToDisp[d.ref]||"")}</b> · weight ${(+d.l.weight).toFixed(2)}</div>`;
+  tip.style.opacity=1; placeTip(e);
+}
+function hideTip(){ tip.style.opacity=0; }
+
+function cancelIntro(){ if(introTimer){introTimer.stop(); introTimer=null;}
+  if(autoplayTimer){autoplayTimer.stop(); autoplayTimer=null;} }  // any case/step change kills a pending autostart
+
 function confColor(c){const r=Math.round(255*(1-Math.max(0,(c-.5)*2)));const g=Math.round(255*Math.min(1,c*2));return `rgb(${Math.min(255,r+30)},${Math.min(255,g)},96)`;}
 function isTrig(id){return cur&&cur.trigger&&id===cur.trigger;}
+function radius(d){return TYPE_R[d.type]||10;}  // node radius is type-based (a node may have no layout pos yet)
+
+// --- layout: layered DAG, depth = column (KPI at left), barycenter ordering to cut crossings ----
+// `visible` (optional Set) restricts the layout to revealed nodes — narrative mode passes a growing
+// subset, so each column re-spaces over only what's revealed (nodes "move apart and balance" as the
+// run discovers them). Faithful mode passes nothing → all nodes, fixed.
+function layout(graph, visible){
+  const nodes=visible?graph.nodes.filter(n=>visible.has(n.id)):graph.nodes;
+  const byDepth={}, maxD=d3.max(graph.nodes,n=>n.depth)||0;
+  nodes.forEach(n=>(byDepth[n.depth]=byDepth[n.depth]||[]).push(n));
+  const target={};  // each node's shallower neighbor (the thing it affects / is part of) → drives ordering
+  graph.edges.forEach(e=>{ if(e.type==="affects") target[e.src]=e.dst; });
+  graph.edges.forEach(e=>{ if(e.type==="part_of" && !(e.src in target)) target[e.src]=e.dst; });
+  COLW=(W-LM-RM)/Math.max(1,maxD);
+  pos={};
+  for(let d=0; d<=maxD; d++){
+    const col=byDepth[d]||[];
+    if(d>0) col.sort((a,b)=>((pos[target[a.id]]||{}).y??H/2)-((pos[target[b.id]]||{}).y??H/2));
+    const gap=(H-TM-BM)/(col.length+1);
+    col.forEach((n,i)=>pos[n.id]={x:LM+d*COLW, y:TM+gap*(i+1), depth:d, type:n.type, name:n.name, r:TYPE_R[n.type]||10});
+  }
+  return maxD;
+}
+// where an unrevealed / entering node sits before it animates into place (its depth column, centered)
+function spawnXY(d){ return {x:LM+(d.depth||0)*COLW, y:H/2}; }
+
+// reveal schedule (narrative): order the hypotheses by when the run first "touches" them (first evidence
+// link / belief movement), then stagger one reveal per step so the causal tree visibly grows out from the
+// KPI. Each hypothesis drags in its ancestor path to the KPI. Real state, re-timed — no fabricated belief.
+function buildReveal(){
+  const steps=cur.steps, g=cur.graph, nS=steps.length;
+  const sig=((steps[0]||{}).hypotheses||[]).map(h=>{
+    let first=nS;  // first step this hypothesis gets evidence or moves belief
+    for(let k=1;k<nS;k++){
+      const touched=steps[k].links.some(l=>l.hypothesis_id===h.id);
+      const hk=steps[k].hypotheses.find(x=>x.id===h.id), hp=steps[k-1].hypotheses.find(x=>x.id===h.id);
+      if(touched||(hk&&hp&&Math.abs(hk.confidence-hp.confidence)>=0.02)){ first=k; break; }
+    }
+    return {h, first};
+  });
+  sig.sort((a,b)=>a.first-b.first);  // earliest-touched first
+  const rv={}; rv[g.root]=0;
+  sig.forEach((s,i)=>{ if(!s.h.node_ref) return;
+    const d=Math.min(Math.max(1,i+1), nS-1);  // one reveal per step, capped at the final step
+    let n=s.h.node_ref, guard=0;
+    while(n && guard++<12){ rv[n]=Math.min(rv[n]??99, d); if(n===g.root) break; n=nextUp[n]; }
+  });
+  return rv;
+}
+function revealedAt(s){ const set=new Set(); for(const id in revealMap) if(revealMap[id]<=s) set.add(id); return set; }
+
+// each node's single step toward the KPI (the thing it affects / is part of) — built per case in selectCase
+function buildNextUp(graph){ const nu={}; graph.edges.forEach(e=>{ if(!(e.src in nu)) nu[e.src]=e.dst; }); return nu; }
+// the headline causal path: leader's node → ... → KPI, following affects/part_of toward the root
+function headlinePath(graph, leaderRef){
+  if(!leaderRef||!pos[leaderRef]) return [];
+  const path=[leaderRef]; let n=leaderRef, guard=0;
+  while(nextUp[n] && guard++<12){ n=nextUp[n]; path.push(n); if(n===graph.root) break; }
+  return path.filter(id=>pos[id]);
+}
+// the path of edges from a node up to the KPI (for evidence tinting / reveal) — ids as "src>dst" keys
+function pathEdges(ref){ const ks=[]; let n=ref, guard=0;
+  while(nextUp[n] && guard++<12){ ks.push(n+">"+nextUp[n]); if(nextUp[n]===(cur.graph||{}).root) break; n=nextUp[n]; } return ks; }
+
+function edgePath(a,b){ const mx=(a.x+b.x)/2; return `M${a.x},${a.y}C${mx},${a.y} ${mx},${b.y} ${b.x},${b.y}`; }
 
 function buildCaseButtons(){
   const box=document.getElementById("cases");box.innerHTML="";
-  M.forEach(m=>{
-    const b=document.createElement("button");b.className="case-btn";b.textContent=m.title||m.case_id;
-    b.onclick=()=>selectCase(m.case_id);b.dataset.id=m.case_id;box.appendChild(b);
-  });
+  // tabs are labelled by the reasoning CHALLENGE (so the strip reads as "kinds of hard reasoning"); the
+  // lidar fault name (m.title) is preserved in the "what this example shows" header. title tooltip keeps it.
+  M.forEach(m=>{const b=document.createElement("button");b.className="case-btn";
+    const pat=((B[m.case_id]||{}).explainer||{}).pattern;
+    b.textContent=pat||m.title||m.case_id; b.title=m.title||"";
+    b.onclick=()=>selectCase(m.case_id);b.dataset.id=m.case_id;box.appendChild(b);});
 }
+
 function selectCase(id){
-  cur=B[id];step=0;stopPlay();
+  cur=B[id]; step=0; stopPlay(); cancelIntro(); pulseId++;  // kill any pulse loop from the prior case
   document.querySelectorAll(".case-btn").forEach(b=>b.classList.toggle("on",b.dataset.id===id));
   const sl=document.getElementById("slider");sl.max=Math.max(0,cur.steps.length-1);sl.value=0;
-  document.getElementById("symptom").textContent=cur.symptom||"";
+  document.getElementById("gsymptom").textContent=cur.symptom||"";  // symptom rides inside the graph frame
   const ans=document.getElementById("answer"), a=cur.answer||{};
   const abst=cur.final_status==="abstained"||a.answer_type==="abstain";
   ans.className="pill "+(abst?"abst":"win");
@@ -123,73 +392,344 @@ function selectCase(id){
   if(ev.conflict_handling!=null)parts.push("conflict "+(+ev.conflict_handling).toFixed(2));
   if(ev.tokens!=null)parts.push((+ev.tokens)+" tok");
   document.getElementById("evrow").textContent=parts.join(" · ")||"";
-  render();
+  // stable H1.. badges for the hypotheses (all seeded at triage), so the rationale's h-ids resolve visually
+  dispId={}; refToDisp={};
+  ((cur.steps[0]||{}).hypotheses||[]).forEach((h,i)=>{
+    const b=/^h\d+$/i.test(h.id)?h.id.toUpperCase():`H${i+1}`;
+    dispId[h.id]=b; if(h.node_ref) refToDisp[h.node_ref]=b;
+  });
+  const g=cur.graph||{nodes:[],edges:[]};
+  nextUp=buildNextUp(g);
+  revealMap=buildReveal();
+  layout(g, MODE==="narrative"?revealedAt(0):null);
+  drawStructure();      // backbone (edges, nodes, labels, badges) — entering nodes spawn at their column
+  renderExplainer();    // "what this example shows" panel
+  if(MODE==="narrative") renderStep(0,true);  // progressive: step 0 reveals just the KPI, then it grows
+  else introExpand();   // faithful: KPI → depth-by-depth reveal → step 0 colors
 }
-function render(){
-  if(!cur)return;
-  const s=cur.steps[step], tr=(cur.trace||[])[step]||{}, prev=(cur.trace||[])[step-1];
+
+// --- static backbone: drawn once per case, then animated in by introExpand() --------------------
+function drawStructure(){
+  svg.selectAll("*").remove();
+  const g=cur.graph||{nodes:[],edges:[]};
+  svg.append("text").attr("class","col-label").attr("x",LM-10).attr("y",34).text("KPI");
+  svg.append("text").attr("class","col-label").attr("x",W-RM-10).attr("y",34).attr("text-anchor","end").text("candidate causes →");
+  // edges
+  svg.append("g").attr("class","edges").selectAll("path").data(g.edges).join("path")
+    .attr("class","edge").attr("d",d=>pos[d.src]&&pos[d.dst]?edgePath(pos[d.src],pos[d.dst]):null)
+    .attr("stroke-dasharray",d=>d.type==="part_of"?"3 3":null).attr("opacity",0);
+  svg.append("g").attr("class","evlinks");
+  svg.append("g").attr("class","evchips");
+  svg.append("g").attr("class","pulses");
+  // nodes
+  const node=svg.append("g").attr("class","nodes").selectAll("g").data(g.nodes,d=>d.id).join("g")
+    .attr("class","node").attr("data-id",d=>d.id)
+    .attr("transform",d=>{const p=pos[d.id]||spawnXY(d);return `translate(${p.x},${p.y})`;}).attr("opacity",0)
+    .style("cursor","pointer").on("mousemove",(e,d)=>showTip(e,d)).on("mouseleave",hideTip)
+    .on("click",(e,d)=>showTip(e,d));  // tap-to-show on touch / mobile
+  node.append("circle").attr("r",radius)
+    .attr("fill",d=>d.id===g.root?"#22304a":"var(--dim)")
+    .attr("stroke",d=>d.id===g.root?"var(--accent)":"#3a4150").attr("stroke-width",d=>d.id===g.root?2:1);
+  // full label (no truncation — hover the node for the hypothesis detail)
+  node.append("text").attr("class","nodeLabel").attr("y",d=>radius(d)+14).text(d=>d.name);
+  // H# badge on hypothesis nodes, so the "this step" rationale's h-ids resolve to the map
+  node.filter(d=>refToDisp[d.id]).each(function(d){
+    const r=radius(d), gx=r*0.78, gy=-r*0.78, g2=d3.select(this);
+    g2.append("circle").attr("class","badgeBg").attr("cx",gx).attr("cy",gy).attr("r",8.5).attr("fill","#c3d0e6");
+    g2.append("text").attr("class","badge").attr("x",gx).attr("y",gy+3.3).attr("text-anchor","middle").text(refToDisp[d.id]);
+  });
+}
+
+function introExpand(){
+  const maxD=d3.max((cur.graph||{nodes:[]}).nodes,n=>n.depth)||0;
+  svg.selectAll(".node").transition().delay(d=>200+pos[d.id].depth*260).duration(480).attr("opacity",1);
+  svg.selectAll(".edge").transition().delay(d=>320+(pos[d.src]?pos[d.src].depth:0)*260).duration(480).attr("opacity",1);
+  introTimer=d3.timeout(()=>{introTimer=null; renderStep(0,true);}, 220+maxD*260+260);
+}
+
+// narrative: animate revealed nodes to their (re-balanced) positions and fade unrevealed ones out.
+// Named transition "move" so it coexists with the "color" recolor transition on the same elements.
+function placeVisible(visible, animated){
+  const td=svg.transition("move").duration(animated?640:340);
+  svg.selectAll(".node").each(function(d){
+    const sel=d3.select(this), vis=(!visible||visible.has(d.id))&&pos[d.id];
+    if(vis) sel.transition(td).attr("opacity",1).attr("transform",`translate(${pos[d.id].x},${pos[d.id].y})`);
+    else sel.transition(td).attr("opacity",0);
+  });
+  svg.selectAll(".edge").transition(td)
+    .attr("opacity",d=>(pos[d.src]&&pos[d.dst])?1:0)
+    .attr("d",d=>(pos[d.src]&&pos[d.dst])?edgePath(pos[d.src],pos[d.dst]):null);
+}
+
+// --- per-step: recolor by belief, attach pruned evidence, pulse the headline path ---------------
+function renderStep(i, animated){
+  if(!cur||!cur.steps||!cur.steps.length)return;
+  step=Math.max(0,Math.min(cur.steps.length-1,i));
+  document.getElementById("slider").value=step;
+  const g=cur.graph||{nodes:[],edges:[]}, s=cur.steps[step];
   document.getElementById("stepnum").textContent=`step ${step} / ${cur.steps.length-1}`;
-  const c=document.getElementById("canvas");while(c.firstChild)c.removeChild(c.firstChild);
-  const H=s.hypotheses,E=s.evidence;
-  const hx=190,ex=620,top=70,gH=H.length?Math.min(74,440/Math.max(1,H.length)):0,gE=E.length?Math.min(54,440/Math.max(1,E.length)):0;
-  const hp={},ep={};H.forEach((h,k)=>hp[h.id]=top+k*gH);E.forEach((e,k)=>ep[e.id]=top+k*gE);
-  c.appendChild(Object.assign(el("text",{x:60,y:42,class:"col-label"}),{textContent:"symptom"}));
-  c.appendChild(Object.assign(el("text",{x:hx-26,y:42,class:"col-label"}),{textContent:"hypotheses"}));
-  c.appendChild(Object.assign(el("text",{x:ex-26,y:42,class:"col-label"}),{textContent:"evidence"}));
-  // symptom node
-  c.appendChild(el("circle",{cx:60,cy:top+ (H.length?gH*(H.length-1)/2:0),r:9,fill:"#2a3346",stroke:"#3a4150"}));
+  const hypByRef={}; s.hypotheses.forEach(h=>{ if(h.node_ref) hypByRef[h.node_ref]=h; });
+  hypByRefCur=hypByRef;  // expose for the hover tooltip
+  const leader=s.hypotheses.find(h=>h.status==="leading")
+    || (s.status!=="abstained" ? [...s.hypotheses].sort((a,b)=>b.confidence-a.confidence)[0] : null);
+  const leaderRef=leader&&leader.confidence>0.5?leader.node_ref:null;
+
+  // narrative: re-layout over the revealed subset (nodes re-balance) and animate the reveal
+  const visible = MODE==="narrative" ? revealedAt(step) : null;
+  if(MODE==="narrative"){ layout(g, visible); placeVisible(visible, animated); }
+
+  headPath=headlinePath(g, leaderRef);
+  const headEdge=new Set();
+  for(let k=0;k<headPath.length-1;k++) headEdge.add(headPath[k]+">"+headPath[k+1]);
+  // belief tint per edge: the strongest hypothesis (by |conf-.5|) whose path-to-KPI crosses the edge —
+  // so support/refutation visibly flows up the structure, not just recolouring the nodes
+  const edgeTint={};
+  s.hypotheses.forEach(h=>{ if(!h.node_ref||!pos[h.node_ref])return;
+    const strn=h.confidence-0.5; if(Math.abs(strn)<0.12)return;
+    pathEdges(h.node_ref).forEach(k=>{ if(!(k in edgeTint)||Math.abs(strn)>Math.abs(edgeTint[k])) edgeTint[k]=strn; });
+  });
+
+  const t=svg.transition("color").duration(animated?520:360);
+  svg.selectAll(".node").each(function(d){
+    if(!pos[d.id])return;  // unrevealed — left hidden by placeVisible
+    const h=hypByRef[d.id], lit=!!h, isLead=h&&h===leader&&leaderRef;
+    d3.select(this).select("circle").transition(t)
+      .attr("fill",d.id===g.root?"#22304a":lit?confColor(h.confidence):"var(--dim)")
+      .attr("stroke",isLead?"#fff":lit?confColor(h.confidence):"#3a4150")
+      .attr("stroke-width",isLead?3.5:lit?2:1)
+      .attr("r",radius(d)*(isLead?1.18:1));
+    d3.select(this).select(".nodeLabel").transition(t).attr("fill",lit||d.id===g.root?"var(--ink)":"var(--muted)");
+  });
+  svg.selectAll(".edge").transition(t)
+    .attr("class",d=>headEdge.has(d.src+">"+d.dst)?"edge head":"edge")
+    .attr("stroke",d=>{const k=d.src+">"+d.dst; if(headEdge.has(k))return null;
+      const tn=edgeTint[k]; return tn==null?null:(tn>0?"var(--good)":"var(--bad)");})
+    .attr("stroke-opacity",d=>{const k=d.src+">"+d.dst, tn=edgeTint[k];
+      return (!headEdge.has(k)&&tn!=null)?Math.min(0.85,0.35+Math.abs(tn)*1.1):null;})
+    .attr("stroke-dasharray",d=>d.type==="part_of"?"3 3":null);
+
+  renderEvidence(s, hypByRef, animated);
+  renderPulse();
+  renderSidePanel(s);
+}
+
+// evidence attached to its node: dominant supporting + dominant opposing per node, above threshold
+function renderEvidence(s, hypByRef, animated){
+  const evById={}; s.evidence.forEach(e=>evById[e.id]=e);
+  const byNode={};
   s.links.forEach(l=>{
-    if(hp[l.hypothesis_id]===undefined||ep[l.evidence_id]===undefined)return;
-    c.appendChild(el("line",{x1:ex-9,y1:ep[l.evidence_id],x2:hx+12,y2:hp[l.hypothesis_id],
-      stroke:l.polarity==="+"?"#43c08a":"#e5604f","stroke-width":1+Math.min(4,l.weight*2),"stroke-opacity":.65}));
+    const h=s.hypotheses.find(x=>x.id===l.hypothesis_id); if(!h||!h.node_ref||!pos[h.node_ref])return;
+    (byNode[h.node_ref]=byNode[h.node_ref]||[]).push(l);
   });
-  H.forEach(h=>{
-    const y=hp[h.id],lead=h.status==="leading",g=el("g",{class:"node"});
-    g.appendChild(el("circle",{cx:hx,cy:y,r:lead?16:13,fill:confColor(h.confidence),
-      stroke:lead?"#fff":"#3a4150","stroke-width":lead?3:1}));
-    g.appendChild(Object.assign(el("text",{x:hx+24,y:y-2}),{textContent:(h.label||h.id).slice(0,32)}));
-    g.appendChild(Object.assign(el("text",{x:hx+24,y:y+13,class:"sub"}),{textContent:`${h.node_ref||""} · ${(h.confidence).toFixed(2)} · ${h.status}`}));
-    c.appendChild(g);
+  const chips=[];
+  Object.entries(byNode).forEach(([ref,links])=>{
+    const pick=p=>links.filter(l=>l.polarity===p&&l.weight>=EV_THRESH).sort((a,b)=>b.weight-a.weight)[0];
+    [pick("+"),pick("-")].filter(Boolean).forEach((l,k)=>{
+      const p=pos[ref], ev=evById[l.evidence_id]||{}, ang=(k?0.62:-0.62);
+      chips.push({ref, l, ev, x:p.x+44, y:p.y+44*ang, nx:p.x, ny:p.y});
+    });
   });
-  E.forEach(e=>{
-    const y=ep[e.id],g=el("g",{class:"node"});
-    const trg=isTrig(e.source)||isTrig(e.id);
-    g.appendChild(el("rect",{x:ex-9,y:y-9,width:18,height:18,rx:4,fill:trg?"#3a2a1c":"#27303f",stroke:trg?"#f2b45a":"#3a4150"}));
-    g.appendChild(Object.assign(el("text",{x:ex+18,y:y+4,class:"sub"}),{textContent:(e.source||e.id).slice(0,26)}));
-    c.appendChild(g);
+  const lt=svg.select(".evlinks").selectAll("line").data(chips,d=>d.ref+d.l.evidence_id+d.l.polarity);
+  lt.join(en=>en.append("line").attr("opacity",0), u=>u, ex=>ex.transition().attr("opacity",0).remove())
+    .attr("class","evlink").attr("x1",d=>d.x).attr("y1",d=>d.y).attr("x2",d=>d.nx).attr("y2",d=>d.ny)
+    .attr("stroke",d=>d.l.polarity==="+"?"var(--good)":"var(--bad)")
+    .attr("stroke-width",d=>1+Math.min(4,d.l.weight*2))
+    .transition().duration(animated?420:260).attr("opacity",d=>Math.min(.85,.4+d.l.weight*.3));
+  const ct=svg.select(".evchips").selectAll("g").data(chips,d=>d.ref+d.l.evidence_id+d.l.polarity);
+  const ce=ct.enter().append("g").attr("opacity",0);
+  ce.append("rect").attr("width",13).attr("height",13).attr("rx",3).attr("x",-6.5).attr("y",-6.5);
+  ce.append("text").attr("class","nodeSub").attr("x",10).attr("y",4).attr("text-anchor","start");
+  ct.exit().transition().attr("opacity",0).remove();
+  const cm=ce.merge(ct).attr("transform",d=>`translate(${d.x},${d.y})`)
+    .style("cursor","pointer").on("mousemove",(e,d)=>showEvTip(e,d)).on("mouseleave",hideTip)
+    .on("click",(e,d)=>showEvTip(e,d));  // tap-to-show on touch / mobile
+  cm.select("rect").attr("fill",d=>d.l.polarity==="+"?"#16352a":"#3a1f1b").attr("stroke",d=>d.l.polarity==="+"?"var(--good)":"var(--bad)");
+  cm.select("text").text(d=>d.ev.source||d.l.evidence_id);  // full source — hover the chip for the evidence summary
+  cm.transition().duration(animated?420:260).attr("opacity",1);
+}
+
+function renderPulse(){
+  const id=++pulseId;  // invalidate any pulse loop from a prior step/case (D3 .remove() doesn't stop transitions)
+  const layer=svg.select(".pulses"); layer.selectAll("*").remove();
+  if(headPath.length<2)return;
+  const pts=headPath.map(id=>pos[id]);
+  let d=`M${pts[0].x},${pts[0].y}`;
+  for(let k=1;k<pts.length;k++){const a=pts[k-1],b=pts[k],mx=(a.x+b.x)/2;d+=`C${mx},${a.y} ${mx},${b.y} ${b.x},${b.y}`;}
+  const path=layer.append("path").attr("d",d).attr("fill","none").attr("stroke","none").node();
+  const len=path.getTotalLength(), dot=layer.append("circle").attr("class","pulse").attr("r",4);
+  (function loop(){
+    if(id!==pulseId)return;  // a newer render superseded this loop — let it die
+    dot.attr("opacity",1).attr("transform",`translate(${pts[pts.length-1].x},${pts[pts.length-1].y})`)
+      .transition().duration(1400).ease(d3.easeCubicInOut)
+      .attrTween("transform",()=>tt=>{const p=path.getPointAtLength(len*(1-tt));return `translate(${p.x},${p.y})`;})
+      .transition().duration(220).attr("opacity",0).on("end",loop);
+  })();
+}
+
+function esc(s){return (s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+
+// "What this example shows" panel: the difficulty mechanisms (plain-English, no internal IDs) + what's hard.
+function renderExplainer(){
+  const ex=cur.explainer||{};
+  const hard=[];
+  if((ex.decoys||[]).length){ const n=ex.decoys.length;
+    hard.push(`${n} decoy hypothes${n>1?"es":"is"} that mimic${n>1?"":"s"} the true cause`); }
+  if(ex.trigger) hard.push(`a salient recent event (<b>${esc(ex.trigger)}</b>) that must be demoted, not blamed`);
+  // (abstain is already the title/body for the abstain case — don't repeat it in the hard-hooks line)
+  // header chip preserves the DOMAIN content (the lidar fault name) now that the tab shows the challenge
+  const dom=document.getElementById("ex-pattern");
+  if(dom) dom.innerHTML = cur.title ? `<span class="dlabel">lidar fault</span><b>${esc(cur.title)}</b>` : "";
+  // title (purpose) STATES it; detail + why ELABORATE without repeating
+  document.getElementById("ex-what").innerHTML=
+    `<div class="lead">${esc(ex.purpose||cur.caption||"")}</div>`
+    +(ex.detail?`<div class="ex-detail">${esc(ex.detail)}</div>`:"")
+    +(ex.why?`<div class="ex-why"><b>Why it matters:</b> ${esc(ex.why)}</div>`:"")
+    +(hard.length?`<div class="ex-meta">What makes it hard: ${hard.join("; ")}.</div>`:"");
+}
+
+// Suite-level "vs baselines" panel (static across cases). Honest by construction: shows where the
+// controller LOSES (evidence-F1, abstention-calibration, cost), not just the accuracy win.
+function renderBaselines(){
+  let rows=`<tr><th>metric</th><th style="text-align:right">controller</th><th style="text-align:right">bare_llm</th><th style="text-align:right">ReAct</th></tr>`;
+  BASELINES.forEach(b=>{
+    const c=b.win?"var(--good)":"var(--bad)";
+    rows+=`<tr><td>${esc(b.label)}${b.caveat?`<div style="color:var(--muted);font-size:10.5px">${esc(b.caveat)}</div>`:""}</td>`
+      +`<td class="num" style="color:${c};font-weight:700">${esc(b.controller)}</td>`
+      +`<td class="num">${esc(b.bare_llm)}</td><td class="num">${esc(b.react)}</td></tr>`;
   });
-  // action card
+  document.getElementById("ex-baselines").innerHTML=
+    `<div class="lead">Versus baselines <span style="color:var(--muted);font-weight:400">— suite-level, n=1, indicative</span></div>`
+    +`<table class="metrics">${rows}</table>`
+    +`<div class="note"><b>Indicative only (n=1).</b> The differential reasoning buys <b style="color:var(--good)">correctness</b>, `
+    +`not efficiency — the controller leads on accuracy but trails on evidence-F1, abstention-calibration, and cost. The accuracy `
+    +`row mixes the post-fix controller against spike-era baselines; an n=3 variance pass is owed before any of this is a headline.</div>`;
+}
+// rewrite the LLM rationale's raw hypothesis ids (h1, hyp.upstream_power, …) to their H# badges
+function resolveHyps(text){
+  let t=esc(text);
+  Object.keys(dispId).sort((a,b)=>b.length-a.length).forEach(id=>{
+    t=t.replace(new RegExp("\\b"+id.replace(/\./g,"\\.")+"\\b","gi"),`<b>${dispId[id]}</b>`);
+  });
+  return t;
+}
+function renderSidePanel(s){
+  const tr=(cur.trace||[])[step]||{}, prev=(cur.trace||[])[step-1], prevS=cur.steps[step-1];
+  const revealed = MODE==="narrative" ? revealedAt(step) : null;  // narrative: side panel mirrors the graph
+  const shown = h => !revealed || (h.node_ref && revealed.has(h.node_ref));
   const ac=document.getElementById("actcard");
   const args=tr.args?Object.values(tr.args).filter(v=>typeof v!=="object").join(" "):"";
-  ac.innerHTML=`<span class="voi">${tr.voi?("VOI "+tr.voi):""}</span><span class="k">${tr.action||"—"}</span> ${args?("· "+args):""}
-    <div class="why">${tr.rationale||""}</div>`;
-  // differential with deltas vs previous step
+  const voi=(tr.voi!=null&&+tr.voi>0)?`VOI ${(+tr.voi).toFixed(2)}`:"";
+  const head=`<div class="head"><span class="verb">${esc(tr.action||"—")}</span>`
+    +`${args?`<span class="arg">· ${esc(args)}</span>`:""}${voi?`<span class="voichip">${voi}</span>`:""}</div>`;
+  if(MODE==="narrative"){
+    // built from this step's structured data so it matches the progressive view (not the literal rationale,
+    // which references all hypotheses seeded at triage). Real data — action, new evidence, belief shifts.
+    const prevIds=new Set((prevS?prevS.evidence:[]).map(e=>e.id));
+    const newEv=s.evidence.filter(e=>!prevIds.has(e.id));
+    let line=step===0 ? "Triaged the symptom — walking the causal graph backward from the KPI to surface candidate causes."
+      : newEv.length ? esc(newEv[newEv.length-1].summary) : "No new measurement this step; consolidating the differential.";
+    const shifts=[];
+    s.hypotheses.forEach(h=>{ if(!shown(h)) return;
+      const pc=prev&&prev.confidences?prev.confidences[h.id]:null;
+      if(pc!=null){ const dv=h.confidence-pc;
+        if(Math.abs(dv)>=.02) shifts.push(`<b>${dispId[h.id]||""}</b> ${dv>0?"▲":"▼"}${Math.abs(dv).toFixed(2)}`); }
+    });
+    ac.innerHTML=head+`<div class="why">${line}</div>`
+      +(shifts.length?`<div class="why" style="margin-top:6px;color:var(--muted)">Belief: ${shifts.join(" · ")}</div>`:"");
+  } else {
+    // the literal rationale is dense multi-sentence prose — split into sentence bullets so it's scannable.
+    // Split only on a period followed by whitespace + an uppercase/"(" start, so decimals (4.96 °C, log_odds=0.00)
+    // and lowercase ids (hyp.upstream_power) don't false-split.
+    const raw=(tr.rationale||"").trim();
+    const sents=raw?raw.split(/\.\s+(?=[A-Z(])/).map(s=>s.replace(/\.\s*$/,"").trim()).filter(Boolean):[];
+    const body = sents.length>1
+      ? `<ul class="why-list">${sents.map(s=>`<li>${resolveHyps(s)}.</li>`).join("")}</ul>`
+      : `<div class="why">${resolveHyps(raw)||"<span style='color:var(--muted)'>—</span>"}</div>`;
+    ac.innerHTML=head+body;
+  }
   const hy=document.getElementById("hyps");hy.innerHTML="";
-  [...H].sort((a,b)=>b.confidence-a.confidence).forEach(h=>{
+  const hyps=[...s.hypotheses].filter(shown).sort((a,b)=>b.confidence-a.confidence);
+  if(!hyps.length) hy.innerHTML='<span class="st" style="color:var(--muted)">no hypotheses surfaced yet</span>';
+  hyps.forEach(h=>{
     let d="";if(prev&&prev.confidences&&prev.confidences[h.id]!=null){const dv=h.confidence-prev.confidences[h.id];
       if(Math.abs(dv)>=.01)d=`<span class="delta ${dv>0?"up":"down"}">${dv>0?"▲":"▼"}${Math.abs(dv).toFixed(2)}</span>`;}
+    const hb=dispId[h.id]?`<span style="font-family:ui-monospace,Menlo,monospace;color:var(--accent);font-weight:700;margin-right:6px">${dispId[h.id]}</span>`:"";
     const div=document.createElement("div");div.className="hyp";
-    div.innerHTML=`<div class="row"><span class="lab">${h.label||h.id}${d}</span><span class="st">${h.status}</span></div>
+    div.innerHTML=`<div class="row"><span class="lab">${hb}${esc(h.label||h.id)}${d}</span><span class="st">${h.status}</span></div>
       <div class="conf-bar"><i style="width:${Math.round(h.confidence*100)}%;background:${confColor(h.confidence)}"></i></div>`;
     hy.appendChild(div);
   });
-  // conflicts
   const cf=document.getElementById("conflicts");cf.innerHTML="";
   if(!s.conflicts.length)cf.innerHTML='<span class="st" style="color:var(--muted)">none yet</span>';
   s.conflicts.forEach(x=>{const d=document.createElement("div");d.className=isTrig(x)?"conflict trigger":"conflict";
     d.textContent=(isTrig(x)?"⚠ ":"⚑ ")+x+(isTrig(x)?"  — demoted trigger (coincident, not causal)":"");cf.appendChild(d);});
   document.getElementById("rec").textContent=s.recommended_action||"—";
 }
-function go(i){if(!cur)return;step=Math.max(0,Math.min(cur.steps.length-1,i));document.getElementById("slider").value=step;render();}
+
+// One-shot autoplay for the hero frame: after the load case's intro choreography settles, drive the
+// existing play() so the first thing a visitor sees is a live, populated, animating graph. Guarded by
+// case id (a case switch changes it), step (manual navigation moves it off 0), and timer (don't double-
+// start) so any user action supersedes the autostart. (Can't key on pulseId — renderPulse bumps it every
+// render.) The d3.timeout is a single shot, not a self-recursing loop, so nothing leaks.
+function autoplayHero(){
+  if(!cur) return;
+  const myCase=cur.case_id;
+  const maxD=d3.max((cur.graph||{nodes:[]}).nodes,n=>n.depth)||0;
+  const introMs = MODE==="narrative" ? 1200 : (220+maxD*260+260);  // mirror introExpand's settle window
+  // ~3s dwell after the graph has settled, so a visitor can read the page before it starts moving.
+  const delay = Math.max(introMs+220, 3000);
+  autoplayTimer=d3.timeout(()=>{ autoplayTimer=null;
+    if(!cur||cur.case_id!==myCase||step!==0||timer) return; play(); }, delay);  // guards: case/step/already-playing
+}
+
+function go(i){if(!cur)return;cancelIntro();renderStep(i,false);}  // user navigation overrides a queued intro
 function play(){stopPlay();document.getElementById("play").textContent="⏸ pause";
-  timer=setInterval(()=>{if(step>=cur.steps.length-1){stopPlay();return;}go(step+1);},1100);}
+  timer=setInterval(()=>{if(step>=cur.steps.length-1){stopPlay();return;}go(step+1);},1500);}
 function stopPlay(){if(timer){clearInterval(timer);timer=null;}document.getElementById("play").textContent="▶ play";}
+const MHINT={narrative:"Both modes replay the same real run. “Discovery order” reveals each hypothesis as the agent surfaced it (real state, re-timed).",
+  faithful:"Both modes replay the same real run. “All at once” seeds every hypothesis at triage (step 0), exactly as the controller runs it."};
+function setMode(m){
+  MODE=m; stopPlay();
+  document.getElementById("mode-narr").classList.toggle("on",m==="narrative");
+  document.getElementById("mode-faith").classList.toggle("on",m==="faithful");
+  document.getElementById("mhint").textContent=MHINT[m];
+  if(cur) selectCase(cur.case_id);  // re-render the current case under the new mode
+}
 document.getElementById("slider").addEventListener("input",e=>go(+e.target.value));
 document.getElementById("prev").onclick=()=>go(step-1);
 document.getElementById("next").onclick=()=>go(step+1);
 document.getElementById("play").onclick=()=>timer?stopPlay():play();
+document.getElementById("mode-narr").onclick=()=>setMode("narrative");
+document.getElementById("mode-faith").onclick=()=>setMode("faithful");
+// mobile: a tap shows the tooltip (node/chip click handlers); a tap anywhere else dismisses it
+document.addEventListener("click",e=>{ if(!e.target.closest(".node,.evchips g")) hideTip(); });
+// Phone reflow (same nodes move, so handlers survive; desktop layout the recruiter signed off stays
+// byte-for-byte). Two moves: (a) the 8 cryptic domain pills must not greet a visitor before the hook —
+// drop the case selector just below the intro; (b) the explainer box, which sits up top on desktop,
+// would push the animated graph below the fold on a phone — so on narrow screens it goes back BELOW the
+// graph (preserving the earlier "surface the graph early on mobile" fix).
+const phoneMQ = window.matchMedia("(max-width:560px)");
+function placeCases(){
+  const cases=document.getElementById("cases"), header=document.querySelector("header"),
+        intro=document.getElementById("intro"), explain=document.getElementById("explain"),
+        wrap=document.getElementById("wrap"), bar=document.getElementById("bar");
+  if(phoneMQ.matches){
+    if(cases.previousElementSibling!==intro) intro.after(cases);   // pills below the hook
+    if(explain.previousElementSibling!==wrap) wrap.after(explain); // explainer below the graph
+    cases.classList.add("cases-mobile");
+  }else{
+    if(cases.parentElement!==header) header.appendChild(cases);    // restore desktop top-right cluster
+    if(explain.nextElementSibling!==bar) bar.before(explain);      // explainer back above the bar
+    cases.classList.remove("cases-mobile");
+  }
+}
+phoneMQ.addEventListener("change", placeCases);
+
 buildCaseButtons();
-if(M.length)selectCase(M[0].case_id);
+placeCases();
+renderBaselines();
+setMode(MODE);  // sets the toggle UI + hint
+if(M.length){selectCase(M[0].case_id); autoplayHero();}  // hero frame: load + autoplay the first case
 </script>
 </body>
 </html>

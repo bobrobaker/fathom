@@ -932,5 +932,173 @@
     "conflict_handling": 1.0,
     "evidence_f1": 0.4,
     "tokens": 83683
+  },
+  "graph": {
+    "root": "kpi.effective_range",
+    "nodes": [
+      {
+        "id": "kpi.effective_range",
+        "type": "KPI",
+        "name": "effective_max_range_m",
+        "depth": 0
+      },
+      {
+        "id": "metric.intensity",
+        "type": "metric",
+        "name": "mean_return_intensity",
+        "depth": 1
+      },
+      {
+        "id": "sub.calibration",
+        "type": "subsystem",
+        "name": "Signal proc / calibration",
+        "depth": 1
+      },
+      {
+        "id": "sub.laser",
+        "type": "subsystem",
+        "name": "Laser emitter",
+        "depth": 2
+      },
+      {
+        "id": "sub.optics",
+        "type": "subsystem",
+        "name": "Optics / window",
+        "depth": 2
+      },
+      {
+        "id": "sub.detector",
+        "type": "subsystem",
+        "name": "Receiver / detector",
+        "depth": 2
+      },
+      {
+        "id": "sub.thermal",
+        "type": "subsystem",
+        "name": "Thermal / TEC",
+        "depth": 3
+      },
+      {
+        "id": "sub.power",
+        "type": "subsystem",
+        "name": "Scanner / power",
+        "depth": 4
+      },
+      {
+        "id": "part.laser_module",
+        "type": "part_type",
+        "name": "Laser module",
+        "depth": 3
+      },
+      {
+        "id": "part.window",
+        "type": "part_type",
+        "name": "Window",
+        "depth": 3
+      },
+      {
+        "id": "part.detector",
+        "type": "part_type",
+        "name": "Detector",
+        "depth": 3
+      },
+      {
+        "id": "part.tec",
+        "type": "part_type",
+        "name": "TEC module",
+        "depth": 4
+      }
+    ],
+    "edges": [
+      {
+        "src": "metric.intensity",
+        "dst": "kpi.effective_range",
+        "type": "affects"
+      },
+      {
+        "src": "sub.calibration",
+        "dst": "kpi.effective_range",
+        "type": "affects"
+      },
+      {
+        "src": "sub.laser",
+        "dst": "metric.intensity",
+        "type": "affects"
+      },
+      {
+        "src": "sub.optics",
+        "dst": "metric.intensity",
+        "type": "affects"
+      },
+      {
+        "src": "sub.detector",
+        "dst": "metric.intensity",
+        "type": "affects"
+      },
+      {
+        "src": "sub.thermal",
+        "dst": "sub.laser",
+        "type": "affects"
+      },
+      {
+        "src": "sub.thermal",
+        "dst": "sub.detector",
+        "type": "affects"
+      },
+      {
+        "src": "sub.power",
+        "dst": "sub.thermal",
+        "type": "affects"
+      },
+      {
+        "src": "part.laser_module",
+        "dst": "sub.laser",
+        "type": "part_of"
+      },
+      {
+        "src": "part.window",
+        "dst": "sub.optics",
+        "type": "part_of"
+      },
+      {
+        "src": "part.detector",
+        "dst": "sub.detector",
+        "type": "part_of"
+      },
+      {
+        "src": "part.tec",
+        "dst": "sub.thermal",
+        "type": "part_of"
+      }
+    ]
+  },
+  "explainer": {
+    "purpose": "A cross-subsystem fault masked by a decoy part, a lying sensor channel, and a coincidental reboot that has to be demoted.",
+    "answer_type": "cause",
+    "pattern": "Red-herring demotion",
+    "detail": "The range started slipping before the reboot, so timing alone clears the eye-catching event. One sensor reads plausibly but wrongly and only counts once it's cross-checked, and the remaining suspects look alike until a computed rate separates them.",
+    "why": "Resisting the obvious recent event and the confident-but-wrong channel is what separates evidence-driven diagnosis from pattern-matching on recency.",
+    "mechanisms": [
+      {
+        "id": "D1",
+        "desc": "A recent, attention-grabbing event looks like the cause but isn't \u2014 the fault started before it, so it has to be ruled out by timing."
+      },
+      {
+        "id": "B5",
+        "desc": "A sensor channel reports plausible-but-wrong values, so its readings can't be trusted on their own and must be cross-checked against an independent source."
+      },
+      {
+        "id": "D5",
+        "desc": "You can't tell the suspects apart by eye \u2014 it takes an actual computation (a rate, residual, or threshold) to discriminate them."
+      },
+      {
+        "id": "A2",
+        "desc": "One reading moves two suspects at once \u2014 it raises one hypothesis while lowering another, so a single check has to be read in both directions."
+      }
+    ],
+    "decoys": [
+      "part.laser_module"
+    ],
+    "trigger": "log.reboot"
   }
 }

@@ -482,5 +482,165 @@
     "conflict_handling": 1.0,
     "evidence_f1": 0.33,
     "tokens": 36527
+  },
+  "graph": {
+    "root": "kpi.effective_range",
+    "nodes": [
+      {
+        "id": "kpi.effective_range",
+        "type": "KPI",
+        "name": "effective_max_range_m",
+        "depth": 0
+      },
+      {
+        "id": "metric.intensity",
+        "type": "metric",
+        "name": "mean_return_intensity",
+        "depth": 1
+      },
+      {
+        "id": "sub.calibration",
+        "type": "subsystem",
+        "name": "Signal proc / calibration",
+        "depth": 1
+      },
+      {
+        "id": "sub.laser",
+        "type": "subsystem",
+        "name": "Laser emitter",
+        "depth": 2
+      },
+      {
+        "id": "sub.optics",
+        "type": "subsystem",
+        "name": "Optics / window",
+        "depth": 2
+      },
+      {
+        "id": "sub.detector",
+        "type": "subsystem",
+        "name": "Receiver / detector",
+        "depth": 2
+      },
+      {
+        "id": "sub.thermal",
+        "type": "subsystem",
+        "name": "Thermal / TEC",
+        "depth": 3
+      },
+      {
+        "id": "sub.power",
+        "type": "subsystem",
+        "name": "Scanner / power",
+        "depth": 4
+      },
+      {
+        "id": "part.laser_module",
+        "type": "part_type",
+        "name": "Laser module",
+        "depth": 3
+      },
+      {
+        "id": "part.window",
+        "type": "part_type",
+        "name": "Window",
+        "depth": 3
+      },
+      {
+        "id": "part.detector",
+        "type": "part_type",
+        "name": "Detector",
+        "depth": 3
+      },
+      {
+        "id": "part.tec",
+        "type": "part_type",
+        "name": "TEC module",
+        "depth": 4
+      }
+    ],
+    "edges": [
+      {
+        "src": "metric.intensity",
+        "dst": "kpi.effective_range",
+        "type": "affects"
+      },
+      {
+        "src": "sub.calibration",
+        "dst": "kpi.effective_range",
+        "type": "affects"
+      },
+      {
+        "src": "sub.laser",
+        "dst": "metric.intensity",
+        "type": "affects"
+      },
+      {
+        "src": "sub.optics",
+        "dst": "metric.intensity",
+        "type": "affects"
+      },
+      {
+        "src": "sub.detector",
+        "dst": "metric.intensity",
+        "type": "affects"
+      },
+      {
+        "src": "sub.thermal",
+        "dst": "sub.laser",
+        "type": "affects"
+      },
+      {
+        "src": "sub.thermal",
+        "dst": "sub.detector",
+        "type": "affects"
+      },
+      {
+        "src": "sub.power",
+        "dst": "sub.thermal",
+        "type": "affects"
+      },
+      {
+        "src": "part.laser_module",
+        "dst": "sub.laser",
+        "type": "part_of"
+      },
+      {
+        "src": "part.window",
+        "dst": "sub.optics",
+        "type": "part_of"
+      },
+      {
+        "src": "part.detector",
+        "dst": "sub.detector",
+        "type": "part_of"
+      },
+      {
+        "src": "part.tec",
+        "dst": "sub.thermal",
+        "type": "part_of"
+      }
+    ]
+  },
+  "explainer": {
+    "purpose": "An aging laser is the true cause, even though a tempting decoy part would normally show a temperature correlation and here doesn't.",
+    "answer_type": "cause",
+    "pattern": "Decoy fails to correlate",
+    "detail": "A thermal cause would track temperature, so the agent computes the correlation, finds none, and uses that absence to rule the tempting decoy out. The laser itself carries both supporting and contradicting evidence that has to be read as a net, not a tally.",
+    "why": "Treating a missing-but-expected signal as real evidence is exactly the move shallow reasoning skips.",
+    "mechanisms": [
+      {
+        "id": "D5",
+        "desc": "You can't tell the suspects apart by eye \u2014 it takes an actual computation (a rate, residual, or threshold) to discriminate them."
+      },
+      {
+        "id": "A1",
+        "desc": "Supporting and contradicting evidence pile up on the same suspect, so its standing is the net of the two \u2014 you can't just tally the readings that point at it."
+      }
+    ],
+    "decoys": [
+      "part.tec"
+    ],
+    "trigger": "log.reboot"
   }
 }

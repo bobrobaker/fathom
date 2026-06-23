@@ -30,29 +30,37 @@ class CaseSpec:
 
 
 CASES: list[CaseSpec] = [
+    # `purpose` doubles as the viewer caption (reader-facing): keep it plain English, no internal
+    # catalog/case references. The difficulty mechanisms live in the tuple; the design rationale in the
+    # trailing comment + salient_is_cause.
     CaseSpec("case1", "tec_degradation", ("D1", "B5", "D5", "A2"), 0,
-             "worked example: cross-subsystem + decoy + lying channel + demoted trigger",
+             "A cross-subsystem fault masked by a decoy part, a lying sensor channel, and a coincidental "
+             "reboot that has to be demoted.",
              authored=True, salient_is_cause=False),       # reboot present, non-causal
     CaseSpec("case2", "laser_aging", ("D5", "A1"), 1,
-             "decoy as a true cause (no temp correlation) — symmetry vs case1",
+             "An aging laser is the true cause, even though a tempting decoy part would normally show a "
+             "temperature correlation and here doesn't.",
              authored=True, salient_is_cause=False),        # reboot present, non-causal
     CaseSpec("case3", "window_contamination", ("C-spatial", "A3"), 2,
-             "spatial-cluster signature; reasoning from absence",
+             "A spatially-clustered intensity loss, pinned down by where it occurs and by an expected "
+             "signal that never appears.",
              authored=True, salient_is_cause=False),        # reboot present, non-causal
     CaseSpec("case4", "calibration_drift", ("B1", "C3"), 3,
-             "post-release config; recent change IS the cause (anti-shortcut balance)",
+             "Here the recent config change really is the culprit — the salient event is the cause, not a "
+             "red herring to rule out.",
              authored=True, salient_is_cause=True),         # cal-table change IS the cause
     CaseSpec("case5", "no_clean_cause", ("E1",), 4,
-             "intermittent/coincidence -> correct answer is abstain",
+             "No single clean cause exists; the correct answer is to abstain rather than name a culprit.",
              authored=True, salient_is_cause=None),         # abstain — no single cause
     CaseSpec("case6", "detector_bias_drift", ("C1", "C2"), 5,
-             "absent-cue; buried evidence reachable via graph traversal + intra-doc",
+             "No obvious cue — the deciding evidence is reached only by traversing the graph to it and "
+             "digging it out of a document.",
              authored=True, salient_is_cause=None),         # absent-cue — no recent event
     CaseSpec("case7", "tec_degradation_variant", ("D6",), 6,
-             "near-symmetric to a decoy; needs the expensive discriminating check",
+             "Two near-identical suspects that only an expensive discriminating check can tell apart.",
              authored=True, salient_is_cause=False),        # reboot present, non-causal
     CaseSpec("case8", "common_mode_power", ("A4", "A5"), 7,
-             "one cause looks like two faults; redundant channels agree but are wrong",
+             "One upstream power fault that masquerades as two independent faults across redundant channels.",
              authored=True, salient_is_cause=True),         # power-mode change IS the cause
 ]
 
